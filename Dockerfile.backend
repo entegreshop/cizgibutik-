@@ -1,0 +1,24 @@
+FROM node:20-slim AS runner
+
+WORKDIR /app
+COPY . .
+
+# İşletim sistemi çakışmasını önlemek için kilit dosyasını siliyoruz
+RUN rm -f package-lock.json
+
+# 1. Proje yapısını bozmadan tüm ana bağımlılıkları kuruyoruz
+RUN npm install --legacy-peer-deps --include=dev
+
+WORKDIR /app/apps/backend
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# 2. İnşaat işlemini güvenli kurulum aşamasında yapıyoruz
+RUN npm run build
+
+# 3. Medusa V2'nin "Admin panelini yanlış klasörde arama" hatasını (bug) çözmek için dosyaları kopyalıyoruz!
+RUN cp -r .medusa/server/public ./public || true
+
+EXPOSE 9000
+
+# 4. Hatalı db komutlarını es geçip DOĞRUDAN sunucuyu (0.0.0.0 üzerinden) başlatıyoruz!
+CMD ["npx", "medusa", "start", "-H", "0.0.0.0"]
