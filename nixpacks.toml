@@ -1,6 +1,0 @@
-[phases.setup]
-nixPkgs = ["nodejs_20", "npm-9_x"]
-nixLibs = ["gcc-unwrapped", "libuuid", "libGL"]
-nixOverlays = ["https://github.com/railwayapp/nix-npm-overlay/archive/main.tar.gz"]
-nixpkgsArchive = "ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7"
-aptPkgs = ["curl", "wget"]
