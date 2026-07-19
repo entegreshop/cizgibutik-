@@ -1,11 +1,11 @@
-const { loadEnv, defineConfig } = require('@medusajs/framework/utils');
+import { loadEnv, defineConfig, Modules } from '@medusajs/framework/utils'
 
-loadEnv(process.env.NODE_ENV || 'development', process.cwd());
+loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
 module.exports = defineConfig({
     admin: {
     disable: false,
-    path: process.env.MEDUSA_ADMIN_PATH || "/app",
+    path: (process.env.MEDUSA_ADMIN_PATH || "/app") as `/${string}`,
     backendUrl: process.env.MEDUSA_BACKEND_URL || "https://api.bodykitmerkezi.com",
   },
   projectConfig: {
@@ -48,4 +48,4 @@ module.exports = defineConfig({
       },
     },
   ],
-});
+})
