@@ -246,7 +246,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
 
       if (shippingOptions && shippingOptions.length > 0) {
-        const flatOptions = shippingOptions.filter(so => so.price_type === "flat")
+        const flatOptions = (shippingOptions as any[]).filter(so => so.price_type === "flat")
         
         if (flatOptions.length > 0) {
           const updateData = flatOptions.map(option => {
