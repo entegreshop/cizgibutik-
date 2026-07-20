@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { updateShippingOptionsWorkflow } from "@medusajs/medusa/core-flows"
 import fs from "fs"
 import path from "path"
 import os from "os"
@@ -62,10 +63,10 @@ const defaultData = {
       key: "interline",
       general: {
         name: "INTERLINE KARGO",
-        active: false,
+        active: true,
         description: "",
         sortOrder: 0,
-        taxNumber: "",
+        taxNumber: "11111111111",
         customerType: "Hepsi",
         companyCode: "",
         logoUrl: "",
@@ -75,15 +76,15 @@ const defaultData = {
         limitProductQuantity: false
       },
       api: {
-        apiActive: false,
-        autoGenerateBarcode: false,
+        apiActive: true,
+        autoGenerateBarcode: true,
         generateBarcodeForNonCarrier: false,
         markAsShippedOnBranchReceive: false,
         barcodeGenerationStage: "Yeni Sipariş",
         sendFixedVolumetricWeight: false,
-        apiAuthorization: "",
-        apiFrom: "",
-        branchName: ""
+        apiAuthorization: "gvC8kSXzRBHMaW1Ucnls53N6KAZ0TFb7YGphm4QE",
+        apiFrom: "modoskop@interlinekargo.com",
+        branchName: "582"
       },
       regions: {
         deliveryType: "all",
@@ -232,9 +233,53 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const body = req.body as any
   const success = writeConfig(body)
+  
   if (success) {
+    try {
+      // Background Sync with Medusa Core
+      const query = req.scope.resolve("query")
+      
+      // 1. Fetch all existing shipping options
+      const { data: shippingOptions } = await query.graph({
+        entity: "shipping_option",
+        fields: ["id", "name", "price_type", "prices.*"]
+      })
+
+      if (shippingOptions && shippingOptions.length > 0) {
+        const flatOptions = shippingOptions.filter(so => so.price_type === "flat")
+        
+        if (flatOptions.length > 0) {
+          const updateData = flatOptions.map(option => {
+            // Find existing try price or create one
+            const existingTryPrice = option.prices?.find((p: any) => p.currency_code === "try" || p.currency_code === "TL")
+            const priceAmount = Number(body.standardShippingFee || 0)
+            
+            return {
+              id: option.id,
+              prices: [
+                {
+                  id: existingTryPrice?.id, // if id exists, it will update, else create
+                  currency_code: "try",
+                  amount: priceAmount
+                }
+              ]
+            }
+          })
+
+          await updateShippingOptionsWorkflow(req.scope).run({
+            input: updateData
+          })
+          console.log("Successfully synced shipping option prices to Medusa Core.")
+        }
+      }
+    } catch (syncError) {
+      console.error("Error syncing shipping options with Medusa Core:", syncError)
+      // We don't fail the request if sync fails, but log it.
+    }
+
     res.json({ success: true, config: body })
   } else {
     res.status(500).json({ success: false, message: "Could not write shipping configuration" })
   }
 }
+
