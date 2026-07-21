@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { updateRegionsWorkflow } from "@medusajs/medusa/core-flows"
 import fs from "fs"
 import path from "path"
 import os from "os"
@@ -100,7 +101,47 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const body = req.body as any
   const success = writeConfig(body)
+  
   if (success) {
+    try {
+      // Background Sync with Medusa Core
+      const query = req.scope.resolve("query")
+      
+      // 1. Fetch all existing regions
+      const { data: regions } = await query.graph({
+        entity: "region",
+        fields: ["id", "payment_providers.*"]
+      })
+
+      if (regions && regions.length > 0) {
+        // Collect active providers from our config
+        const activeProviders: string[] = []
+        if (body.paytr?.active) activeProviders.push("pp_custom-payment_PAYTR")
+        if (body.bank_transfer?.active) activeProviders.push("pp_custom-payment_BANK-TRANSFER")
+        if (body.cash_on_delivery?.active) activeProviders.push("pp_custom-payment_CASH-ON-DELIVERY")
+        if (body.card_on_delivery?.active) activeProviders.push("pp_custom-payment_CARD-ON-DELIVERY")
+
+        // Update all regions to include these providers
+        for (const region of regions as any[]) {
+          // We can optionally merge with existing providers, or just set them to the active ones.
+          // Medusa also has "pp_system_default". We will include it so admin manual payment works.
+          const finalProviders = ["pp_system_default", ...activeProviders]
+
+          await updateRegionsWorkflow(req.scope).run({
+            input: {
+              selector: { id: region.id },
+              update: {
+                payment_providers: finalProviders
+              }
+            }
+          })
+        }
+        console.log("Successfully synced payment providers to regions.")
+      }
+    } catch (syncError) {
+      console.error("Error syncing payment providers with Medusa Core:", syncError)
+    }
+
     res.json({ success: true, config: body })
   } else {
     res.status(500).json({ success: false, message: "Could not write configuration" })
