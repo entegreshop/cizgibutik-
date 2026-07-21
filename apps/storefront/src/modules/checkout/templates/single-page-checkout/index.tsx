@@ -169,9 +169,11 @@ export default function SinglePageCheckout({
 
   // Fetch payment settings from backend
   useEffect(() => {
-    sdk.client.fetch<{ config: PaymentConfig }>("/store/payment-settings")
+    const ts = new Date().getTime()
+    sdk.client.fetch<{ config: PaymentConfig }>(`/store/payment-settings?t=${ts}`)
       .then((res) => {
         if (res && res.config) {
+          console.log("Loaded payment settings:", res.config)
           setPaymentSettings(res.config)
         }
       })
