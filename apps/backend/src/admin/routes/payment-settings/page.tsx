@@ -294,7 +294,7 @@ const PaymentSettingsPage = () => {
             <div className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm flex flex-col gap-y-4">
               <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-x-2">
                 <span className="w-2 h-2 rounded-full bg-violet-500" />
-                Genel Kargo Ayarları
+                Genel Ayarlar
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
