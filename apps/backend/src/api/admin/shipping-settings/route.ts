@@ -4,7 +4,7 @@ import fs from "fs"
 import path from "path"
 import os from "os"
 
-const configFilePath = path.join(os.homedir(), ".xoox-shipping-settings.json")
+const configFilePath = path.join(process.cwd(), ".xoox-shipping-settings.json")
 
 const defaultData = {
   systemType: "advanced", // "advanced" | "simple"

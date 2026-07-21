@@ -4,7 +4,7 @@ import fs from "fs"
 import path from "path"
 import os from "os"
 
-const configFilePath = path.join(os.homedir(), ".xoox-payment-settings.json")
+const configFilePath = path.join(process.cwd(), ".xoox-payment-settings.json")
 
 const defaultInstallments = [
   { taksit: "Tek Çekim", oran: 0, active: true },
