@@ -46,6 +46,11 @@ module.exports = defineConfig({
             resolve: "./src/modules/payment-integrations",
             id: "payment-integrations",
             options: {},
+          },
+          {
+            resolve: "./src/modules/xoox-payment",
+            id: "xoox-payment",
+            options: {},
           }
         ],
       },
@@ -72,6 +77,9 @@ module.exports = defineConfig({
         },
       },
     } : {}),
+    xml_import: {
+      resolve: "./src/modules/xml_import",
+    },
     [Modules.FILE]: {
       resolve: "@medusajs/file",
       options: {
