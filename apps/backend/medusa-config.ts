@@ -42,9 +42,36 @@ module.exports = defineConfig({
             id: "custom-payment",
             options: {},
           },
+          {
+            resolve: "./src/modules/payment-integrations",
+            id: "payment-integrations",
+            options: {},
+          }
         ],
       },
     },
+    ...(process.env.REDIS_URL ? {
+      [Modules.EVENT_BUS]: {
+        resolve: "@medusajs/event-bus-redis",
+        options: {
+          redisUrl: process.env.REDIS_URL,
+        },
+      },
+      [Modules.CACHE]: {
+        resolve: "@medusajs/cache-redis",
+        options: {
+          redisUrl: process.env.REDIS_URL,
+        },
+      },
+      [Modules.WORKFLOW_ENGINE]: {
+        resolve: "@medusajs/workflow-engine-redis",
+        options: {
+          redis: {
+            url: process.env.REDIS_URL,
+          },
+        },
+      },
+    } : {}),
     [Modules.FILE]: {
       resolve: "@medusajs/file",
       options: {
