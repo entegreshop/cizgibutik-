@@ -41,19 +41,12 @@ module.exports = defineConfig({
             resolve: "./src/modules/custom-payment",
             id: "custom-payment",
             options: {},
-          },
-          {
-            resolve: "./src/modules/payment-integrations",
-            id: "payment-integrations",
-            options: {},
-          },
-          {
-            resolve: "./src/modules/xoox-payment",
-            id: "xoox-payment",
-            options: {},
           }
         ],
       },
+    },
+    multiPaymentModuleService: {
+      resolve: "./src/modules/payment-integrations"
     },
     ...(process.env.REDIS_URL ? {
       [Modules.EVENT_BUS]: {
