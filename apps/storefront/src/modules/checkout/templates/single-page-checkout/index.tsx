@@ -217,23 +217,27 @@ export default function SinglePageCheckout({
     const subtotalVal = (cart.subtotal ?? 0) / 100
     const availableMethods: Array<"paytr" | "cash_on_delivery" | "card_on_delivery" | "bank_transfer"> = []
 
+    const parseMin = (val: any) => val ? Number(val) : 0
+    const parseMax = (val: any) => val ? Number(val) : 1000000
+    const isActive = (val: any) => val === true || String(val) === "true"
+
     const paytr = paymentSettings.paytr
-    if (paytr?.active && subtotalVal >= (paytr.min_total ?? 0) && subtotalVal <= (paytr.max_total ?? 1000000)) {
+    if (isActive(paytr?.active) && subtotalVal >= parseMin(paytr?.min_total) && subtotalVal <= parseMax(paytr?.max_total)) {
       availableMethods.push("paytr")
     }
 
     const bt = paymentSettings.bank_transfer
-    if (bt?.active && subtotalVal >= (bt.min_total ?? 0) && subtotalVal <= (bt.max_total ?? 1000000)) {
+    if (isActive(bt?.active) && subtotalVal >= parseMin(bt?.min_total) && subtotalVal <= parseMax(bt?.max_total)) {
       availableMethods.push("bank_transfer")
     }
 
     const cc = paymentSettings.card_on_delivery
-    if (cc?.active && subtotalVal >= (cc.min_total ?? 0) && subtotalVal <= (cc.max_total ?? 1000000)) {
+    if (isActive(cc?.active) && subtotalVal >= parseMin(cc?.min_total) && subtotalVal <= parseMax(cc?.max_total)) {
       availableMethods.push("card_on_delivery")
     }
 
     const cod = paymentSettings.cash_on_delivery
-    if (cod?.active && subtotalVal >= (cod.min_total ?? 0) && subtotalVal <= (cod.max_total ?? 1000000)) {
+    if (isActive(cod?.active) && subtotalVal >= parseMin(cod?.min_total) && subtotalVal <= parseMax(cod?.max_total)) {
       availableMethods.push("cash_on_delivery")
     }
 
@@ -407,11 +411,15 @@ export default function SinglePageCheckout({
     const cod = paymentSettings.cash_on_delivery
     const cc = paymentSettings.card_on_delivery
 
+    const parseMin = (val: any) => val ? Number(val) : 0
+    const parseMax = (val: any) => val ? Number(val) : 1000000
+    const isActive = (val: any) => val === true || String(val) === "true"
+
     return {
-      isPaytrAvailable: paytr?.active && subtotalAmount >= (paytr.min_total ?? 0) && subtotalAmount <= (paytr.max_total ?? 1000000),
-      isBankTransferAvailable: bt?.active && subtotalAmount >= (bt.min_total ?? 0) && subtotalAmount <= (bt.max_total ?? 1000000),
-      isCashOnDeliveryAvailable: cod?.active && subtotalAmount >= (cod.min_total ?? 0) && subtotalAmount <= (cod.max_total ?? 1000000),
-      isCardOnDeliveryAvailable: cc?.active && subtotalAmount >= (cc.min_total ?? 0) && subtotalAmount <= (cc.max_total ?? 1000000)
+      isPaytrAvailable: isActive(paytr?.active) && subtotalAmount >= parseMin(paytr?.min_total) && subtotalAmount <= parseMax(paytr?.max_total),
+      isBankTransferAvailable: isActive(bt?.active) && subtotalAmount >= parseMin(bt?.min_total) && subtotalAmount <= parseMax(bt?.max_total),
+      isCashOnDeliveryAvailable: isActive(cod?.active) && subtotalAmount >= parseMin(cod?.min_total) && subtotalAmount <= parseMax(cod?.max_total),
+      isCardOnDeliveryAvailable: isActive(cc?.active) && subtotalAmount >= parseMin(cc?.min_total) && subtotalAmount <= parseMax(cc?.max_total)
     }
   }, [paymentSettings, subtotalAmount])
 
