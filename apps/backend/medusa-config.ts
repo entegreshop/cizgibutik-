@@ -105,3 +105,15 @@ module.exports = defineConfig({
     },
   }
 })
+
+// Veritabanindaki eski payment provider kalintilarini silen gecici temizlik kodu
+setTimeout(async () => {
+  try {
+    const { Client } = require('pg');
+    const c = new Client({ connectionString: process.env.DATABASE_URL });
+    await c.connect();
+    await c.query("DELETE FROM payment_provider WHERE id NOT IN ('pp_CASH-ON-DELIVERY_CASH-ON-DELIVERY', 'pp_CARD-ON-DELIVERY_CARD-ON-DELIVERY', 'pp_BANK-TRANSFER_BANK-TRANSFER', 'pp_PAYTR_PAYTR', 'pp_system_default')");
+    await c.end();
+    console.log('ESKI ODEME YONTEMLERI VERITABANINDAN SILINDI!');
+  } catch (e) { console.error(e); }
+}, 10000);
