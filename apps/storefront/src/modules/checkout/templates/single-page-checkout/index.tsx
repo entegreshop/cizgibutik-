@@ -70,6 +70,13 @@ interface ShippingConfig {
   freeShippingEnabled: boolean
   freeShippingThreshold: number
   freeShippingCurrency: string
+  carriers?: Array<{
+    id: string
+    general: {
+      name: string
+      active: boolean
+    }
+  }>
 }
 
 type SinglePageCheckoutProps = {
@@ -878,7 +885,51 @@ export default function SinglePageCheckout({
               <h2 className="text-xl font-bold text-zinc-900 mb-4">Kargo Yöntemi</h2>
               
               <div className="grid grid-cols-1 gap-2">
-                {shippingMethods && shippingMethods.map((sm) => {
+                {shippingSettings?.carriers?.filter(c => c.general?.active).length ? (
+                  shippingSettings.carriers.filter(c => c.general?.active).map((carrier) => {
+                    const sm = shippingMethods?.[0]
+                    const isSelected = shippingMethodId === carrier.id
+                    
+                    const basePrice = sm?.amount ? (sm.amount / 100) : 0
+                    const optionPrice = shippingSettings?.standardShippingEnabled 
+                      ? shippingSettings.standardShippingFee
+                      : basePrice
+                      
+                    const displayPrice = isFreeShipping ? 0 : optionPrice
+                    
+                    return (
+                      <div
+                        key={carrier.id}
+                        onClick={() => {
+                          if (sm) {
+                            handleSetShippingMethod(sm.id)
+                          }
+                          setShippingMethodId(carrier.id)
+                        }}
+                        className={`flex flex-col p-4 border cursor-pointer select-none transition-colors ${
+                          isSelected ? "border-black bg-zinc-50" : "border-gray-200 bg-white hover:border-black"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-x-3">
+                            <input
+                              type="radio"
+                              checked={isSelected}
+                              onChange={() => {}}
+                              className="w-4 h-4 text-black focus:ring-black accent-black"
+                            />
+                            <span className="text-sm font-semibold text-zinc-900">
+                              {carrier.general.name}
+                            </span>
+                          </div>
+                          <span className="text-sm font-bold text-zinc-900">
+                            {displayPrice === 0 ? "Ücretsiz" : `₺${displayPrice.toFixed(2)}`}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })
+                ) : shippingMethods && shippingMethods.length > 0 ? shippingMethods.map((sm) => {
                   const isSelected = shippingMethodId === sm.id
                   
                   // Calculate dynamic option price
@@ -915,7 +966,9 @@ export default function SinglePageCheckout({
                       </div>
                     </div>
                   )
-                })}
+                }) : (
+                  <div className="text-sm text-zinc-500">Kargo seçeneği bulunamadı.</div>
+                )}
               </div>
 
               {/* Free shipping banner */}
