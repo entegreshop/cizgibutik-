@@ -106,14 +106,21 @@ module.exports = defineConfig({
   }
 })
 
-// Veritabanindaki eski payment provider kalintilarini silen gecici temizlik kodu
+// Veritabanindaki eski payment provider kalintilarini ve kopmus baglantilari silen temizlik kodu
 setTimeout(async () => {
   try {
     const { Client } = require('pg');
     const c = new Client({ connectionString: process.env.DATABASE_URL });
     await c.connect();
-    await c.query("DELETE FROM payment_provider WHERE id NOT IN ('pp_CASH-ON-DELIVERY_CASH-ON-DELIVERY', 'pp_CARD-ON-DELIVERY_CARD-ON-DELIVERY', 'pp_BANK-TRANSFER_BANK-TRANSFER', 'pp_PAYTR_PAYTR', 'pp_system_default')");
+    
+    // 1. Gecersiz odeme saglayicilarini sil (zaten silinmisti)
+    await c.query(`DELETE FROM payment_provider WHERE id NOT IN ('pp_CASH-ON-DELIVERY_CASH-ON-DELIVERY', 'pp_CARD-ON-DELIVERY_CARD-ON-DELIVERY', 'pp_BANK-TRANSFER_BANK-TRANSFER', 'pp_PAYTR_PAYTR', 'pp_system_default')`).catch(() => {});
+    
+    // 2. Bölgelere (Region) bagli olan ama aslinda silinmis olan (null dönen) ödeme yöntemlerinin kopmus baglantilarini sil
+    await c.query(`DELETE FROM region_payment_provider WHERE payment_provider_id NOT IN (SELECT id FROM payment_provider)`).catch(() => {});
+    await c.query(`DELETE FROM store_payment_provider WHERE payment_provider_id NOT IN (SELECT id FROM payment_provider)`).catch(() => {});
+    
     await c.end();
-    console.log('ESKI ODEME YONTEMLERI VERITABANINDAN SILINDI!');
+    console.log('KOPMUS VERITABANI BAGLANTILARI TEMIZLENDI!');
   } catch (e) { console.error(e); }
 }, 10000);
