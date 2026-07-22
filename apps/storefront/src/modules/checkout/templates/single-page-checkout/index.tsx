@@ -206,7 +206,8 @@ export default function SinglePageCheckout({
 
   // Fetch shipping settings from backend
   useEffect(() => {
-    sdk.client.fetch<{ config: ShippingConfig }>("/store/shipping-settings")
+    const ts = new Date().getTime()
+    sdk.client.fetch<{ config: ShippingConfig }>(`/store/shipping-settings?t=${ts}`)
       .then((res) => {
         if (res && res.config) {
           setShippingSettings(res.config)
