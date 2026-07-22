@@ -41,6 +41,21 @@ module.exports = defineConfig({
             resolve: "./src/modules/custom-payment",
             id: "custom-payment",
             options: {},
+          },
+          {
+            resolve: "./src/modules/payment-integrations/providers/paytr",
+            id: "paytr",
+            options: {},
+          },
+          {
+            resolve: "./src/modules/payment-integrations/providers/cod",
+            id: "cod",
+            options: {},
+          },
+          {
+            resolve: "./src/modules/payment-integrations/providers/bank-transfer",
+            id: "bank-transfer",
+            options: {},
           }
         ],
       },
