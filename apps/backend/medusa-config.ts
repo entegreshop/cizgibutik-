@@ -38,23 +38,23 @@ module.exports = defineConfig({
       options: {
         providers: [
           {
-            resolve: "./src/modules/custom-payment",
-            id: "custom-payment",
+            resolve: "./src/modules/custom-payment/providers/cash-on-delivery",
+            id: "CASH-ON-DELIVERY",
             options: {},
           },
           {
-            resolve: "./src/modules/payment-integrations/providers/paytr",
-            id: "paytr",
+            resolve: "./src/modules/custom-payment/providers/card-on-delivery",
+            id: "CARD-ON-DELIVERY",
             options: {},
           },
           {
-            resolve: "./src/modules/payment-integrations/providers/cod",
-            id: "cod",
+            resolve: "./src/modules/custom-payment/providers/bank-transfer",
+            id: "BANK-TRANSFER",
             options: {},
           },
           {
-            resolve: "./src/modules/payment-integrations/providers/bank-transfer",
-            id: "bank-transfer",
+            resolve: "./src/modules/custom-payment/providers/paytr",
+            id: "PAYTR",
             options: {},
           }
         ],
