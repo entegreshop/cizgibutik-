@@ -468,6 +468,37 @@ const IkasProductsPage = () => {
       const globalImages = images.map(img => img.url)
       const uniqueImageUrls = Array.from(new Set([...globalImages, ...variantImages]))
 
+      // Fetch default shipping profile to attach to product automatically
+      let shippingProfileId: string | undefined = undefined;
+      try {
+        const spRes = await fetch("/admin/shipping-profiles");
+        if (spRes.ok) {
+           const spData = await spRes.json();
+           // In Medusa V2, usually there is a default type or we just grab the first one
+           const defaultProfile = spData.shipping_profiles?.find((sp: any) => sp.type === "default" || sp.name?.toLowerCase().includes("default")) || spData.shipping_profiles?.[0];
+           if (defaultProfile) {
+             shippingProfileId = defaultProfile.id;
+           }
+        }
+      } catch (e) {
+        console.error("Could not fetch shipping profile", e);
+      }
+
+      // Fetch default sales channel to attach to product automatically
+      let salesChannelId: string | undefined = undefined;
+      try {
+        const scRes = await fetch("/admin/sales-channels");
+        if (scRes.ok) {
+           const scData = await scRes.json();
+           const defaultChannel = scData.sales_channels?.find((sc: any) => sc.name?.toLowerCase().includes("default")) || scData.sales_channels?.[0];
+           if (defaultChannel) {
+             salesChannelId = defaultChannel.id;
+           }
+        }
+      } catch (e) {
+        console.error("Could not fetch sales channel", e);
+      }
+
       // Determine Medusa V2 Payload
       const payload: any = {
         title: productName,
@@ -477,6 +508,14 @@ const IkasProductsPage = () => {
         images: uniqueImageUrls.map(url => ({ url })),
         collection_id: brand || undefined,
         categories: category ? [{ id: category }] : []
+      }
+      
+      if (shippingProfileId) {
+        payload.shipping_profile_id = shippingProfileId;
+      }
+
+      if (salesChannelId) {
+        payload.sales_channels = [{ id: salesChannelId }];
       }
 
       if (isVariantProduct) {
