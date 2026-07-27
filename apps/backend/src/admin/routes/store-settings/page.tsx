@@ -81,6 +81,11 @@ export default function StoreSettingsPage() {
     sideMenuLogo: null,
     siteTitle: "",
     footerCopyrightText: "",
+    contactCompany: "",
+    contactAddress: "",
+    contactPhone: "",
+    contactEmail: "",
+    contactHours: "",
   })
 
   useEffect(() => {
@@ -99,6 +104,11 @@ export default function StoreSettingsPage() {
             sideMenuLogo: null,
             siteTitle: "",
             footerCopyrightText: "",
+            contactCompany: "",
+            contactAddress: "",
+            contactPhone: "",
+            contactEmail: "",
+            contactHours: "",
             ...data.config
           })
         }
@@ -263,6 +273,50 @@ export default function StoreSettingsPage() {
           <Text size="xsmall" className="text-ui-fg-subtle">
             Sayfanın en altındaki bilgi metni. (Güvenlik sertifikası metni sabittir, buraya sadece telif kısmını girebilirsiniz.)
           </Text>
+        </div>
+      </div>
+
+      <Heading level="h2" className="mb-4 mt-8">İletişim Bilgileri (Bize Ulaşın)</Heading>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+        <div className="flex flex-col gap-2">
+          <Label>Firma Adı</Label>
+          <Input 
+            placeholder="Örn: ÖZSE MODA TEKSTİL LTD. ŞTİ." 
+            value={config.contactCompany || ""} 
+            onChange={(e) => setConfig({ ...config, contactCompany: e.target.value })} 
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label>E-Posta Adresi</Label>
+          <Input 
+            placeholder="Örn: E-posta: info@kombingo.com" 
+            value={config.contactEmail || ""} 
+            onChange={(e) => setConfig({ ...config, contactEmail: e.target.value })} 
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label>Telefon Numarası</Label>
+          <Input 
+            placeholder="Örn: Tel: +90 530 456 43 77" 
+            value={config.contactPhone || ""} 
+            onChange={(e) => setConfig({ ...config, contactPhone: e.target.value })} 
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label>Çalışma Saatleri</Label>
+          <Input 
+            placeholder="Örn: Hafta içi 09.00 - 19.00..." 
+            value={config.contactHours || ""} 
+            onChange={(e) => setConfig({ ...config, contactHours: e.target.value })} 
+          />
+        </div>
+        <div className="flex flex-col gap-2 md:col-span-2">
+          <Label>Adres</Label>
+          <Input 
+            placeholder="Örn: Adres: Merkez Mahallesi..." 
+            value={config.contactAddress || ""} 
+            onChange={(e) => setConfig({ ...config, contactAddress: e.target.value })} 
+          />
         </div>
       </div>
     </Container>
