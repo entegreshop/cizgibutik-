@@ -1,32 +1,21 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Client } from "pg"
 
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
   try {
-    const dbUrl = process.env.DATABASE_URL
-    if (!dbUrl) {
-      return res.status(500).json({ error: "No DATABASE_URL found" })
-    }
-
-    const client = new Client({
-      connectionString: dbUrl
-    })
-    
-    await client.connect()
+    const knex = req.scope.resolve("pgConnection") as any
 
     // Get default shipping profile
-    const profileRes = await client.query(`SELECT id FROM shipping_profile WHERE type = 'default' LIMIT 1`)
+    const profileRes = await knex.raw(`SELECT id FROM shipping_profile WHERE type = 'default' LIMIT 1`)
     if (profileRes.rowCount === 0) {
-      await client.end()
       return res.status(404).json({ error: "No default shipping profile found" })
     }
     const profileId = profileRes.rows[0].id
 
     // Find products without a shipping profile
-    const missingProducts = await client.query(`
+    const missingProducts = await knex.raw(`
       SELECT p.id 
       FROM product p
       LEFT JOIN product_shipping_profile psp ON p.id = psp.product_id
@@ -37,22 +26,20 @@ export async function GET(
     let fixedCount = 0
     if (missingProducts.rowCount > 0) {
       for (const row of missingProducts.rows) {
-        await client.query(`
+        await knex.raw(`
           INSERT INTO product_shipping_profile (id, product_id, shipping_profile_id, created_at, updated_at)
-          VALUES (md5(random()::text || clock_timestamp()::text), $1, $2, now(), now())
+          VALUES (md5(random()::text || clock_timestamp()::text), ?, ?, now(), now())
           ON CONFLICT DO NOTHING
         `, [row.id, profileId])
         fixedCount++
       }
     }
 
-    await client.end()
-
     return res.json({ 
       success: true, 
       message: `Fixed ${fixedCount} products by assigning them to default shipping profile ${profileId}.` 
     })
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({ error: error.message, stack: error.stack })
   }
 }
