@@ -78,6 +78,11 @@ export async function POST(
     const productModuleService = req.scope.resolve("product")
     const existingCategories = await productModuleService.listProductCategories({}, { take: 1000 })
 
+    // Resolve Default Shipping Profile
+    const fulfillmentModuleService = req.scope.resolve("fulfillment")
+    const shippingProfiles = await fulfillmentModuleService.listShippingProfiles({ type: "default" })
+    const defaultProfileId = shippingProfiles[0]?.id
+
     // Helper to resolve nested object path (e.g., "subproducts > subproduct > price_list")
     const resolvePath = (obj: any, path: string) => {
       if (!path) return undefined;
@@ -229,6 +234,7 @@ export async function POST(
         status: "published" as any,
         images: images,
         categories: productCategories,
+        shipping_profile_id: defaultProfileId,
         metadata: {
            seo_title: item.seo_title || "",
            seo_description: item.seo_description || ""
