@@ -1844,7 +1844,7 @@ const IkasProductsPage = () => {
                   <label className="text-[12px] text-slate-700 block font-normal">Arama Önizlemesi</label>
                   <div className="border border-slate-200 rounded p-4 bg-white shadow-sm flex flex-col gap-1">
                     <div className="text-[13px] text-[#202124] flex items-center gap-1">
-                      fametarz.com/ <span className="text-[#4d5156]">{productName ? productName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '') : "krem-desenli-oversize-tisort-ve-sort-takimi"}</span>
+                      {typeof window !== 'undefined' ? window.location.hostname.replace('api.', '').replace('app.', '') : 'cizgibutik.com'}/ <span className="text-[#4d5156]">{productName ? productName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '') : "krem-desenli-oversize-tisort-ve-sort-takimi"}</span>
                     </div>
                     <div className="text-[18px] text-[#1a0dab] hover:underline cursor-pointer truncate">
                       {seoTitle || (productName ? `${productName} | En Uygun Fiyatlar` : "Krem Desenli Oversize Tişört ve Şort Takımı")}
