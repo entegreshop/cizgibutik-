@@ -375,8 +375,16 @@ const IkasProductsPage = () => {
     // Set Images with variant color mapping
     const prodImages = prod.images?.map((img: any) => {
       const isVideo = isVideoUrl(img.url)
-      const matchingVariant = prod.variants?.find((v: any) => v.metadata?.image === img.url)
-      const colorVal = matchingVariant?.options?.find((o: any) => o.option_id === colorOpt?.id)?.value
+      
+      // Önce metadata'daki image_colors havuzundan rengini bulmaya çalış
+      let colorVal = prod.metadata?.image_colors?.[img.url];
+      
+      // Eğer metadata'da yoksa, eski yöntemle varyant metadata'sından bul
+      if (!colorVal) {
+        const matchingVariant = prod.variants?.find((v: any) => v.metadata?.image === img.url)
+        colorVal = matchingVariant?.options?.find((o: any) => o.option_id === colorOpt?.id)?.value
+      }
+      
       return {
         url: img.url,
         filename: img.url.split("/").pop() || "",
@@ -468,6 +476,13 @@ const IkasProductsPage = () => {
       const globalImages = images.map(img => img.url)
       const uniqueImageUrls = Array.from(new Set([...globalImages, ...variantImages]))
 
+      const imageColors: Record<string, string> = {}
+      images.forEach(img => {
+        if (img.url && img.color) {
+          imageColors[img.url] = img.color
+        }
+      })
+
       // Determine Medusa V2 Payload
       const payload: any = {
         title: productName,
@@ -476,7 +491,8 @@ const IkasProductsPage = () => {
         thumbnail: uniqueImageUrls[0] || "",
         images: uniqueImageUrls.map(url => ({ url })),
         collection_id: brand || undefined,
-        categories: category ? [{ id: category }] : []
+        categories: category ? [{ id: category }] : [],
+        metadata: { image_colors: imageColors }
       }
 
       if (isVariantProduct) {
@@ -1894,13 +1910,12 @@ const IkasProductsPage = () => {
                 
                 {(() => {
                   const activeColor = variantsTable[activeVariantIndexForImage]?.color
-                  // Sadece o renge ait olanları VEYA henüz hiçbir renge atanmamış (genel) resimleri göster:
-                  const filteredImages = images.filter(img => !img.color || img.color === activeColor || true)
+                  const filteredImages = images.filter(img => img.color === activeColor)
                   
                   if (filteredImages.length === 0) {
                     return (
                       <div className="mx-4 text-center py-10 text-xs text-slate-400 font-medium bg-slate-50 rounded-xl border border-dashed border-slate-200 animate-fadeIn">
-                        Görsel havuzunda henüz görsel/video bulunmuyor.
+                        Bu renk ({activeColor || "Standart"}) için henüz görsel/video yüklenmedi.
                       </div>
                     )
                   }
