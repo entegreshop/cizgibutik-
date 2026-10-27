@@ -146,9 +146,8 @@ const SideMenu = ({ regions, locales, currentLocale, categories }: SideMenuProps
                   <div className="flex flex-col h-full bg-white relative">
                     {/* Header: Logo and Close Button */}
                     <div className="flex items-center justify-between p-4 pb-2">
-                       {/* Left space for alignment or site logo */}
                        <div className="flex-1">
-                         <span className="font-bold text-2xl tracking-widest uppercase text-black">XOOX</span>
+                         <img src="/cizgi-logo.png" alt="Çizgi Butik" className="h-7 w-auto object-contain" />
                        </div>
                        
                        <div className="flex items-center gap-4">
