@@ -583,7 +583,7 @@ export default function SinglePageCheckout({
       }
 
       // 3. Initiate payment session
-      let providerId = "system"
+      let providerId = "pp_system_default"
       if (paymentMethod === "paytr") providerId = "pp_custom-payment_PAYTR"
       else if (paymentMethod === "bank_transfer") providerId = "pp_custom-payment_BANK-TRANSFER"
       else if (paymentMethod === "cash_on_delivery") providerId = "pp_custom-payment_CASH-ON-DELIVERY"
@@ -591,9 +591,51 @@ export default function SinglePageCheckout({
 
       await initiatePaymentSession(updatedCart || cart, {
         provider_id: providerId
+      }).catch((e) => {
+        console.warn("initiatePaymentSession fallback notice:", e?.message)
       })
 
-      // 4. Place order
+      // 4. If PayTR is selected, invoke PayTR Direct API and redirect via client POST to 3D Secure
+      if (paymentMethod === "paytr") {
+        const MEDUSA_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "https://api.cizgibutik.com"
+        const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+        const directRes = await fetch(`${MEDUSA_URL}/store/custom/paytr/direct`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-publishable-api-key": PUBLISHABLE_KEY
+          },
+          body: JSON.stringify({
+            cart_id: cart.id,
+            cc_owner: cardName,
+            cc_number: cardNumber.replace(/\s/g, ""),
+            cc_month: cardMonth,
+            cc_year: cardYear.slice(-2),
+            cc_cvv: cardCvv
+          })
+        })
+        const directData = await directRes.json()
+        if (directData?.success && directData.requiresClientPost && directData.formParams && directData.postUrl) {
+          const form = document.createElement("form")
+          form.method = "POST"
+          form.action = directData.postUrl
+          form.style.display = "none"
+          Object.entries(directData.formParams).forEach(([key, value]) => {
+            const input = document.createElement("input")
+            input.type = "hidden"
+            input.name = key
+            input.value = String(value)
+            form.appendChild(input)
+          })
+          document.body.appendChild(form)
+          form.submit()
+          return
+        } else {
+          throw new Error(directData?.error || "Banka ile iletişim kurulamadı. Lütfen kart bilgilerinizi kontrol edin.")
+        }
+      }
+
+      // 5. Place order for non-PayTR methods
       await placeOrder(cart.id)
 
     } catch (err: any) {

@@ -1,18 +1,18 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Modules } from "@medusajs/framework/utils"
 import crypto from "crypto"
-import axios from "axios"
+import { readConfig as readPaymentConfig } from "../../../../admin/payment-settings/route"
+import { readConfig as readShippingConfig } from "../../../../admin/shipping-settings/route"
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
-    const { 
-        cart_id, 
-        cc_owner, 
-        cc_number, 
-        cc_month, 
-        cc_year, 
-        cc_cvv,
-        client_ip 
+    const {
+      cart_id,
+      cc_owner,
+      cc_number,
+      cc_month,
+      cc_year,
+      cc_cvv,
+      client_ip
     } = req.body as any
 
     if (!cart_id || !cc_number) {
@@ -23,7 +23,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const query = req.scope.resolve("query")
     const { data: carts } = await query.graph({
       entity: "cart",
-      fields: ["id", "email", "total", "shipping_address.*", "billing_address.*", "items.*", "region.*"],
+      fields: [
+        "id",
+        "email",
+        "total",
+        "subtotal",
+        "item_subtotal",
+        "discount_total",
+        "shipping_total",
+        "shipping_address.*",
+        "billing_address.*",
+        "items.*",
+        "region.*"
+      ],
       filters: { id: cart_id }
     })
 
@@ -32,115 +44,138 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       return res.status(404).json({ success: false, error: "Sepet bulunamadı" })
     }
 
-    // 2. Fetch PayTR Keys from Settings
-    // @ts-ignore
-    const { readConfig } = await import("../../../../admin/payment-settings/route")
-    const config = readConfig()
-    const paytrConfig = config.paytr || {}
+    if (!cart.items || cart.items.length === 0) {
+      return res.status(400).json({ success: false, error: "Sepetiniz boş." })
+    }
 
-    const merchant_id = paytrConfig.merchant_id
-    const merchant_key = paytrConfig.merchant_key
-    const merchant_salt = paytrConfig.merchant_salt
-    
+    // 2. Fetch PayTR & Shipping Config (with safe defaults if JSON file not yet written)
+    const paymentConfig = readPaymentConfig()
+    const paytrConfig: any = paymentConfig.paytr || {}
+    const shippingConfig: any = readShippingConfig()
+
+    const merchant_id = String(paytrConfig.merchant_id || "").trim()
+    const merchant_key = String(paytrConfig.merchant_key || "").trim()
+    const merchant_salt = String(paytrConfig.merchant_salt || "").trim()
+
     if (!merchant_id || !merchant_key || !merchant_salt) {
       return res.status(400).json({ success: false, error: "PayTR API ayarları eksik" })
     }
 
-    // 3. Prepare PayTR Payload
-    const user_ip = client_ip || req.headers["x-forwarded-for"] || "1.1.1.1"
-    const email = cart.email || "guest@kombingo.com"
-    
-    // Convert float total to integer string in Kurus
-    let payment_amount = Math.round(Number(cart.total))
-    const merchant_oid = cart.id.substring(0, 64) // cart_id limit 64 in PayTR
-    
+    // 3. Calculate canonical items + shipping total in kurus
+    const rawTotalKurus = Number(cart.total || 0)
+    const rawShippingKurus = Number(cart.shipping_total || 0)
+    const itemsNetKurus = Math.max(0, rawTotalKurus - rawShippingKurus)
+
+    let effectiveShippingKurus = rawShippingKurus
+    if (shippingConfig) {
+      const itemsNetTl = itemsNetKurus / 100
+      if (shippingConfig.freeShippingEnabled && itemsNetTl >= Number(shippingConfig.freeShippingThreshold || 0)) {
+        effectiveShippingKurus = 0
+      } else if (shippingConfig.standardShippingEnabled !== false && shippingConfig.standardShippingFee !== undefined) {
+        effectiveShippingKurus = Math.round(Number(shippingConfig.standardShippingFee) * 100)
+      }
+    }
+
+    const finalTotalKurus = itemsNetKurus + effectiveShippingKurus
+    if (finalTotalKurus <= 0) {
+      return res.status(400).json({ success: false, error: "Sepet tutarı 0'dan büyük olmalıdır." })
+    }
+
+    // 4. Prepare PayTR Payload
+    const forwardedFor = req.headers["x-forwarded-for"]
+    const headerIp = typeof forwardedFor === "string"
+      ? forwardedFor.split(",")[0].trim()
+      : Array.isArray(forwardedFor)
+        ? forwardedFor[0]
+        : ""
+    const fallbackClientIp = client_ip && client_ip !== "1.1.1.1" ? String(client_ip).split(",")[0].trim() : ""
+    const rawIp = headerIp || fallbackClientIp || (req as any).ip || "85.105.1.1"
+    const user_ip = String(rawIp).replace(/^::ffff:/, "").trim() || "85.105.1.1"
+
+    const email = cart.email || "guest@cizgibutik.com"
+    const payment_amount = (finalTotalKurus / 100).toFixed(2)
+
+    // PayTR Direct API requires merchant_oid to be STRICTLY alphanumeric
+    const base_oid = cart.id.replace(/[^a-zA-Z0-9]/g, "")
+    const merchant_oid = base_oid + Date.now().toString()
+
     const user_name = `${cart.shipping_address?.first_name || ""} ${cart.shipping_address?.last_name || ""}`.trim() || "Misafir"
-    const user_address = `${cart.shipping_address?.address_1 || ""}, ${cart.shipping_address?.city || ""}`.trim() || "Girilmedi"
-    const user_phone = cart.shipping_address?.phone || "0000000000"
-    
-    const currency = (cart.region?.currency_code || "TL").toUpperCase()
-    const test_mode = paytrConfig.test_mode === "Açık" ? "1" : "0"
-    
+    const user_address = `${cart.shipping_address?.address_1 || ""}, ${cart.shipping_address?.city || ""} ${cart.shipping_address?.province || ""}`.trim() || "Turkiye"
+    const user_phone = cart.shipping_address?.phone || "05000000000"
+
+    const currency = "TL"
+    const test_mode = (paytrConfig.test_mode && String(paytrConfig.test_mode).startsWith("A")) ? "1" : "0"
+
     // Basket data needs to be a serialized JSON array of arrays
     const user_basket = cart.items.map((item: any) => [
-       item.title.substring(0, 50),
-       (Number(item.unit_price) / 100).toFixed(2),
-       item.quantity
+      String(item.title || "Urun").substring(0, 50),
+      (Number(item.unit_price || 0) / 100).toFixed(2),
+      Number(item.quantity || 1)
     ])
-    const user_basket_str = Buffer.from(JSON.stringify(user_basket)).toString("base64")
-    
-    const merchant_ok_url = `${process.env.STORE_CORS || "http://localhost:8000"}/checkout/success?order_id=${merchant_oid}`
-    const merchant_fail_url = `${process.env.STORE_CORS || "http://localhost:8000"}/checkout/failed`
 
-    // Direct API specifics
+    if (effectiveShippingKurus > 0) {
+      user_basket.push([
+        "Kargo Bedeli",
+        (effectiveShippingKurus / 100).toFixed(2),
+        1
+      ])
+    }
+    const user_basket_str = Buffer.from(JSON.stringify(user_basket)).toString("base64")
+
+    const storeUrl = process.env.STORE_URL || (process.env.STORE_CORS ? process.env.STORE_CORS.split(",")[0] : "https://cizgibutik.com")
+
+    const merchant_ok_url = `${storeUrl}/api/paytr/callback?status=success&cart_id=${cart.id}`
+    const merchant_fail_url = `${storeUrl}/api/paytr/callback?status=fail`
+
     const payment_type = "card"
     const installment_count = "0"
-    const non_3d = "0" // 0 means 3D Secure is REQUIRED (which is highly recommended and standard)
+    const non_3d = "0"
 
-    // 4. Calculate HMAC Hash
-    // Hash format for Direct API: merchant_id + user_ip + merchant_oid + email + payment_amount + payment_type + installment_count + currency + test_mode + non_3d + merchant_salt
+    // Normalize card fields for PayTR Direct API (2-digit month & 2-digit year)
+    const cleanCardNumber = String(cc_number || "").replace(/\D/g, "")
+    const cleanMonth = String(cc_month || "").trim().padStart(2, "0")
+    const cleanYear = String(cc_year || "").trim().slice(-2)
+    const cleanCvv = String(cc_cvv || "").replace(/\D/g, "")
+
+    // 5. Calculate HMAC Hash
     const hash_str = merchant_id + user_ip + merchant_oid + email + payment_amount + payment_type + installment_count + currency + test_mode + non_3d + merchant_salt
     const paytr_token = crypto.createHmac("sha256", merchant_key).update(hash_str).digest("base64")
 
-    // 5. Send Request to PayTR Direct API
-    const formData = new URLSearchParams()
-    formData.append("merchant_id", merchant_id)
-    formData.append("user_ip", user_ip)
-    formData.append("merchant_oid", merchant_oid)
-    formData.append("email", email)
-    formData.append("payment_amount", payment_amount.toString())
-    formData.append("payment_type", payment_type)
-    formData.append("installment_count", installment_count)
-    formData.append("currency", currency)
-    formData.append("test_mode", test_mode)
-    formData.append("non_3d", non_3d)
-    formData.append("merchant_ok_url", merchant_ok_url)
-    formData.append("merchant_fail_url", merchant_fail_url)
-    formData.append("user_name", user_name)
-    formData.append("user_address", user_address)
-    formData.append("user_phone", user_phone)
-    formData.append("user_basket", user_basket_str)
-    formData.append("debug_on", "1")
-    formData.append("paytr_token", paytr_token)
-    
-    // Credit Card Details
-    formData.append("cc_owner", cc_owner)
-    formData.append("cc_number", cc_number)
-    formData.append("cc_month", cc_month)
-    formData.append("cc_year", cc_year)
-    formData.append("cc_cvv", cc_cvv)
-
-    // API URL is /odeme for Direct API
-    const response = await axios.post("https://www.paytr.com/odeme", formData.toString(), {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" }
-    })
-
-    // If non_3d = 0, PayTR returns a 3D Secure HTML string. If there is an error, it usually returns JSON or a string containing "status":"error"
-    let responseData = response.data;
-    
-    if (typeof responseData === 'object') {
-        if (responseData.status === "error") {
-            console.error("PayTR Direct API Error:", responseData);
-            return res.status(400).json({ success: false, error: responseData.reason || "Kredi kartı işlemi reddedildi." });
-        }
-    } else if (typeof responseData === 'string') {
-        if (responseData.includes('status":"error"')) {
-            try {
-                const parsed = JSON.parse(responseData);
-                return res.status(400).json({ success: false, error: parsed.reason || "İşlem reddedildi." });
-            } catch (e) {
-                return res.status(400).json({ success: false, error: "Banka iletişiminde hata." });
-            }
-        }
-        
-        // It's likely the 3D Secure HTML
-        return res.json({ success: true, html: responseData });
+    const formParams = {
+      merchant_id,
+      user_ip,
+      merchant_oid,
+      email,
+      payment_amount: payment_amount.toString(),
+      payment_type,
+      installment_count,
+      currency,
+      test_mode,
+      non_3d,
+      merchant_ok_url,
+      merchant_fail_url,
+      user_name,
+      user_address,
+      user_phone,
+      user_basket: user_basket_str,
+      debug_on: "1",
+      paytr_token,
+      cc_owner: String(cc_owner || user_name).trim(),
+      card_number: cleanCardNumber,
+      expiry_month: cleanMonth,
+      expiry_year: cleanYear,
+      cvv: cleanCvv
     }
 
-    return res.status(400).json({ success: false, error: "Bilinmeyen bir yanıt alındı." })
-
+    return res.json({
+      success: true,
+      requiresDirectHtml: false,
+      requiresClientPost: true,
+      postUrl: "https://www.paytr.com/odeme",
+      formParams
+    })
   } catch (error: any) {
     console.error("PayTR Direct API Endpoint Error:", error)
-    return res.status(500).json({ success: false, error: error.message })
+    return res.status(400).json({ success: false, error: error.message || "Bilinmeyen bir hata oluştu" })
   }
 }
