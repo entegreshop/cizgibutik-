@@ -71,9 +71,9 @@ const initialConfig: PaymentConfig = {
     active: true,
     min_total: 0,
     max_total: 100000,
-    merchant_id: "647433",
-    merchant_key: "Xon89DCuBQGLIM7",
-    merchant_salt: "tXX2UJMk5CZrBke4",
+    merchant_id: "629307",
+    merchant_key: "9FMJdoSkaUX87q8F",
+    merchant_salt: "1uFDNEN7PX3a6CR2",
     test_mode: "Kapalı",
     disable_3d_secure_intl: false,
     installments: defaultInstallments

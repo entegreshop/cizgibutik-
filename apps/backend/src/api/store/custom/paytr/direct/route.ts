@@ -90,7 +90,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         : ""
     const cfIp = typeof req.headers["cf-connecting-ip"] === "string" ? req.headers["cf-connecting-ip"].trim() : ""
     const fallbackClientIp = client_ip && client_ip !== "1.1.1.1" && client_ip !== "127.0.0.1" ? String(client_ip).split(",")[0].trim() : ""
-    const rawIp = fallbackClientIp || cfIp || headerIp || (req as any).ip || "85.105.1.1"
+    const isIpv4 = (ip: string) => /^\d{1,3}(\.\d{1,3}){3}$/.test(ip)
+    const rawIp =
+      (isIpv4(fallbackClientIp) ? fallbackClientIp : "") ||
+      (isIpv4(cfIp) ? cfIp : "") ||
+      (isIpv4(headerIp) ? headerIp : "") ||
+      fallbackClientIp ||
+      cfIp ||
+      headerIp ||
+      (req as any).ip ||
+      "85.105.1.1"
     const user_ip = String(rawIp).replace(/^::ffff:/, "").trim() || "85.105.1.1"
 
     const email = cart.email || "guest@cizgibutik.com"

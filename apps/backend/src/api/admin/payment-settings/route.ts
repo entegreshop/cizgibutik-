@@ -29,8 +29,8 @@ const defaultData = {
     min_total: 0,
     max_total: 100000,
     merchant_id: process.env.PAYTR_MERCHANT_ID || "629307",
-    merchant_key: process.env.PAYTR_MERCHANT_KEY || "9FMjdoSkaUX87q8F",
-    merchant_salt: process.env.PAYTR_MERCHANT_SALT || "1uFDNFN7PX3a6CR7",
+    merchant_key: process.env.PAYTR_MERCHANT_KEY || "9FMJdoSkaUX87q8F",
+    merchant_salt: process.env.PAYTR_MERCHANT_SALT || "1uFDNEN7PX3a6CR2",
     test_mode: "Kapalı",
     disable_3d_secure_intl: false,
     installments: defaultInstallments
@@ -74,7 +74,7 @@ export function readConfig() {
       const content = fs.readFileSync(targetPath, "utf-8")
       const parsed = JSON.parse(content)
       const parsedPaytr = { ...(parsed.paytr || {}) }
-      if (parsedPaytr.merchant_id === "647433" || parsedPaytr.merchant_key === "Xon89DCuBQGLIM7") {
+      if (parsedPaytr.merchant_id === "647433" || parsedPaytr.merchant_key === "Xon89DCuBQGLIM7" || parsedPaytr.merchant_key === "9FMjdoSkaUX87q8F" || parsedPaytr.merchant_salt === "1uFDNFN7PX3a6CR7") {
         delete parsedPaytr.merchant_id
         delete parsedPaytr.merchant_key
         delete parsedPaytr.merchant_salt
