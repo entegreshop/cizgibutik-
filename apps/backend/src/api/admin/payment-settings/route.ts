@@ -73,10 +73,16 @@ export function readConfig() {
     if (targetPath) {
       const content = fs.readFileSync(targetPath, "utf-8")
       const parsed = JSON.parse(content)
+      const parsedPaytr = { ...(parsed.paytr || {}) }
+      if (parsedPaytr.merchant_id === "647433" || parsedPaytr.merchant_key === "Xon89DCuBQGLIM7") {
+        delete parsedPaytr.merchant_id
+        delete parsedPaytr.merchant_key
+        delete parsedPaytr.merchant_salt
+      }
       return {
         ...defaultData,
         ...parsed,
-        paytr: { ...defaultData.paytr, ...(parsed.paytr || {}) },
+        paytr: { ...defaultData.paytr, ...parsedPaytr },
         bank_transfer: { ...defaultData.bank_transfer, ...(parsed.bank_transfer || {}) },
         cash_on_delivery: { ...defaultData.cash_on_delivery, ...(parsed.cash_on_delivery || {}) },
         card_on_delivery: { ...defaultData.card_on_delivery, ...(parsed.card_on_delivery || {}) }
@@ -125,10 +131,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       if (regions && regions.length > 0) {
         // Collect active providers from our config
         const activeProviders: string[] = []
-        if (body.paytr?.active) activeProviders.push("pp_custom-payment_PAYTR")
-        if (body.bank_transfer?.active) activeProviders.push("pp_custom-payment_BANK-TRANSFER")
-        if (body.cash_on_delivery?.active) activeProviders.push("pp_custom-payment_CASH-ON-DELIVERY")
-        if (body.card_on_delivery?.active) activeProviders.push("pp_custom-payment_CARD-ON-DELIVERY")
+        if (body.paytr?.active) activeProviders.push("pp_PAYTR_PAYTR")
+        if (body.bank_transfer?.active) activeProviders.push("pp_BANK-TRANSFER_BANK-TRANSFER")
+        if (body.cash_on_delivery?.active) activeProviders.push("pp_CASH-ON-DELIVERY_CASH-ON-DELIVERY")
+        if (body.card_on_delivery?.active) activeProviders.push("pp_CARD-ON-DELIVERY_CARD-ON-DELIVERY")
 
         // Update all regions to include these providers
         for (const region of regions as any[]) {

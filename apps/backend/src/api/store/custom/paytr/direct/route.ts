@@ -88,8 +88,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       : Array.isArray(forwardedFor)
         ? forwardedFor[0]
         : ""
-    const fallbackClientIp = client_ip && client_ip !== "1.1.1.1" ? String(client_ip).split(",")[0].trim() : ""
-    const rawIp = headerIp || fallbackClientIp || (req as any).ip || "85.105.1.1"
+    const cfIp = typeof req.headers["cf-connecting-ip"] === "string" ? req.headers["cf-connecting-ip"].trim() : ""
+    const fallbackClientIp = client_ip && client_ip !== "1.1.1.1" && client_ip !== "127.0.0.1" ? String(client_ip).split(",")[0].trim() : ""
+    const rawIp = fallbackClientIp || cfIp || headerIp || (req as any).ip || "85.105.1.1"
     const user_ip = String(rawIp).replace(/^::ffff:/, "").trim() || "85.105.1.1"
 
     const email = cart.email || "guest@cizgibutik.com"
