@@ -104,7 +104,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const user_phone = cart.shipping_address?.phone || "05000000000"
 
     const currency = "TL"
-    const test_mode = (paytrConfig.test_mode && String(paytrConfig.test_mode).startsWith("A")) ? "1" : "0"
 
     // Basket data needs to be a serialized JSON array of arrays
     const user_basket = cart.items.map((item: any) => [
@@ -136,6 +135,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const cleanMonth = String(cc_month || "").trim().padStart(2, "0")
     const cleanYear = String(cc_year || "").trim().slice(-2)
     const cleanCvv = String(cc_cvv || "").replace(/\D/g, "")
+
+    const isTestCard = cleanCardNumber.startsWith("9792") || ["4355084355084358", "5406675406675403"].includes(cleanCardNumber)
+    const test_mode = (isTestCard || (paytrConfig.test_mode && String(paytrConfig.test_mode).toLowerCase().startsWith("a"))) ? "1" : "0"
 
     // 5. Calculate HMAC Hash
     const hash_str = merchant_id + user_ip + merchant_oid + email + payment_amount + payment_type + installment_count + currency + test_mode + non_3d + merchant_salt
