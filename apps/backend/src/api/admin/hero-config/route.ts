@@ -6,50 +6,58 @@ import os from "os"
 const configFilePath = path.join(process.cwd(), "uploads", "hero-config.json")
 const legacyConfigFilePath = path.join(os.homedir(), ".xoox-hero-config.json")
 
-const defaultCategories = [
+export const defaultCategories = [
   {
     name: "Jean Pantolon",
     handle: "jean-pantolon",
-    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l1.5 16h-4.5L12 9l-2 11H5.5L7 4z"/><path d="M7 7h10"/><path d="M9 4v3"/><path d="M15 4v3"/></svg>`
+    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l1.5 16h-4.5L12 9l-2 11H5.5L7 4z"/><path d="M7 7h10"/><path d="M9 4v3"/><path d="M15 4v3"/></svg>`,
+    active: true,
   },
   {
     name: "Tayt",
     handle: "tayt",
-    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8l1 16h-3.5L12 9.5 10.5 20H7.0L8 4z"/><path d="M8 7.5h8"/></svg>`
+    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8l1 16h-3.5L12 9.5 10.5 20H7.0L8 4z"/><path d="M8 7.5h8"/></svg>`,
+    active: true,
   },
   {
     name: "Sweat",
     handle: "sweat",
-    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l-3 3.5L5.5 15l1.5-2v6.5A1.5 1.5 0 0 0 8.5 21h7a1.5 1.5 0 0 0 1.5-1.5V13l1.5 2 2.5-2.5L18 9V6a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3v3z"/><path d="M9 10a3 3 0 0 0 6 0"/><path d="M12 3v5"/></svg>`
+    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l-3 3.5L5.5 15l1.5-2v6.5A1.5 1.5 0 0 0 8.5 21h7a1.5 1.5 0 0 0 1.5-1.5V13l1.5 2 2.5-2.5L18 9V6a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3v3z"/><path d="M9 10a3 3 0 0 0 6 0"/><path d="M12 3v5"/></svg>`,
+    active: true,
   },
   {
     name: "Mont & Kürk",
     handle: "mont",
-    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8a3 3 0 0 0-3-3h-2L12 3.5 10 5H8a3 3 0 0 0-3 3z"/><path d="M12 3.5V21"/><path d="M5 9h14"/><path d="M5 13h14"/><path d="M5 17h14"/></svg>`
+    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8a3 3 0 0 0-3-3h-2L12 3.5 10 5H8a3 3 0 0 0-3 3z"/><path d="M12 3.5V21"/><path d="M5 9h14"/><path d="M5 13h14"/><path d="M5 17h14"/></svg>`,
+    active: true,
   },
   {
     name: "Kombin",
     handle: "kombin",
-    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a2 2 0 0 0-2 2c0 .5.2.9.5 1.2L5 8.5v3l4.5 1V19A1.5 1.5 0 0 0 11 20.5h2a1.5 1.5 0 0 0 1.5-1.5v-6.5l4.5-1v-3L13.5 6.2c.3-.3.5-.7.5-1.2a2 2 0 0 0-2-2z"/><path d="M8 8.5V17"/><path d="M16 8.5V17"/></svg>`
+    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a2 2 0 0 0-2 2c0 .5.2.9.5 1.2L5 8.5v3l4.5 1V19A1.5 1.5 0 0 0 11 20.5h2a1.5 1.5 0 0 0 1.5-1.5v-6.5l4.5-1v-3L13.5 6.2c.3-.3.5-.7.5-1.2a2 2 0 0 0-2-2z"/><path d="M8 8.5V17"/><path d="M16 8.5V17"/></svg>`,
+    active: true,
   },
   {
     name: "Tshirt",
     handle: "tshirt",
-    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5.5L3.5 8 5.5 11l2-1.5v10.0A1.5 1.5 0 0 0 9 21h6a1.5 1.5 0 0 0 1.5-1.5V9.5l2 1.5 2-3L18 5.5V3.5a1.5 1.5 0 0 0-1.5-1.5h-9A1.5 1.5 0 0 0 6 3.5v2.0z"/><path d="M9.5 2h5A2.5 2.5 0 0 1 12 4.5 2.5 2.5 0 0 1 9.5 2z"/></svg>`
+    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5.5L3.5 8 5.5 11l2-1.5v10.0A1.5 1.5 0 0 0 9 21h6a1.5 1.5 0 0 0 1.5-1.5V9.5l2 1.5 2-3L18 5.5V3.5a1.5 1.5 0 0 0-1.5-1.5h-9A1.5 1.5 0 0 0 6 3.5v2.0z"/><path d="M9.5 2h5A2.5 2.5 0 0 1 12 4.5 2.5 2.5 0 0 1 9.5 2z"/></svg>`,
+    active: true,
   },
   {
     name: "Gözlük",
     handle: "gozluk",
-    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a3 3 0 0 1 3-3h3.5a3 3 0 0 1 3 3v0a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v0z"/><path d="M11.5 11a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3v0a3 3 0 0 1-3 3h-3.5a3 3 0 0 1-3-3v0z"/><path d="M9.5 11h2.5"/><path d="M3 11.5c.5-3 2-4.5 3.5-4.5"/><path d="M21 11.5c-.5-3-2-4.5-3.5-4.5"/></svg>`
+    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a3 3 0 0 1 3-3h3.5a3 3 0 0 1 3 3v0a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v0z"/><path d="M11.5 11a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3v0a3 3 0 0 1-3 3h-3.5a3 3 0 0 1-3-3v0z"/><path d="M9.5 11h2.5"/><path d="M3 11.5c.5-3 2-4.5 3.5-4.5"/><path d="M21 11.5c-.5-3-2-4.5-3.5-4.5"/></svg>`,
+    active: true,
   },
   {
     name: "Çanta",
     handle: "canta",
-    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l1 11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2L5 8z"/><path d="M9 8V5.5a3 3 0 0 1 6 0V8"/></svg>`
-  }
+    icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l1 11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2L5 8z"/><path d="M9 8V5.5a3 3 0 0 1 6 0V8"/></svg>`,
+    active: true,
+  },
 ]
 
-const defaultBanners = [
+export const defaultBanners = [
   {
     tag: "Trend Koleksiyon",
     title: "PREMIUM JEAN KOLEKSİYONU",
@@ -57,6 +65,9 @@ const defaultBanners = [
     btn_text: "Koleksiyonu Keşfet",
     btn_link: "/categories/jean-pantolon",
     image_url: "",
+    btn_bg: "#4F46E5",
+    btn_text_color: "#ffffff",
+    active: true,
   },
   {
     tag: "Özel Seçki",
@@ -65,19 +76,82 @@ const defaultBanners = [
     btn_text: "Şimdi İncele",
     btn_link: "/categories/kombin",
     image_url: "",
-  }
+    btn_bg: "#7C3AED",
+    btn_text_color: "#ffffff",
+    active: true,
+  },
 ]
 
-const defaultData = {
-  tag: "MEDUSA V2 × NEXT.JS",
-  title: "XOOX Mağazasına Hoş Geldiniz",
-  subtitle: "Medusa V2 altyapısıyla güçlendirilen yeni 2026 koleksiyonumuzu keşfedin",
+export const defaultCarouselBlocks = [
+  {
+    id: "carousel-yeni-sezon",
+    title: "Öne Çıkan Sezon Ürünleri",
+    subtitle: "En çok tercih edilen yeni sezon kombin ve parçaları keşfedin",
+    badge_text: "VİTRİN SEÇKİSİ",
+    source_type: "latest",
+    handle: "",
+    limit: 8,
+    position: "below_banners",
+    bg_color: "#ffffff",
+    text_color: "#111827",
+    accent_color: "#7C3AED",
+    btn_text: "Tümünü Gör",
+    btn_link: "/store",
+    autoplay: true,
+    active: true,
+  },
+]
+
+export const defaultTrustBadges = [
+  {
+    title: "ÜCRETSİZ KARGO",
+    description: "3000 ₺ ve üzeri tüm siparişlerinizde kargo bedava.",
+    icon: "truck",
+    active: true,
+  },
+  {
+    title: "%100 GÜVENLİ ÖDEME",
+    description: "256-Bit SSL sertifikası ve 3D Secure ile güvenli alışveriş.",
+    icon: "shield",
+    active: true,
+  },
+  {
+    title: "KOLAY İADE & DEĞİŞİM",
+    description: "14 gün içerisinde koşulsuz iade ve hızlı değişim garantisi.",
+    icon: "refresh",
+    active: true,
+  },
+]
+
+export const defaultData = {
+  // Hero Banner & Slider Settings
+  tag: "2026 YENİ SEZON KOLEKSİYONU",
+  title: "Çizgi Butik'e Hoş Geldiniz",
+  subtitle: "Yeni sezonun en trend kadın giyim, jean, tayt ve kombin modellerini hemen keşfedin",
   btn_text: "Şimdi Alışverişe Başla",
   btn_link: "/store",
-  media_type: "image", // "image" or "video"
+  media_type: "image",
   media_url: "",
+  mobile_media_url: "",
+  hero_height: "75vh",
+  hero_overlay_opacity: 15,
+  hero_text_color: "#09090B",
+  hero_btn_bg: "#7C3AED",
+  hero_btn_text_color: "#ffffff",
+  hero_autoplay: true,
+  hero_interval: 5000,
+  hero_slides: [] as any[],
+
+  // Vitrin Settings
   categories: defaultCategories,
   banners: defaultBanners,
+  carousel_blocks: defaultCarouselBlocks,
+  trust_badges: defaultTrustBadges,
+  show_promo_banners: true,
+  show_category_circles: true,
+  show_trust_badges: true,
+
+  // Announcement & Marquee Bars
   top_announcement: "2026 YAZ SEZONU MODELLERİ",
   top_announcement_enabled: true,
   top_announcement_bg: "#000000",
@@ -90,32 +164,119 @@ const defaultData = {
   scrolling_text_product_enabled: true,
   scrolling_text_product_bg: "#FFD700",
   scrolling_text_product_text_color: "#000000",
+
   // Button Settings
   buy_now_enabled: true,
+  buy_now_text: "HEMEN AL",
   buy_now_bg: "#E50000",
   buy_now_text_color: "#ffffff",
   add_to_cart_enabled: true,
+  add_to_cart_text: "SEPETE EKLE",
   add_to_cart_bg: "#000000",
   add_to_cart_text_color: "#ffffff",
   whatsapp_enabled: true,
+  whatsapp_text: "WHATSAPP İLE SİPARİŞ",
   whatsapp_number: "905323370081",
   whatsapp_bg: "#ffffff",
   whatsapp_text_color: "#25D366",
+  button_border_radius: "0px",
+
+  // Header & Footer Settings
+  header_settings: {
+    sticky: true,
+    bg_color: "#ffffff",
+    text_color: "#000000",
+    border_color: "#e5e7eb",
+    logo_height_desktop: 44,
+    logo_height_mobile: 36,
+    show_search: true,
+    show_account: true,
+    show_cart: true,
+  },
+  footer_settings: {
+    bg_color: "#0a0a0c",
+    text_color: "#ffffff",
+    accent_color: "#ffffff",
+    show_social: true,
+    instagram_url: "https://instagram.com/cizgibutik",
+    facebook_url: "https://facebook.com/cizgibutik",
+    whatsapp_url: "https://wa.me/905323370081",
+    tiktok_url: "",
+    youtube_url: "",
+    ssl_badge_text: "Bu site 256 Bit SSL sertifikası ile korunmaktadır.",
+    show_payment_icons: true,
+  },
+
+  // Product Detail Settings
+  product_detail_settings: {
+    show_live_viewers: true,
+    live_viewers_min: 12,
+    live_viewers_max: 34,
+    show_favorite_button: true,
+    show_reviews_link: true,
+    show_trust_row: true,
+    trust_badge_1_text: "Güvenli Ödeme",
+    trust_badge_2_text: "Aynı Gün Kargo",
+    shipping_info_text: "Saat 15:00'a kadar verilen tüm siparişleriniz aynı gün kargoya teslim edilmektedir. Teslimat süresi ortalama 1-3 iş günüdür.",
+    return_policy_text: "Siparişinizdeki ürünleri teslim aldığınız tarihten itibaren 14 gün içerisinde, kullanılmamış ve etiketleri sökülmemiş olması şartıyla iade edebilirsiniz.",
+    show_sticky_mobile_bar: true,
+  },
+
+  // Cart Settings
+  cart_settings: {
+    page_title: "Alışveriş Sepetim",
+    show_free_shipping_bar: true,
+    free_shipping_threshold: 3000,
+    free_shipping_bar_color: "#10B981",
+    show_coupon_box: true,
+    checkout_btn_text: "Güvenli Ödemeye Geç",
+    checkout_btn_bg: "#000000",
+    checkout_btn_text_color: "#ffffff",
+    trust_note_text: "256-Bit SSL Güvencesiyle Hızlı & Güvenli Alışveriş",
+  },
+
+  // Checkout Modal / Form Settings
+  checkout_settings: {
+    modal_title: "Hızlı ve Güvenli Ödeme",
+    delivery_section_title: "Teslimat Adresi",
+    payment_section_title: "Ödeme Yöntemi",
+    accent_color: "#111827",
+    submit_btn_text: "Siparişi Tamamla",
+    submit_btn_bg: "#1A1A1A",
+    submit_btn_text_color: "#ffffff",
+    show_email: true,
+    require_email: true,
+    show_order_note: true,
+    show_coupon: true,
+    show_invoice_type: true,
+    default_payment_method: "credit_card",
+    ssl_badge_text: "Tüm bilgileriniz 256bit SSL Sertifikası ile korunmaktadır.",
+    copyright_text: "© 2026 Çizgi Butik Tüm Hakları Saklıdır",
+  },
 }
 
-function readConfig() {
+export function readHeroConfig() {
   try {
     const targetPath = fs.existsSync(configFilePath)
       ? configFilePath
-      : (fs.existsSync(legacyConfigFilePath) ? legacyConfigFilePath : null)
+      : fs.existsSync(legacyConfigFilePath)
+      ? legacyConfigFilePath
+      : null
     if (targetPath) {
       const content = fs.readFileSync(targetPath, "utf-8")
       const parsed = JSON.parse(content)
       return {
         ...defaultData,
         ...parsed,
-        categories: parsed.categories || defaultCategories,
-        banners: parsed.banners || defaultBanners,
+        categories: Array.isArray(parsed.categories) && parsed.categories.length > 0 ? parsed.categories : defaultCategories,
+        banners: Array.isArray(parsed.banners) && parsed.banners.length > 0 ? parsed.banners : defaultBanners,
+        carousel_blocks: Array.isArray(parsed.carousel_blocks) ? parsed.carousel_blocks : defaultCarouselBlocks,
+        trust_badges: Array.isArray(parsed.trust_badges) && parsed.trust_badges.length > 0 ? parsed.trust_badges : defaultTrustBadges,
+        header_settings: { ...defaultData.header_settings, ...(parsed.header_settings || {}) },
+        footer_settings: { ...defaultData.footer_settings, ...(parsed.footer_settings || {}) },
+        product_detail_settings: { ...defaultData.product_detail_settings, ...(parsed.product_detail_settings || {}) },
+        cart_settings: { ...defaultData.cart_settings, ...(parsed.cart_settings || {}) },
+        checkout_settings: { ...defaultData.checkout_settings, ...(parsed.checkout_settings || {}) },
       }
     }
   } catch (err) {
@@ -139,47 +300,53 @@ function writeConfig(data: any) {
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const config = readConfig()
+  const config = readHeroConfig()
   res.json({ config })
 }
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const body = req.body as any
-  const config = readConfig()
+  const body = (req.body as any) || {}
+  const incoming = body.config && typeof body.config === "object" ? body.config : body
+  const config = readHeroConfig()
 
   const updatedConfig = {
-    tag: body.tag ?? config.tag,
-    title: body.title ?? config.title,
-    subtitle: body.subtitle ?? config.subtitle,
-    btn_text: body.btn_text ?? config.btn_text,
-    btn_link: body.btn_link ?? config.btn_link,
-    media_type: body.media_type ?? config.media_type,
-    media_url: body.media_url ?? config.media_url,
-    categories: body.categories ?? config.categories,
-    banners: body.banners ?? config.banners,
-    top_announcement: body.top_announcement ?? config.top_announcement,
-    top_announcement_enabled: body.top_announcement_enabled ?? config.top_announcement_enabled,
-    top_announcement_bg: body.top_announcement_bg ?? config.top_announcement_bg,
-    top_announcement_text_color: body.top_announcement_text_color ?? config.top_announcement_text_color,
-    scrolling_text_home: body.scrolling_text_home ?? config.scrolling_text_home,
-    scrolling_text_home_enabled: body.scrolling_text_home_enabled ?? config.scrolling_text_home_enabled,
-    scrolling_text_home_bg: body.scrolling_text_home_bg ?? config.scrolling_text_home_bg,
-    scrolling_text_home_text_color: body.scrolling_text_home_text_color ?? config.scrolling_text_home_text_color,
-    scrolling_text_product: body.scrolling_text_product ?? config.scrolling_text_product,
-    scrolling_text_product_enabled: body.scrolling_text_product_enabled ?? config.scrolling_text_product_enabled,
-    scrolling_text_product_bg: body.scrolling_text_product_bg ?? config.scrolling_text_product_bg,
-    scrolling_text_product_text_color: body.scrolling_text_product_text_color ?? config.scrolling_text_product_text_color,
-    // Button Settings
-    buy_now_enabled: body.buy_now_enabled ?? config.buy_now_enabled,
-    buy_now_bg: body.buy_now_bg ?? config.buy_now_bg,
-    buy_now_text_color: body.buy_now_text_color ?? config.buy_now_text_color,
-    add_to_cart_enabled: body.add_to_cart_enabled ?? config.add_to_cart_enabled,
-    add_to_cart_bg: body.add_to_cart_bg ?? config.add_to_cart_bg,
-    add_to_cart_text_color: body.add_to_cart_text_color ?? config.add_to_cart_text_color,
-    whatsapp_enabled: body.whatsapp_enabled ?? config.whatsapp_enabled,
-    whatsapp_number: body.whatsapp_number ?? config.whatsapp_number,
-    whatsapp_bg: body.whatsapp_bg ?? config.whatsapp_bg,
-    whatsapp_text_color: body.whatsapp_text_color ?? config.whatsapp_text_color,
+    ...config,
+    ...incoming,
+    header_settings: {
+      ...config.header_settings,
+      ...(incoming.header_settings || {}),
+    },
+    footer_settings: {
+      ...config.footer_settings,
+      ...(incoming.footer_settings || {}),
+    },
+    product_detail_settings: {
+      ...config.product_detail_settings,
+      ...(incoming.product_detail_settings || {}),
+    },
+    cart_settings: {
+      ...config.cart_settings,
+      ...(incoming.cart_settings || {}),
+    },
+    checkout_settings: {
+      ...config.checkout_settings,
+      ...(incoming.checkout_settings || {}),
+    },
+  }
+
+  // Keep primary hero fields synced with hero_slides[0] if hero_slides was updated
+  if (Array.isArray(incoming.hero_slides) && incoming.hero_slides.length > 0) {
+    const firstActive = incoming.hero_slides.find((s: any) => s.active !== false) || incoming.hero_slides[0]
+    if (firstActive && incoming.title === undefined) {
+      updatedConfig.tag = firstActive.tag ?? updatedConfig.tag
+      updatedConfig.title = firstActive.title ?? updatedConfig.title
+      updatedConfig.subtitle = firstActive.subtitle ?? updatedConfig.subtitle
+      updatedConfig.btn_text = firstActive.btn_text ?? updatedConfig.btn_text
+      updatedConfig.btn_link = firstActive.btn_link ?? updatedConfig.btn_link
+      updatedConfig.media_url = firstActive.media_url ?? updatedConfig.media_url
+      updatedConfig.mobile_media_url = firstActive.mobile_media_url ?? updatedConfig.mobile_media_url
+      updatedConfig.media_type = firstActive.media_type ?? updatedConfig.media_type
+    }
   }
 
   const success = writeConfig(updatedConfig)
@@ -189,4 +356,3 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     res.status(500).json({ success: false, message: "Could not write configuration" })
   }
 }
-
