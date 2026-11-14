@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { syncCartShippingMethods } from "../../../../admin/shipping-settings/route"
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   try {
@@ -47,6 +48,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
     if (completeIfNeeded) {
       try {
+        await syncCartShippingMethods(req.scope, cartId)
         const { completeCartWorkflow } = await import("@medusajs/core-flows")
         const { result } = await completeCartWorkflow(req.scope).run({
           input: { id: cartId }

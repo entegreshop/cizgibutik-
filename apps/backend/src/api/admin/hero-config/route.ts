@@ -3,7 +3,8 @@ import fs from "fs"
 import path from "path"
 import os from "os"
 
-const configFilePath = path.join(os.homedir(), ".xoox-hero-config.json")
+const configFilePath = path.join(process.cwd(), "uploads", "hero-config.json")
+const legacyConfigFilePath = path.join(os.homedir(), ".xoox-hero-config.json")
 
 const defaultCategories = [
   {
@@ -104,8 +105,11 @@ const defaultData = {
 
 function readConfig() {
   try {
-    if (fs.existsSync(configFilePath)) {
-      const content = fs.readFileSync(configFilePath, "utf-8")
+    const targetPath = fs.existsSync(configFilePath)
+      ? configFilePath
+      : (fs.existsSync(legacyConfigFilePath) ? legacyConfigFilePath : null)
+    if (targetPath) {
+      const content = fs.readFileSync(targetPath, "utf-8")
       const parsed = JSON.parse(content)
       return {
         ...defaultData,
@@ -122,6 +126,10 @@ function readConfig() {
 
 function writeConfig(data: any) {
   try {
+    const dir = path.dirname(configFilePath)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
     fs.writeFileSync(configFilePath, JSON.stringify(data, null, 2), "utf-8")
     return true
   } catch (err) {
