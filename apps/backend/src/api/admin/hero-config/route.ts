@@ -102,6 +102,27 @@ export const defaultCarouselBlocks = [
   },
 ]
 
+export const defaultBannerCarousels = [
+  {
+    id: "banner-carousel-1",
+    title: "Kışlık Kombinler",
+    title_color: "#111827",
+    cta_text: "Fırsatları Kaçırma",
+    cta_link: "/store",
+    cta_color: "#f02d9c",
+    footer_note: "Sezon sonuna kadar geçerlidir. Fırsat; kupon ve sepette indirim avantajlarını kapsar.",
+    badge_text: "YENİ SEZON FIRSATI",
+    bg_image_url: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#dce6f2",
+    source_type: "latest",
+    handle: "",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+]
+
 export const defaultTrustBadges = [
   {
     title: "ÜCRETSİZ KARGO",
@@ -140,12 +161,15 @@ export const defaultData = {
   hero_btn_text_color: "#ffffff",
   hero_autoplay: true,
   hero_interval: 5000,
+  show_hero_banner: true,
+  hero_display_mode: "standard_hero",
   hero_slides: [] as any[],
 
   // Vitrin Settings
   categories: defaultCategories,
   banners: defaultBanners,
   carousel_blocks: defaultCarouselBlocks,
+  banner_carousels: defaultBannerCarousels,
   trust_badges: defaultTrustBadges,
   show_promo_banners: true,
   show_category_circles: true,
@@ -307,6 +331,7 @@ export function readHeroConfig() {
         categories: Array.isArray(parsed.categories) && parsed.categories.length > 0 ? parsed.categories : defaultCategories,
         banners: Array.isArray(parsed.banners) && parsed.banners.length > 0 ? parsed.banners : defaultBanners,
         carousel_blocks: Array.isArray(parsed.carousel_blocks) ? parsed.carousel_blocks : defaultCarouselBlocks,
+        banner_carousels: Array.isArray(parsed.banner_carousels) && parsed.banner_carousels.length > 0 ? parsed.banner_carousels : defaultBannerCarousels,
         trust_badges: Array.isArray(parsed.trust_badges) && parsed.trust_badges.length > 0 ? parsed.trust_badges : defaultTrustBadges,
         header_settings: { ...defaultData.header_settings, ...(parsed.header_settings || {}) },
         footer_settings: { ...defaultData.footer_settings, ...(parsed.footer_settings || {}) },

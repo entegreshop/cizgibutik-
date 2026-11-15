@@ -61,6 +61,25 @@ export interface CarouselBlockItem {
   active: boolean
 }
 
+export interface BannerCarouselItem {
+  id: string
+  title: string
+  title_color: string
+  cta_text: string
+  cta_link: string
+  cta_color: string
+  footer_note: string
+  badge_text: string
+  bg_image_url: string
+  bg_color: string
+  source_type: "latest" | "category" | "collection"
+  handle: string
+  limit: number
+  position: "replace_hero" | "above_banners" | "below_banners" | "below_collection" | "below_products"
+  free_shipping_text: string
+  active: boolean
+}
+
 export interface TrustBadgeItem {
   title: string
   description: string
@@ -113,10 +132,32 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
     hero_btn_text_color: "#ffffff",
     hero_autoplay: true,
     hero_interval: 5000,
+    show_hero_banner: true,
+    hero_display_mode: "standard_hero",
     hero_slides: [] as HeroSlide[],
     categories: [] as CategoryCircle[],
     banners: [] as PromoBannerItem[],
     carousel_blocks: [] as CarouselBlockItem[],
+    banner_carousels: [
+      {
+        id: "banner-carousel-1",
+        title: "Kışlık Kombinler",
+        title_color: "#111827",
+        cta_text: "Fırsatları Kaçırma",
+        cta_link: "/store",
+        cta_color: "#f02d9c",
+        footer_note: "Sezon sonuna kadar geçerlidir. Fırsat; kupon ve sepette indirim avantajlarını kapsar.",
+        badge_text: "YENİ SEZON FIRSATI",
+        bg_image_url: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&auto=format&fit=crop&q=80",
+        bg_color: "#dce6f2",
+        source_type: "latest",
+        handle: "",
+        limit: 8,
+        position: "below_collection",
+        free_shipping_text: "HIZLI KARGO",
+        active: true,
+      },
+    ] as BannerCarouselItem[],
     trust_badges: [] as TrustBadgeItem[],
     show_promo_banners: true,
     show_category_circles: true,
@@ -456,6 +497,42 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
         ========================================================= */}
         {section === "hero" && (
           <div className="space-y-6">
+            {/* Hero Banner Aktif / Pasif & Hero Yerine Banner Carousel Koyma Ayarı */}
+            <div className="p-4 rounded-[8px] border-2 border-[#3d94fb]/30 bg-[#f4f8ff] flex flex-wrap items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[14.5px] font-bold text-[#1e293b]">
+                    🎛️ Ana Sayfa Üst Karşılama (Hero) Alanı Görünüm &amp; Konum Kontrolü
+                  </span>
+                </div>
+                <p className="text-[12px] text-[#74788d]">
+                  Hero Banner&apos;ı aktif/pasif yapabilir veya Hero Banner yerine doğrudan &quot;Banner Üstü Kategori Carousel&quot; bloğunu en üste koyabilirsiniz.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="flex items-center gap-2 px-3.5 py-2 rounded-[6px] bg-white border border-[#e2e5ec] text-[12.5px] font-bold text-[#1e293b] cursor-pointer shadow-2xs">
+                  <input
+                    type="checkbox"
+                    checked={config.show_hero_banner ?? true}
+                    onChange={(e) => updateField("show_hero_banner", e.target.checked)}
+                    className="w-4 h-4 accent-[#0abb87]"
+                  />
+                  Hero Banner Aktif
+                </label>
+
+                <select
+                  value={config.hero_display_mode || "standard_hero"}
+                  onChange={(e) => updateField("hero_display_mode", e.target.value)}
+                  className="h-[38px] px-3 rounded-[6px] border border-[#3d94fb] bg-white text-[12.5px] font-bold text-[#1e293b] cursor-pointer"
+                >
+                  <option value="standard_hero">Mod: Standart Hero Banner Göster (Varsayılan)</option>
+                  <option value="banner_carousel">Mod: Hero Banner Yerine Banner Üstü Kategori Carousel Koy</option>
+                  <option value="both">Mod: İkisini Birlikte Göster (Üstte Hero + Altta Banner Carousel)</option>
+                  <option value="hidden">Mod: Hero Alanını Tamamen Gizle (Pasif)</option>
+                </select>
+              </div>
+            </div>
+
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#ebedf2]">
               <div>
                 <h4 className="text-[16px] font-bold text-[#1e293b]">🎯 Hero Banner &amp; Çoklu Manşet Slider Ayarları</h4>
@@ -1860,10 +1937,251 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
         )}
 
         {/* =========================================================
-            3. ANA SAYFA CAROUSEL BLOK AYARLARI
+            3. ANA SAYFA CAROUSEL BLOK AYARLARI (BANNER ÜSTÜ CAROUSEL & STANDART CAROUSEL)
         ========================================================= */}
         {section === "carousel" && (
-          <div className="space-y-6">
+          <div className="space-y-8">
+            {/* A. BANNER ÜSTÜ KATEGORİ & ÜRÜN CAROUSEL BLOKLARI (n11 Stili - Üst Yuvarlak Marka Etiketleri Olmadan) */}
+            <div className="p-5 rounded-[8px] border-2 border-[#c91d82]/30 bg-[#fdf8fc] space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#f3d6e8]">
+                <div>
+                  <h4 className="text-[16px] font-bold text-[#1e293b]">
+                    🖼️ Banner Üstü Kategori &amp; Ürün Carousel Blokları (n11 Stili Kampanya Alanı)
+                  </h4>
+                  <p className="text-[12.5px] text-[#74788d] mt-0.5">
+                    Geniş kampanya görseli üzerinde sol tarafta başlık (&quot;Kışlık Kombinler&quot;, &quot;Fırsatları Kaçırma &gt;&quot;), sağ tarafta ise üst yuvarlak marka ikonları olmadan doğrudan kaydırılabilir ürün kartları gösterir.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newBannerCarousel: BannerCarouselItem = {
+                      id: "banner-carousel-" + Date.now(),
+                      title: "Kışlık Kombinler",
+                      title_color: "#111827",
+                      cta_text: "Fırsatları Kaçırma",
+                      cta_link: "/store",
+                      cta_color: "#f02d9c",
+                      footer_note: "Sezon sonuna kadar geçerlidir. Fırsat; kupon ve sepette indirim avantajlarını kapsar.",
+                      badge_text: "YENİ SEZON FIRSATI",
+                      bg_image_url:
+                        "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&auto=format&fit=crop&q=80",
+                      bg_color: "#dce6f2",
+                      source_type: "latest",
+                      handle: "",
+                      limit: 8,
+                      position: "below_banners",
+                      free_shipping_text: "HIZLI KARGO",
+                      active: true,
+                    }
+                    updateField("banner_carousels", [...(config.banner_carousels || []), newBannerCarousel])
+                  }}
+                  className="h-[38px] px-4 rounded-[5px] bg-[#c91d82] hover:opacity-95 text-white text-[13px] font-bold cursor-pointer shadow-xs"
+                >
+                  + Yeni Banner Üstü Carousel Ekle
+                </button>
+              </div>
+
+              {(config.banner_carousels || []).map((bBlock: BannerCarouselItem, bIdx: number) => (
+                <div
+                  key={bBlock.id || bIdx}
+                  className="p-5 rounded-[8px] border border-[#e2e5ec] bg-white space-y-4 shadow-2xs"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#ebedf2]">
+                    <div className="flex items-center gap-2.5">
+                      <span className="px-2.5 py-1 rounded bg-[#c91d82] text-white text-[11.5px] font-bold">
+                        Banner Carousel #{bIdx + 1}
+                      </span>
+                      <span className="text-[14.5px] font-bold text-[#1e293b]">
+                        {bBlock.title || "Kışlık Kombinler"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-1.5 text-[12.5px] font-semibold cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={bBlock.active !== false}
+                          onChange={(e) => {
+                            const next = [...(config.banner_carousels || [])]
+                            next[bIdx] = { ...bBlock, active: e.target.checked }
+                            updateField("banner_carousels", next)
+                          }}
+                        />
+                        Aktif
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = (config.banner_carousels || []).filter((_: any, i: number) => i !== bIdx)
+                          updateField("banner_carousels", next)
+                        }}
+                        className="px-3 py-1 rounded bg-red-50 text-red-600 text-[12px] font-semibold cursor-pointer"
+                      >
+                        🗑 Sil
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Sol Ana Başlık</label>
+                      <input
+                        type="text"
+                        value={bBlock.title || ""}
+                        onChange={(e) => {
+                          const next = [...(config.banner_carousels || [])]
+                          next[bIdx] = { ...bBlock, title: e.target.value }
+                          updateField("banner_carousels", next)
+                        }}
+                        placeholder="Örn: Kışlık Kombinler"
+                        className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12.5px] font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Alt Başlık / Link Metni</label>
+                      <input
+                        type="text"
+                        value={bBlock.cta_text || ""}
+                        onChange={(e) => {
+                          const next = [...(config.banner_carousels || [])]
+                          next[bIdx] = { ...bBlock, cta_text: e.target.value }
+                          updateField("banner_carousels", next)
+                        }}
+                        placeholder="Örn: Fırsatları Kaçırma"
+                        className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12.5px] font-semibold text-[#f02d9c]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Yönlendirme Linki</label>
+                      <input
+                        type="text"
+                        value={bBlock.cta_link || "/store"}
+                        onChange={(e) => {
+                          const next = [...(config.banner_carousels || [])]
+                          next[bIdx] = { ...bBlock, cta_link: e.target.value }
+                          updateField("banner_carousels", next)
+                        }}
+                        className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12px] font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Kart Kargo Şerit Yazısı</label>
+                      <input
+                        type="text"
+                        value={bBlock.free_shipping_text || "HIZLI KARGO"}
+                        onChange={(e) => {
+                          const next = [...(config.banner_carousels || [])]
+                          next[bIdx] = { ...bBlock, free_shipping_text: e.target.value }
+                          updateField("banner_carousels", next)
+                        }}
+                        className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12px] font-bold"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Sol Alt Kampanya Açıklama Notu</label>
+                      <input
+                        type="text"
+                        value={bBlock.footer_note || ""}
+                        onChange={(e) => {
+                          const next = [...(config.banner_carousels || [])]
+                          next[bIdx] = { ...bBlock, footer_note: e.target.value }
+                          updateField("banner_carousels", next)
+                        }}
+                        className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12px]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Ürün Kaynağı</label>
+                      <select
+                        value={bBlock.source_type || "latest"}
+                        onChange={(e) => {
+                          const next = [...(config.banner_carousels || [])]
+                          next[bIdx] = { ...bBlock, source_type: e.target.value as any }
+                          updateField("banner_carousels", next)
+                        }}
+                        className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12.5px] bg-white"
+                      >
+                        <option value="latest">Son Eklenen Ürünler</option>
+                        <option value="category">Belirli Bir Kategori (Handle)</option>
+                        <option value="collection">Belirli Bir Koleksiyon (Handle)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Kategori Handle / Konum</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={bBlock.handle || ""}
+                          onChange={(e) => {
+                            const next = [...(config.banner_carousels || [])]
+                            next[bIdx] = { ...bBlock, handle: e.target.value }
+                            updateField("banner_carousels", next)
+                          }}
+                          placeholder="kombin"
+                          className="h-[36px] px-2.5 rounded border border-[#e2e5ec] text-[12px] font-mono"
+                        />
+                        <select
+                          value={bBlock.position || "below_collection"}
+                          onChange={(e) => {
+                            const next = [...(config.banner_carousels || [])]
+                            next[bIdx] = { ...bBlock, position: e.target.value as any }
+                            updateField("banner_carousels", next)
+                          }}
+                          className="h-[36px] px-2 rounded border border-[#e2e5ec] text-[11.5px] bg-white font-semibold"
+                        >
+                          <option value="below_collection">Çizgi Collection Altında (Varsayılan)</option>
+                          <option value="replace_hero">Hero Banner Yerinde (En Üstte)</option>
+                          <option value="above_banners">İkili Kampanya Banner Üstünde</option>
+                          <option value="below_banners">İkili Kampanya Banner Altında</option>
+                          <option value="below_products">Tüm Ürün Vitrini Altında</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-4">
+                      <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">
+                        Arka Plan Kampanya Görseli (Sol Model / Konsept Görseli)
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={bBlock.bg_image_url || ""}
+                          onChange={(e) => {
+                            const next = [...(config.banner_carousels || [])]
+                            next[bIdx] = { ...bBlock, bg_image_url: e.target.value }
+                            updateField("banner_carousels", next)
+                          }}
+                          placeholder="Görsel URL veya bilgisayardan yükleyin"
+                          className="flex-1 h-[36px] px-3 rounded border border-[#e2e5ec] text-[12px]"
+                        />
+                        <label className="px-3.5 py-2 rounded bg-[#eef4ff] text-[#3d94fb] text-[12px] font-bold cursor-pointer shrink-0">
+                          {uploadingKey === `bcarousel-${bIdx}` ? "Yükleniyor..." : "📁 Görsel Yükle"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0]
+                              if (f) {
+                                uploadMediaFile(f, `bcarousel-${bIdx}`, (url) => {
+                                  const next = [...(config.banner_carousels || [])]
+                                  next[bIdx] = { ...bBlock, bg_image_url: url }
+                                  updateField("banner_carousels", next)
+                                })
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#ebedf2]">
               <div>
                 <h4 className="text-[16px] font-bold text-[#1e293b]">🎠 Ana Sayfa Ürün / Koleksiyon Carousel Blok Ayarları</h4>
