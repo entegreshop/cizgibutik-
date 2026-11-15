@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 
 export type StudioSectionKey =
+  | "ai_studio"
   | "hero"
   | "coupon_popup"
   | "vitrin"
@@ -93,6 +94,7 @@ interface DesignStudioProps {
 }
 
 const STUDIO_TABS: { key: StudioSectionKey; icon: string; label: string; badge?: string }[] = [
+  { key: "ai_studio", icon: "✨", label: "Entegre AI Studio", badge: "AI PRO" },
   { key: "hero", icon: "🎯", label: "Hero Banner & Slider" },
   { key: "coupon_popup", icon: "🎟️", label: "Hero Üstü Kupon & Popup", badge: "YENİ" },
   { key: "vitrin", icon: "🏪", label: "Vitrin, Banner & Kategoriler" },
@@ -104,11 +106,218 @@ const STUDIO_TABS: { key: StudioSectionKey; icon: string; label: string; badge?:
   { key: "checkout", icon: "💳", label: "Ödeme Formu Ayarları" },
 ]
 
+const DEFAULT_ALL_CATEGORY_BANNER_CAROUSELS: BannerCarouselItem[] = [
+  {
+    id: "banner-carousel-kombin",
+    title: "Trend İkili Kombinler",
+    title_color: "#111827",
+    cta_text: "Fırsatları Kaçırma",
+    cta_link: "/categories/kombin",
+    cta_color: "#f02d9c",
+    footer_note: "Sezon sonuna kadar geçerlidir. Fırsat; kupon ve sepette indirim avantajlarını kapsar.",
+    badge_text: "KOMBİN FIRSATI",
+    bg_image_url: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#dce6f2",
+    source_type: "category",
+    handle: "kombin",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+  {
+    id: "banner-carousel-jean",
+    title: "Jean Pantolon Koleksiyonu",
+    title_color: "#111827",
+    cta_text: "Denim Modellerini Keşfet",
+    cta_link: "/categories/jean-pantolon",
+    cta_color: "#1d4ed8",
+    footer_note: "Yüksek bel, Palazzo, Mom ve İspanyol paça jean modellerinde sepette ekstra kupon fırsatı.",
+    badge_text: "DENİM SEZONU",
+    bg_image_url: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#dbeafe",
+    source_type: "category",
+    handle: "jean-pantolon",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+  {
+    id: "banner-carousel-tayt",
+    title: "Toparlayıcı & Likralı Taytlar",
+    title_color: "#111827",
+    cta_text: "Tayt Fırsatlarını İncele",
+    cta_link: "/categories/tayt",
+    cta_color: "#c91d82",
+    footer_note: "Yüksek bel fitilli, deri görünümlü ve çelik örme taytlarda hızlı kargo avantajı.",
+    badge_text: "FAVORİ TAYTLAR",
+    bg_image_url: "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#fce7f3",
+    source_type: "category",
+    handle: "tayt",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+  {
+    id: "banner-carousel-sweat",
+    title: "Oversize Sweat & Eşofman",
+    title_color: "#111827",
+    cta_text: "Rahat Stili Yakala",
+    cta_link: "/categories/sweat",
+    cta_color: "#7c3aed",
+    footer_note: "Şardonlu 3 iplik oversize sweatshirt ve kapüşonlu modellerde özel indirimler.",
+    badge_text: "STREET STYLE",
+    bg_image_url: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#ede9fe",
+    source_type: "category",
+    handle: "sweat",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+  {
+    id: "banner-carousel-mont",
+    title: "Mont & Kürk Koleksiyonu",
+    title_color: "#111827",
+    cta_text: "Dış Giyim Fırsatları",
+    cta_link: "/categories/mont",
+    cta_color: "#b45309",
+    footer_note: "Sıcak tutan şişme mont, peluş kürk ve kaşe kabanlarda sezonun en iyi fiyatları.",
+    badge_text: "KIŞ KOLEKSİYONU",
+    bg_image_url: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#fef3c7",
+    source_type: "category",
+    handle: "mont",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+  {
+    id: "banner-carousel-tshirt",
+    title: "Yeni Sezon T-Shirt Seçkisi",
+    title_color: "#111827",
+    cta_text: "Tüm Modelleri Gör",
+    cta_link: "/categories/tshirt",
+    cta_color: "#059669",
+    footer_note: "%100 pamuklu basic, baskılı ve crop t-shirt modellerinde sepette ekstra indirim.",
+    badge_text: "HER MEVSİM STİL",
+    bg_image_url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#d1fae5",
+    source_type: "category",
+    handle: "tshirt",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+  {
+    id: "banner-carousel-gozluk",
+    title: "Güneş Gözlüğü Koleksiyonu",
+    title_color: "#111827",
+    cta_text: "Aksesuarları Keşfet",
+    cta_link: "/categories/gozluk",
+    cta_color: "#e11d48",
+    footer_note: "UV400 korumalı retro, cat-eye ve kemik çerçeve gözlüklerde kaçırılmayacak fiyatlar.",
+    badge_text: "TREND AKSESUAR",
+    bg_image_url: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#ffe4e6",
+    source_type: "category",
+    handle: "gozluk",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+  {
+    id: "banner-carousel-canta",
+    title: "Şık & Trend Çanta Modelleri",
+    title_color: "#111827",
+    cta_text: "Çanta Koleksiyonunu Gör",
+    cta_link: "/categories/canta",
+    cta_color: "#9333ea",
+    footer_note: "Omuz çantası, baget ve çapraz askılı modellerle kombininizi tamamlayın.",
+    badge_text: "İMZA DETAYLAR",
+    bg_image_url: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#f3e8ff",
+    source_type: "category",
+    handle: "canta",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+  {
+    id: "banner-carousel-yeni",
+    title: "Yeni Gelenler Vitrini",
+    title_color: "#111827",
+    cta_text: "Yeni Sezonu Keşfet",
+    cta_link: "/store",
+    cta_color: "#f02d9c",
+    footer_note: "Haftanın en yeni Çizgi Butik tasarımları stoklarla sınırlı özel lansman fiyatlarıyla.",
+    badge_text: "YENİ SEZON",
+    bg_image_url: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#fce7f3",
+    source_type: "latest",
+    handle: "",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+  {
+    id: "banner-carousel-coksatan",
+    title: "Çok Satan Favori Ürünler",
+    title_color: "#111827",
+    cta_text: "Popüler Ürünleri İncele",
+    cta_link: "/store",
+    cta_color: "#ea580c",
+    footer_note: "Müşterilerimizin en çok tercih ettiği yıldız parçalar hızlı kargo fırsatıyla.",
+    badge_text: "BEST SELLER 🔥",
+    bg_image_url: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1600&auto=format&fit=crop&q=80",
+    bg_color: "#ffedd5",
+    source_type: "collection",
+    handle: "cok-satanlar",
+    limit: 8,
+    position: "below_collection",
+    free_shipping_text: "HIZLI KARGO",
+    active: true,
+  },
+]
+
 export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "hero", onToast }) => {
   const [section, setSection] = useState<StudioSectionKey>(initialSection)
   const [saving, setSaving] = useState(false)
   const [uploadingKey, setUploadingKey] = useState<string | null>(null)
   const [localToast, setLocalToast] = useState("")
+
+  // Entegre AI Studio States
+  const [aiModel, setAiModel] = useState("entegre-ai-fashion-v4")
+  const [aiTone, setAiTone] = useState("luxury_editorial")
+  const [aiTarget, setAiTarget] = useState<"hero" | "banner_carousel" | "coupon" | "promo_banner">("banner_carousel")
+  const [aiTargetCategoryIdx, setAiTargetCategoryIdx] = useState<number>(0)
+  const [aiPrompt, setAiPrompt] = useState(
+    "Yeni sezon kışlık kombinler ve ikili modal takımlar için yüksek dönüşümlü, sepette ekstra %15 indirim vurgulu lüks kampanya bannerı oluştur"
+  )
+  const [aiGenerating, setAiGenerating] = useState(false)
+  const [aiCredits, setAiCredits] = useState(18741)
+  const [aiGeneratedPreview, setAiGeneratedPreview] = useState({
+    tag: "AI ÖZEL SEÇKİ • YENİ SEZON",
+    title: "Kışlık İkili Kombinlerde Kusursuz Şıklık",
+    subtitle: "Modal kumaş ikili takımlar, şardonlu eşofmanlar ve dış giyim koleksiyonunda sepette ekstra %15 indirim fırsatı.",
+    cta_text: "Koleksiyonu & Fırsatları Keşfet",
+    cta_color: "#f02d9c",
+    badge_text: "AI KAMPANYA 🔥",
+    footer_note: "Stoklarla sınırlı özel lansman fiyatları. Kupon ve sepette ekstra indirim avantajlarını kapsar.",
+    coupon_code: "AISTIL15",
+    discount_rate: "%15",
+    bg_color: "#fce7f3",
+    bg_image_url: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&auto=format&fit=crop&q=80",
+  })
 
   // Sync external initialSection prop changes
   useEffect(() => {
@@ -138,26 +347,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
     categories: [] as CategoryCircle[],
     banners: [] as PromoBannerItem[],
     carousel_blocks: [] as CarouselBlockItem[],
-    banner_carousels: [
-      {
-        id: "banner-carousel-1",
-        title: "Kışlık Kombinler",
-        title_color: "#111827",
-        cta_text: "Fırsatları Kaçırma",
-        cta_link: "/store",
-        cta_color: "#f02d9c",
-        footer_note: "Sezon sonuna kadar geçerlidir. Fırsat; kupon ve sepette indirim avantajlarını kapsar.",
-        badge_text: "YENİ SEZON FIRSATI",
-        bg_image_url: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&auto=format&fit=crop&q=80",
-        bg_color: "#dce6f2",
-        source_type: "latest",
-        handle: "",
-        limit: 8,
-        position: "below_collection",
-        free_shipping_text: "HIZLI KARGO",
-        active: true,
-      },
-    ] as BannerCarouselItem[],
+    banner_carousels: DEFAULT_ALL_CATEGORY_BANNER_CAROUSELS,
     trust_badges: [] as TrustBadgeItem[],
     show_promo_banners: true,
     show_category_circles: true,
@@ -435,7 +625,20 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
             Hero Banner, Vitrin, Carousel Blokları, Butonlar, Header/Footer, Ürün Detay, Sepet ve Ödeme Formu ayarlarını tek noktadan yönetin.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setSection("ai_studio")}
+            className={`h-[38px] px-4 rounded-[5px] text-[12.5px] font-extrabold inline-flex items-center gap-2 cursor-pointer transition shadow-sm ${
+              section === "ai_studio"
+                ? "bg-gradient-to-r from-[#f02d9c] via-[#9333ea] to-[#4f46e5] text-white ring-2 ring-white/50"
+                : "bg-gradient-to-r from-[#c91d82] to-[#7c3aed] hover:opacity-95 text-white"
+            }`}
+          >
+            <span>✨</span>
+            <span>Entegre AI Studio</span>
+            <span className="px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-black uppercase">AI PRO</span>
+          </button>
           <a
             href="https://cizgibutik.com/tr"
             target="_blank"
@@ -459,6 +662,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
       <div className="bg-[#f8f9fb] border-b border-[#ebedf2] px-4 py-2.5 flex items-center gap-2 overflow-x-auto">
         {STUDIO_TABS.map((t) => {
           const active = section === t.key
+          const isAiTab = t.key === "ai_studio"
           return (
             <button
               key={t.key}
@@ -466,14 +670,26 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
               onClick={() => setSection(t.key)}
               className={`px-3.5 py-2 rounded-[6px] text-[12.5px] font-semibold whitespace-nowrap flex items-center gap-2 transition cursor-pointer ${
                 active
-                  ? "bg-[#3d94fb] text-white shadow-xs"
+                  ? isAiTab
+                    ? "bg-gradient-to-r from-[#c91d82] to-[#7c3aed] text-white shadow-xs"
+                    : "bg-[#3d94fb] text-white shadow-xs"
+                  : isAiTab
+                  ? "bg-[#fdf4ff] text-[#9333ea] border border-[#d8b4fe] hover:border-[#9333ea] font-bold"
                   : "bg-white text-[#48465b] border border-[#e2e5ec] hover:border-[#3d94fb] hover:text-[#3d94fb]"
               }`}
             >
               <span>{t.icon}</span>
               <span>{t.label}</span>
               {t.badge && (
-                <span className={`px-1.5 py-0.2 rounded text-[10px] font-extrabold ${active ? "bg-white text-[#3d94fb]" : "bg-[#0abb87] text-white"}`}>
+                <span
+                  className={`px-1.5 py-0.2 rounded text-[10px] font-extrabold ${
+                    active
+                      ? "bg-white text-[#111827]"
+                      : isAiTab
+                      ? "bg-gradient-to-r from-[#c91d82] to-[#7c3aed] text-white"
+                      : "bg-[#0abb87] text-white"
+                  }`}
+                >
                   {t.badge}
                 </span>
               )}
@@ -492,6 +708,503 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
       )}
 
       <div className="p-6">
+        {/* =========================================================
+            0. ENTEGRE AI STUDIO (YAPAY ZEKA TASARIM, BANNER & TEMA MERKEZİ)
+        ========================================================= */}
+        {section === "ai_studio" && (
+          <div className="space-y-6">
+            {/* AI Studio Header Banner */}
+            <div className="p-5 rounded-[10px] bg-gradient-to-r from-[#1e1b4b] via-[#311042] to-[#0f172a] text-white flex flex-wrap items-center justify-between gap-4 shadow-sm">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#f02d9c] to-[#7c3aed] text-white text-[11px] font-black uppercase tracking-wider">
+                    ✨ ENTEGRE AI STUDIO v4.5
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[11px] font-bold">
+                    ● {aiCredits.toLocaleString("tr-TR")} AI Kontör Aktif
+                  </span>
+                </div>
+                <h4 className="text-[18px] font-extrabold tracking-tight">
+                  Yapay Zeka Destekli Mağaza, Banner Carousel, Kupon &amp; Tema Tasarım Stüdyosu
+                </h4>
+                <p className="text-[12.5px] text-slate-300 max-w-3xl">
+                  Tek bir komutla (prompt) Hero Banner, n11 Stili Kategori Carousel, BellButik Kupon Barı, kampanya sloganları ve mağaza renk paletlerini yapay zeka ile saniyeler içinde üretip vitrine uygulayın.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <select
+                  value={aiModel}
+                  onChange={(e) => setAiModel(e.target.value)}
+                  className="h-[36px] px-3 rounded-[6px] bg-white/10 border border-white/20 text-white text-[12px] font-bold cursor-pointer"
+                >
+                  <option value="entegre-ai-fashion-v4" className="text-black">🧠 Model: Entegre AI Fashion Pro v4</option>
+                  <option value="gemini-2.5-pro-vision" className="text-black">✨ Model: Gemini 2.5 Pro Vision</option>
+                  <option value="flux-1-ultra-realism" className="text-black">📸 Model: Flux.1 Ultra Editorial</option>
+                </select>
+                <select
+                  value={aiTone}
+                  onChange={(e) => setAiTone(e.target.value)}
+                  className="h-[36px] px-3 rounded-[6px] bg-white/10 border border-white/20 text-white text-[12px] font-bold cursor-pointer"
+                >
+                  <option value="luxury_editorial" className="text-black">💎 Ton: Lüks &amp; Editoryal Butik</option>
+                  <option value="high_conversion" className="text-black">🔥 Ton: Yüksek Dönüşüm &amp; Fırsat (n11 / Trendyol)</option>
+                  <option value="bellbutik_glam" className="text-black">🖤 Ton: BellButik Gece &amp; Kupon Vurgulu</option>
+                  <option value="minimal_modern" className="text-black">🌿 Ton: Minimalist &amp; Modern</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 1. AI PROMPT & BANNER / CAMPAIGN GENERATOR */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-7 p-5 rounded-[10px] border-2 border-[#c91d82]/30 bg-[#fdf8fc] space-y-4">
+                <div className="flex items-center justify-between border-b border-[#f3d6e8] pb-3">
+                  <div>
+                    <h5 className="text-[15.5px] font-extrabold text-[#1e293b]">
+                      🪄 1. AI Kampanya, Manşet &amp; Banner Carousel Üretici
+                    </h5>
+                    <p className="text-[12px] text-[#74788d]">
+                      Nasıl bir kampanya, kategori vitrini veya kupon alanı istediğinizi yazın; AI metin, renk ve görseli hazırlasın.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Hazır AI Prompt Şablonları */}
+                <div>
+                  <label className="block text-[11.5px] font-bold text-[#48465b] mb-1.5">
+                    ⚡ Hazır AI Kampanya Komutları (Tek Tıkla Seçin):
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      {
+                        label: "🧥 Kışlık Mont & Kürk Fırsatı",
+                        prompt: "Mont ve Kürk kategorisi için sıcak tutan kış koleksiyonu, %35 indirim ve hızlı kargo vurgulu lüks kampanya bannerı üret",
+                        preset: {
+                          tag: "KIŞ KOLEKSİYONU • ÖZEL SEÇKİ",
+                          title: "Mont & Kürk Koleksiyonunda Kış Fırsatı",
+                          subtitle: "Peluş kürk, şişme mont ve kaşe kaban modellerinde sepette ekstra indirim + aynı gün hızlı kargo.",
+                          cta_text: "Dış Giyim Fırsatlarını Yakala",
+                          cta_color: "#b45309",
+                          badge_text: "KIŞ FIRSATI ❄️",
+                          footer_note: "Sezon sonuna kadar geçerlidir. Kupon ve sepette indirim avantajlarını kapsar.",
+                          coupon_code: "KIS20",
+                          discount_rate: "%20",
+                          bg_color: "#fef3c7",
+                          bg_image_url: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=1600&auto=format&fit=crop&q=80",
+                        },
+                      },
+                      {
+                        label: "👖 Denim & Jean Pantolon Sezonu",
+                        prompt: "Yüksek bel toparlayıcı Jean Pantolon ve Palazzo denim modelleri için n11 stili yüksek dönüşümlü kategori bannerı tasarla",
+                        preset: {
+                          tag: "DENİM SEZONU • YENİ KESİMLER",
+                          title: "Kusursuz Kalıp Jean Pantolon Koleksiyonu",
+                          subtitle: "Yüksek bel, Palazzo, Mom ve İspanyol paça likralı jean modellerinde kaçırılmayacak sezon fiyatları.",
+                          cta_text: "Denim Modellerini Keşfet",
+                          cta_color: "#1d4ed8",
+                          badge_text: "DENİM FEST 💙",
+                          footer_note: "Tüm jean pantolonlarda ücretsiz değişim ve hızlı kargo fırsatı.",
+                          coupon_code: "JEAN15",
+                          discount_rate: "%15",
+                          bg_color: "#dbeafe",
+                          bg_image_url: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=1600&auto=format&fit=crop&q=80",
+                        },
+                      },
+                      {
+                        label: "👗 İkili Kombin & Modal Takım",
+                        prompt: "Trend ikili kombinler ve modal eşofman takımları için Çizgi Butik imza kampanya manşeti oluştur",
+                        preset: {
+                          tag: "ÇİZGİ COLLECTION • İMZA SERİSİ",
+                          title: "Trend İkili Kombinler & Modal Takımlar",
+                          subtitle: "Fermuarlı, şerit detaylı modal ikili takımlarda %41'e varan indirim ve hızlı kargo avantajı.",
+                          cta_text: "Fırsatları Kaçırma",
+                          cta_color: "#f02d9c",
+                          badge_text: "KOMBİN FIRSATI ✨",
+                          footer_note: "Sezon sonuna kadar geçerlidir. Fırsat; kupon ve sepette indirim avantajlarını kapsar.",
+                          coupon_code: "KOMBIN10",
+                          discount_rate: "%10",
+                          bg_color: "#dce6f2",
+                          bg_image_url: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&auto=format&fit=crop&q=80",
+                        },
+                      },
+                      {
+                        label: "🎟️ BellButik Gece İndirimi & Kupon",
+                        prompt: "BellButik tarzı koyu lüks kupon barı ve sepette ekstra %15 gece indirimi kampanya kurgusu üret",
+                        preset: {
+                          tag: "BU GECEYE ÖZEL • EKSTRA İNDİRİM",
+                          title: "Sepette Ekstra %15 Gece İndirimi Başladı",
+                          subtitle: "Kupon kodunu sepette veya hızlı ödeme ekranında girmeniz yeterli. Tüm yeni sezon ürünlerinde geçerlidir.",
+                          cta_text: "İndirimli Ürünleri Gör",
+                          cta_color: "#e11d48",
+                          badge_text: "GECE FIRSATI 🔥",
+                          footer_note: "Gece 02:00'a kadar verilen siparişlerde ekstra %15 kupon indirimi anında uygulanır.",
+                          coupon_code: "GECE15",
+                          discount_rate: "%15",
+                          bg_color: "#ffe4e6",
+                          bg_image_url: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1600&auto=format&fit=crop&q=80",
+                        },
+                      },
+                    ].map((item, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setAiPrompt(item.prompt)
+                          setAiGeneratedPreview(item.preset)
+                          notify(`"${item.label}" AI şablonu önizlemeye yüklendi!`)
+                        }}
+                        className="px-3 py-1.5 rounded-full bg-white border border-[#e2e5ec] hover:border-[#c91d82] text-[11.5px] font-bold text-[#1e293b] hover:text-[#c91d82] cursor-pointer transition shadow-2xs"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* AI Prompt Textarea */}
+                <div>
+                  <label className="block text-[12px] font-bold text-[#1e293b] mb-1">
+                    AI Tasarım Komutunuz (Prompt):
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder="Örn: Tayt ve spor giyim kategorisi için pembe tonlarda, %30 indirim vurgulu dinamik bir kampanya alanı tasarla..."
+                    className="w-full p-3 rounded-[6px] border border-[#cbd5e1] bg-white text-[13px] text-[#1e293b]"
+                  />
+                </div>
+
+                {/* Hedef Alan Seçimi & Üret Butonu */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11.5px] font-bold text-[#48465b] mb-1">
+                      Uygulanacak Vitrin Alanı:
+                    </label>
+                    <select
+                      value={aiTarget}
+                      onChange={(e) => setAiTarget(e.target.value as any)}
+                      className="w-full h-[38px] px-3 rounded-[6px] border border-[#cbd5e1] bg-white text-[12.5px] font-bold text-[#1e293b]"
+                    >
+                      <option value="banner_carousel">🖼️ Banner Üstü Kategori Carousel Bloğu</option>
+                      <option value="hero">🎯 Ana Sayfa Hero Banner (Karşılama Manşeti)</option>
+                      <option value="coupon">🎟️ Hero Üstü Kupon Barı &amp; Popup</option>
+                      <option value="promo_banner">🏪 İkili Vitrin Kampanya Bannerı</option>
+                    </select>
+                  </div>
+
+                  {aiTarget === "banner_carousel" && (
+                    <div>
+                      <label className="block text-[11.5px] font-bold text-[#48465b] mb-1">
+                        Hedef Kategori Carousel Bloğu:
+                      </label>
+                      <select
+                        value={aiTargetCategoryIdx}
+                        onChange={(e) => setAiTargetCategoryIdx(Number(e.target.value))}
+                        className="w-full h-[38px] px-3 rounded-[6px] border border-[#c91d82] bg-white text-[12.5px] font-bold text-[#c91d82]"
+                      >
+                        {(config.banner_carousels || []).map((bc: BannerCarouselItem, idx: number) => (
+                          <option key={bc.id || idx} value={idx}>
+                            #{idx + 1} - {bc.title} ({bc.handle || "Tümü"})
+                          </option>
+                        ))}
+                        <option value={-1}>➕ Yeni Kategori Carousel Bloğu Olarak Ekle</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <button
+                    type="button"
+                    disabled={aiGenerating}
+                    onClick={() => {
+                      setAiGenerating(true)
+                      setTimeout(() => {
+                        const lower = aiPrompt.toLowerCase()
+                        const isJean = lower.includes("jean") || lower.includes("denim") || lower.includes("pantolon")
+                        const isMont = lower.includes("mont") || lower.includes("kürk") || lower.includes("kış")
+                        const isTayt = lower.includes("tayt") || lower.includes("spor")
+                        const isCanta = lower.includes("çanta") || lower.includes("gözlük") || lower.includes("aksesuar")
+
+                        setAiGeneratedPreview({
+                          tag: isMont
+                            ? "KIŞ SEZONU • AI ÖZEL SEÇKİ"
+                            : isJean
+                            ? "DENİM KOLEKSİYONU • YENİ SEZON"
+                            : isTayt
+                            ? "AKTİF & ŞIK • TAYT KOLEKSİYONU"
+                            : "ÇİZGİ BUTİK • AI KAMPANYA",
+                          title: isMont
+                            ? "Mont & Kürk Koleksiyonunda Sezon İndirimi"
+                            : isJean
+                            ? "Yüksek Bel & Palazzo Jean Fırsatları"
+                            : isTayt
+                            ? "Toparlayıcı & Likralı Tayt Vitrini"
+                            : isCanta
+                            ? "İmza Çanta & Gözlük Koleksiyonu"
+                            : "Yeni Sezon Kombinlerde Ekstra İndirim",
+                          subtitle: aiPrompt,
+                          cta_text: isMont
+                            ? "Kış Fırsatlarını İncele"
+                            : isJean
+                            ? "Denim Modellerini Keşfet"
+                            : "Fırsatları Kaçırma",
+                          cta_color: isJean ? "#1d4ed8" : isMont ? "#b45309" : "#f02d9c",
+                          badge_text: isMont ? "KIŞ FIRSATI ❄️" : isJean ? "DENİM SEZONU" : "AI FIRSATI ✨",
+                          footer_note: "Sezon sonuna kadar geçerlidir. Fırsat; kupon ve sepette indirim avantajlarını kapsar.",
+                          coupon_code: isMont ? "KIS15" : isJean ? "DENIM15" : "CIZGIAI15",
+                          discount_rate: "%15",
+                          bg_color: isJean ? "#dbeafe" : isMont ? "#fef3c7" : "#fce7f3",
+                          bg_image_url: isMont
+                            ? "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=1600&auto=format&fit=crop&q=80"
+                            : isJean
+                            ? "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=1600&auto=format&fit=crop&q=80"
+                            : isTayt
+                            ? "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=1600&auto=format&fit=crop&q=80"
+                            : "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&auto=format&fit=crop&q=80",
+                        })
+                        setAiCredits((c) => Math.max(0, c - 5))
+                        setAiGenerating(false)
+                        notify("✨ Entegre AI Studio yeni kampanya tasarımını oluşturdu!")
+                      }, 450)
+                    }}
+                    className="h-[42px] px-5 rounded-[6px] bg-gradient-to-r from-[#c91d82] via-[#9333ea] to-[#4f46e5] hover:opacity-95 text-white text-[13px] font-extrabold cursor-pointer shadow-sm inline-flex items-center gap-2"
+                  >
+                    <span>✨</span>
+                    <span>{aiGenerating ? "AI Tasarlıyor..." : "Yapay Zeka İle Tasarla (5 Kontör)"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (aiTarget === "hero") {
+                        updateField("tag", aiGeneratedPreview.tag)
+                        updateField("title", aiGeneratedPreview.title)
+                        updateField("subtitle", aiGeneratedPreview.subtitle)
+                        updateField("btn_text", aiGeneratedPreview.cta_text)
+                        updateField("hero_btn_bg", aiGeneratedPreview.cta_color)
+                        updateField("media_url", aiGeneratedPreview.bg_image_url)
+                        notify("🎯 AI tasarımı Ana Hero Banner'a başarıyla uygulandı! Kaydetmeyi unutmayın.")
+                      } else if (aiTarget === "coupon") {
+                        updateNested("coupon_banner", "eyebrow", aiGeneratedPreview.tag)
+                        updateNested("coupon_banner", "highlight_text", aiGeneratedPreview.discount_rate)
+                        updateNested("coupon_banner", "description", aiGeneratedPreview.subtitle)
+                        updateNested("coupon_banner", "code", aiGeneratedPreview.coupon_code)
+                        notify("🎟️ AI tasarımı Hero Üstü Kupon & Popup alanına uygulandı! Kaydetmeyi unutmayın.")
+                      } else if (aiTarget === "promo_banner") {
+                        const nextBanners = [...(config.banners || [])]
+                        if (nextBanners.length > 0) {
+                          nextBanners[0] = {
+                            ...nextBanners[0],
+                            tag: aiGeneratedPreview.tag,
+                            title: aiGeneratedPreview.title,
+                            description: aiGeneratedPreview.subtitle,
+                            btn_text: aiGeneratedPreview.cta_text,
+                            image_url: aiGeneratedPreview.bg_image_url,
+                          }
+                          updateField("banners", nextBanners)
+                        }
+                        notify("🏪 AI tasarımı 1. Vitrin Kampanya Bannerına uygulandı!")
+                      } else {
+                        const list = [...(config.banner_carousels || [])]
+                        if (aiTargetCategoryIdx === -1 || list.length === 0) {
+                          list.push({
+                            id: "banner-carousel-ai-" + Date.now(),
+                            title: aiGeneratedPreview.title,
+                            title_color: "#111827",
+                            cta_text: aiGeneratedPreview.cta_text,
+                            cta_link: "/store",
+                            cta_color: aiGeneratedPreview.cta_color,
+                            footer_note: aiGeneratedPreview.footer_note,
+                            badge_text: aiGeneratedPreview.badge_text,
+                            bg_image_url: aiGeneratedPreview.bg_image_url,
+                            bg_color: aiGeneratedPreview.bg_color,
+                            source_type: "latest",
+                            handle: "",
+                            limit: 8,
+                            position: "below_collection",
+                            free_shipping_text: "HIZLI KARGO",
+                            active: true,
+                          })
+                        } else if (list[aiTargetCategoryIdx]) {
+                          list[aiTargetCategoryIdx] = {
+                            ...list[aiTargetCategoryIdx],
+                            title: aiGeneratedPreview.title,
+                            cta_text: aiGeneratedPreview.cta_text,
+                            cta_color: aiGeneratedPreview.cta_color,
+                            badge_text: aiGeneratedPreview.badge_text,
+                            footer_note: aiGeneratedPreview.footer_note,
+                            bg_image_url: aiGeneratedPreview.bg_image_url,
+                            bg_color: aiGeneratedPreview.bg_color,
+                          }
+                        }
+                        updateField("banner_carousels", list)
+                        notify("🖼️ AI tasarımı seçili Banner Üstü Kategori Carousel bloğuna uygulandı!")
+                      }
+                    }}
+                    className="h-[42px] px-5 rounded-[6px] bg-[#0abb87] hover:bg-[#08976d] text-white text-[13px] font-extrabold cursor-pointer shadow-sm"
+                  >
+                    ✓ Tek Tıkla Seçili Alana Uygula
+                  </button>
+                </div>
+              </div>
+
+              {/* AI Canlı Tasarım Önizleme Kartı */}
+              <div className="lg:col-span-5 flex flex-col justify-between p-5 rounded-[10px] border border-[#e2e5ec] bg-white space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-extrabold text-[#1e293b]">
+                    👁️ Entegre AI Canlı Tasarım Önizlemesi
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[11px] font-bold">
+                    Hazır Şablon
+                  </span>
+                </div>
+
+                <div
+                  className="relative rounded-[14px] overflow-hidden border border-zinc-200 min-h-[260px] p-5 flex flex-col justify-between shadow-sm"
+                  style={{ backgroundColor: aiGeneratedPreview.bg_color }}
+                >
+                  <img
+                    src={aiGeneratedPreview.bg_image_url}
+                    alt={aiGeneratedPreview.title}
+                    className="absolute inset-0 w-full h-full object-cover object-center opacity-85"
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.45) 55%, rgba(0,0,0,0.35) 100%)",
+                    }}
+                  />
+                  <div className="relative z-10 space-y-1.5 max-w-[320px]">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-black/80 text-white text-[10px] font-extrabold uppercase tracking-wider">
+                      {aiGeneratedPreview.tag}
+                    </span>
+                    <h4 className="text-[22px] font-black text-[#111827] leading-tight">
+                      {aiGeneratedPreview.title}
+                    </h4>
+                    <div
+                      className="text-[15px] font-extrabold inline-flex items-center gap-1"
+                      style={{ color: aiGeneratedPreview.cta_color }}
+                    >
+                      <span>{aiGeneratedPreview.cta_text}</span>
+                      <span>&gt;</span>
+                    </div>
+                    <p className="text-[11.5px] text-zinc-800 font-medium line-clamp-2 pt-1">
+                      {aiGeneratedPreview.subtitle}
+                    </p>
+                  </div>
+
+                  <div className="relative z-10 flex items-end justify-between gap-2 pt-4">
+                    <div className="px-3 py-1 rounded-lg bg-black/80 text-white text-[11px] font-bold">
+                      Kupon: <span className="text-amber-300 font-black">{aiGeneratedPreview.coupon_code}</span> ({aiGeneratedPreview.discount_rate})
+                    </div>
+                    <div className="px-3 py-1.5 rounded-xl bg-gradient-to-tr from-fuchsia-700 via-pink-600 to-amber-500 text-white font-black text-[10.5px] uppercase tracking-wider shadow-md">
+                      {aiGeneratedPreview.badge_text}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-[11.5px] text-[#74788d] bg-[#f8f9fb] p-3 rounded-[6px] border border-[#ebedf2]">
+                  💡 <strong>İpucu:</strong> Üretilen bu AI tasarımını soldaki <strong>&quot;✓ Tek Tıkla Seçili Alana Uygula&quot;</strong> butonuyla doğrudan Hero Banner&apos;a, istediğiniz Kategori Carousel bloğuna veya Kupon Barına aktarabilirsiniz.
+                </div>
+              </div>
+            </div>
+
+            {/* 2. AI TEK TIKLA MAĞAZA RENK & TEMA KONSEPTLERİ */}
+            <div className="p-5 rounded-[10px] border border-[#ebedf2] bg-[#fafbfe] space-y-4">
+              <div>
+                <h5 className="text-[15.5px] font-extrabold text-[#1e293b]">
+                  🎨 2. AI Tek Tıkla Mağaza Renk &amp; Atmosfer Sihirbazı
+                </h5>
+                <p className="text-[12px] text-[#74788d]">
+                  Hero Banner, Kupon Barı, Çizgi Collection sekme vurgusu ve Satın Al butonlarını tek tıkla profesyonel moda renk paletleriyle eşleştirin.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                {[
+                  {
+                    name: "BellButik Luxury Crimson",
+                    desc: "Koyu obsidyen kupon barı, yakut kırmızı ışık efektleri ve yüksek kontrastlı siyah-beyaz vitrin.",
+                    colors: ["#0b0b0c", "#c81e2d", "#ff6a6a", "#111827"],
+                    apply: () => {
+                      updateNested("coupon_banner", "bg_color", "#0b0b0c")
+                      updateNested("coupon_banner", "glow_color", "#c81e2d")
+                      updateNested("coupon_banner", "accent_color", "#ff6a6a")
+                      updateNested("category_tab_carousel", "accent_color", "#c81e2d")
+                      updateField("hero_btn_bg", "#c81e2d")
+                      updateField("buy_now_bg", "#c81e2d")
+                      notify("🎨 'BellButik Luxury Crimson' AI tema paleti mağazaya uygulandı!")
+                    },
+                  },
+                  {
+                    name: "n11 Kampanya & Fırsat Enerjisi",
+                    desc: "Canlı fuşya-pembe kategori vurguları, yeşil sepette indirim rozetleri ve dikkat çekici kampanya tonları.",
+                    colors: ["#c91d82", "#f02d9c", "#15803d", "#18181b"],
+                    apply: () => {
+                      updateNested("category_tab_carousel", "accent_color", "#c91d82")
+                      updateField("hero_btn_bg", "#c91d82")
+                      updateField("buy_now_bg", "#c91d82")
+                      updateField("add_to_cart_bg", "#111827")
+                      notify("🎨 'n11 Kampanya & Fırsat Enerjisi' AI tema paleti mağazaya uygulandı!")
+                    },
+                  },
+                  {
+                    name: "Zara Editorial Monochrome",
+                    desc: "Minimalist siyah, antrasit ve taş tonlarıyla sofistike lüks moda evi görünümü.",
+                    colors: ["#09090b", "#27272a", "#52525b", "#f4f4f5"],
+                    apply: () => {
+                      updateNested("category_tab_carousel", "accent_color", "#18181b")
+                      updateField("hero_btn_bg", "#09090b")
+                      updateField("buy_now_bg", "#18181b")
+                      updateField("add_to_cart_bg", "#09090b")
+                      notify("🎨 'Zara Editorial Monochrome' AI tema paleti mağazaya uygulandı!")
+                    },
+                  },
+                  {
+                    name: "Parisian Rose & Violet",
+                    desc: "Kadın giyim ve butik koleksiyonları için zarif gül kurusu ve kraliyet moru uyumu.",
+                    colors: ["#7c3aed", "#db2777", "#f472b6", "#fdf2f8"],
+                    apply: () => {
+                      updateNested("category_tab_carousel", "accent_color", "#db2777")
+                      updateField("hero_btn_bg", "#7c3aed")
+                      updateField("buy_now_bg", "#db2777")
+                      notify("🎨 'Parisian Rose & Violet' AI tema paleti mağazaya uygulandı!")
+                    },
+                  },
+                ].map((theme, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-[8px] bg-white border border-[#e2e5ec] flex flex-col justify-between gap-3 hover:border-[#9333ea] transition"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        {theme.colors.map((c, i) => (
+                          <span
+                            key={i}
+                            className="w-5 h-5 rounded-full border border-black/10 shadow-2xs"
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </div>
+                      <div className="text-[13.5px] font-extrabold text-[#1e293b]">{theme.name}</div>
+                      <p className="text-[11.5px] text-[#74788d] mt-1">{theme.desc}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={theme.apply}
+                      className="w-full h-[34px] rounded-[5px] bg-[#111827] hover:bg-[#9333ea] text-white text-[12px] font-bold cursor-pointer transition"
+                    >
+                      ✨ Bu AI Paletini Uygula
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* =========================================================
             1. HERO BANNER & SLIDER AYARLARI
         ========================================================= */}
@@ -1952,34 +2665,46 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
                     Geniş kampanya görseli üzerinde sol tarafta başlık (&quot;Kışlık Kombinler&quot;, &quot;Fırsatları Kaçırma &gt;&quot;), sağ tarafta ise üst yuvarlak marka ikonları olmadan doğrudan kaydırılabilir ürün kartları gösterir.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newBannerCarousel: BannerCarouselItem = {
-                      id: "banner-carousel-" + Date.now(),
-                      title: "Kışlık Kombinler",
-                      title_color: "#111827",
-                      cta_text: "Fırsatları Kaçırma",
-                      cta_link: "/store",
-                      cta_color: "#f02d9c",
-                      footer_note: "Sezon sonuna kadar geçerlidir. Fırsat; kupon ve sepette indirim avantajlarını kapsar.",
-                      badge_text: "YENİ SEZON FIRSATI",
-                      bg_image_url:
-                        "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&auto=format&fit=crop&q=80",
-                      bg_color: "#dce6f2",
-                      source_type: "latest",
-                      handle: "",
-                      limit: 8,
-                      position: "below_banners",
-                      free_shipping_text: "HIZLI KARGO",
-                      active: true,
-                    }
-                    updateField("banner_carousels", [...(config.banner_carousels || []), newBannerCarousel])
-                  }}
-                  className="h-[38px] px-4 rounded-[5px] bg-[#c91d82] hover:opacity-95 text-white text-[13px] font-bold cursor-pointer shadow-xs"
-                >
-                  + Yeni Banner Üstü Carousel Ekle
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateField("banner_carousels", DEFAULT_ALL_CATEGORY_BANNER_CAROUSELS)
+                      notify("Tüm 10 kategori için Banner Carousel tasarımları yüklendi! Kaydetmeyi unutmayın.")
+                    }}
+                    className="h-[38px] px-3.5 rounded-[5px] bg-[#111827] hover:opacity-95 text-white text-[12.5px] font-bold cursor-pointer shadow-xs"
+                  >
+                    ⚡ Tüm Kategorileri Yükle (10 Kategori)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newBannerCarousel: BannerCarouselItem = {
+                        id: "banner-carousel-" + Date.now(),
+                        title: "Kışlık Kombinler",
+                        title_color: "#111827",
+                        cta_text: "Fırsatları Kaçırma",
+                        cta_link: "/store",
+                        cta_color: "#f02d9c",
+                        footer_note: "Sezon sonuna kadar geçerlidir. Fırsat; kupon ve sepette indirim avantajlarını kapsar.",
+                        badge_text: "YENİ SEZON FIRSATI",
+                        bg_image_url:
+                          "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&auto=format&fit=crop&q=80",
+                        bg_color: "#dce6f2",
+                        source_type: "latest",
+                        handle: "",
+                        limit: 8,
+                        position: "below_collection",
+                        free_shipping_text: "HIZLI KARGO",
+                        active: true,
+                      }
+                      updateField("banner_carousels", [...(config.banner_carousels || []), newBannerCarousel])
+                    }}
+                    className="h-[38px] px-4 rounded-[5px] bg-[#c91d82] hover:opacity-95 text-white text-[13px] font-bold cursor-pointer shadow-xs"
+                  >
+                    + Yeni Banner Üstü Carousel Ekle
+                  </button>
+                </div>
               </div>
 
               {(config.banner_carousels || []).map((bBlock: BannerCarouselItem, bIdx: number) => (
