@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 
 export type StudioSectionKey =
   | "hero"
+  | "coupon_popup"
   | "vitrin"
   | "carousel"
   | "buttons"
@@ -74,6 +75,7 @@ interface DesignStudioProps {
 
 const STUDIO_TABS: { key: StudioSectionKey; icon: string; label: string; badge?: string }[] = [
   { key: "hero", icon: "🎯", label: "Hero Banner & Slider" },
+  { key: "coupon_popup", icon: "🎟️", label: "Hero Üstü Kupon & Popup", badge: "YENİ" },
   { key: "vitrin", icon: "🏪", label: "Vitrin, Banner & Kategoriler" },
   { key: "carousel", icon: "🎠", label: "Carousel Blok Ayarları", badge: "YENİ" },
   { key: "buttons", icon: "🔘", label: "Buton Ayarları" },
@@ -212,6 +214,27 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
       ssl_badge_text: "Tüm bilgileriniz 256bit SSL Sertifikası ile korunmaktadır.",
       copyright_text: "© 2026 Çizgi Butik Tüm Hakları Saklıdır",
     },
+    coupon_banner: {
+      enabled: true,
+      eyebrow: "ÇİZGİ BUTİK'E ÖZEL",
+      title_prefix: "SEPETTE EKSTRA",
+      highlight_text: "%10",
+      title_suffix: "İNDİRİM",
+      description: "Kupon kodunu sepette veya hızlı ödeme ekranında girmeniz yeterli. Kampanya tüm yeni sezon ürünlerinde geçerlidir.",
+      code_label: "KOD",
+      code: "CIZGI10",
+      copy_text: "KOPYALA",
+      copied_text: "KOPYALANDI",
+      bg_color: "#0b0b0c",
+      glow_color: "#c81e2d",
+      accent_color: "#ff6a6a",
+      show_popup_on_copy: true,
+      popup_title: "Kupon Kodunuz Tanımlandı! 🎉",
+      popup_description: "İndirim kuponunuz panoya kopyalandı ve ödeme formunuza otomatik olarak tanımlandı. Alışverişinizi tamamlarken ekstra indiriminiz anında uygulanacaktır.",
+      popup_btn_text: "Alışverişe Başla & İndirimi Kullan",
+      popup_btn_link: "/store",
+      auto_apply_checkout: true,
+    },
   })
 
   // Logo & Corporate Config (/admin/logo-config)
@@ -252,6 +275,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
             product_detail_settings: { ...prev.product_detail_settings, ...(heroRes.config.product_detail_settings || {}) },
             cart_settings: { ...prev.cart_settings, ...(heroRes.config.cart_settings || {}) },
             checkout_settings: { ...prev.checkout_settings, ...(heroRes.config.checkout_settings || {}) },
+            coupon_banner: { ...prev.coupon_banner, ...(heroRes.config.coupon_banner || {}) },
           }))
         }
         if (logoRes?.config) {
@@ -847,6 +871,405 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* =========================================================
+            1.5 HERO BANNER ÜSTÜ KUPON KODU BARI & AKSİYON POPUP (BELL BUTİK LUXURY STİLİ)
+        ========================================================= */}
+        {section === "coupon_popup" && (
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h4 className="text-[16px] font-bold text-[#1e293b]">
+                  🎟️ Hero Banner Üstü Kupon Kodu Tanımlama Barı &amp; Aksiyon Popup Ayarları
+                </h4>
+                <p className="text-[12.5px] text-[#74788d] mt-0.5">
+                  Ana sayfada Hero Banner&apos;ın hemen üstünde yer alan lüks cam efektli (Glassmorphism) kupon barını, kopyalama aksiyonunu, ödeme formuna otomatik kupon tanımlamasını ve onay popup penceresini buradan özelleştirin.
+                </p>
+              </div>
+              <label className="flex items-center gap-2 px-4 py-2 rounded-[6px] bg-[#eefbf5] border border-[#0abb87] text-[#08976d] font-bold text-[13px] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={config.coupon_banner?.enabled ?? true}
+                  onChange={(e) => updateNested("coupon_banner", "enabled", e.target.checked)}
+                  className="w-4 h-4 accent-[#0abb87]"
+                />
+                Hero Üstü Kupon Barı Aktif
+              </label>
+            </div>
+
+            {/* CANLI BELL BUTİK STİLİ KUPON BARI ÖNİZLEMESİ */}
+            <div className="rounded-[10px] overflow-hidden border border-[#ebedf2] shadow-sm">
+              <div className="bg-[#f8f9fb] px-4 py-2 border-b border-[#ebedf2] flex items-center justify-between text-[11.5px] font-semibold text-[#74788d]">
+                <span>CANLI VİTRİN ÖNİZLEMESİ (Hero Banner Üstü Görünüm)</span>
+                <span className="text-[#0abb87] font-bold">● Kopyalama &amp; Popup Aksiyonu Aktif</span>
+              </div>
+              <div
+                style={{
+                  position: "relative",
+                  padding: "16px 20px",
+                  backgroundColor: config.coupon_banner?.bg_color || "#0b0b0c",
+                  backgroundImage: `radial-gradient(600px 200px at 15% 20%, ${config.coupon_banner?.glow_color || "#c81e2d"}66, transparent 60%), radial-gradient(600px 200px at 85% 80%, ${config.coupon_banner?.glow_color || "#c81e2d"}66, transparent 60%)`,
+                  color: "#fff",
+                }}
+              >
+                <div
+                  style={{
+                    maxWidth: "1100px",
+                    margin: "0 auto",
+                    padding: "12px 18px",
+                    borderRadius: "14px",
+                    background: "linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.04))",
+                    border: "1px solid rgba(255,255,255,0.16)",
+                    backdropFilter: "blur(14px)",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      style={{
+                        width: "38px",
+                        height: "38px",
+                        borderRadius: "11px",
+                        background: "radial-gradient(circle at 30% 30%, #ffffff, #f3f3f3 60%, #dadada)",
+                        color: "#111",
+                        display: "grid",
+                        placeItems: "center",
+                        fontWeight: 900,
+                      }}
+                    >
+                      🎟️
+                    </div>
+                    <div>
+                      <div className="text-[10.5px] uppercase tracking-[1.4px] opacity-85">
+                        {config.coupon_banner?.eyebrow || "ÇİZGİ BUTİK'E ÖZEL"}
+                      </div>
+                      <div className="text-[15.5px] font-extrabold tracking-wide">
+                        {config.coupon_banner?.title_prefix || "SEPETTE EKSTRA"}{" "}
+                        <span
+                          style={{
+                            background: `linear-gradient(90deg, #fff, ${config.coupon_banner?.accent_color || "#ff6a6a"})`,
+                            WebkitBackgroundClip: "text",
+                            backgroundClip: "text",
+                            color: "transparent",
+                            fontWeight: 900,
+                          }}
+                        >
+                          {config.coupon_banner?.highlight_text || "%10"}
+                        </span>{" "}
+                        {config.coupon_banner?.title_suffix || "İNDİRİM"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-[12.5px] text-white/90 text-center flex-1 min-w-[220px]">
+                    {config.coupon_banner?.description ||
+                      "Kupon kodunu sepette veya hızlı ödeme ekranında girmeniz yeterli."}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "8px 12px",
+                      borderRadius: "11px",
+                      border: "1px dashed rgba(255,255,255,0.38)",
+                      background: "rgba(15,15,17,0.55)",
+                    }}
+                  >
+                    <span className="text-[10px] tracking-[1.4px] opacity-75 uppercase">
+                      {config.coupon_banner?.code_label || "KOD"}
+                    </span>
+                    <strong className="text-[13.5px] tracking-[1.5px] font-extrabold">
+                      {config.coupon_banner?.code || "CIZGI10"}
+                    </strong>
+                    <span className="px-2.5 py-1 rounded-[7px] bg-white text-[#121214] text-[11px] font-extrabold">
+                      📋 {config.coupon_banner?.copy_text || "KOPYALA"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* HAZIR RENK TEMA ŞABLONLARI */}
+            <div className="p-4 rounded-[8px] border border-[#ebedf2] bg-[#fafbfe] flex flex-wrap items-center justify-between gap-3">
+              <div className="text-[12.5px] font-bold text-[#1e293b]">🎨 Hazır Lüks Kupon Barı Renk Temaları:</div>
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { name: "Bell Bordo Luxury (Orijinal)", bg: "#0b0b0c", glow: "#c81e2d", accent: "#ff6a6a" },
+                  { name: "Çizgi Butik Mor / Violet", bg: "#09070f", glow: "#7c3aed", accent: "#c4b5fd" },
+                  { name: "Zümrüt Yeşili", bg: "#070d0a", glow: "#059669", accent: "#6ee7b7" },
+                  { name: "Altın & Şampanya", bg: "#0c0a07", glow: "#d97706", accent: "#fde68a" },
+                  { name: "Gece Siyahı Minimal", bg: "#09090b", glow: "#3f3f46", accent: "#f4f4f5" },
+                ].map((preset) => (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    onClick={() => {
+                      updateNested("coupon_banner", "bg_color", preset.bg)
+                      updateNested("coupon_banner", "glow_color", preset.glow)
+                      updateNested("coupon_banner", "accent_color", preset.accent)
+                      notify(`${preset.name} renk şablonu uygulandı!`)
+                    }}
+                    className="px-3 py-1.5 rounded-[6px] border border-[#e2e5ec] bg-white hover:border-[#3d94fb] text-[11.5px] font-semibold text-[#1e293b] flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: preset.glow }} />
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Sol: Kupon Barı Metin, Kod ve Renk Ayarları */}
+              <div className="p-5 rounded-[8px] border border-[#e2e5ec] bg-[#fafbfe] space-y-4">
+                <div className="text-[14px] font-bold text-[#1e293b]">1. Kupon Barı Metinleri, Kupon Kodu &amp; Renkler</div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Üst Mini Başlık (Eyebrow)</label>
+                    <input
+                      type="text"
+                      value={config.coupon_banner?.eyebrow || ""}
+                      onChange={(e) => updateNested("coupon_banner", "eyebrow", e.target.value)}
+                      placeholder="Örn: ÇİZGİ BUTİK'E ÖZEL"
+                      className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12.5px] bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Aktif Kupon Kodu</label>
+                    <input
+                      type="text"
+                      value={config.coupon_banner?.code || ""}
+                      onChange={(e) => updateNested("coupon_banner", "code", e.target.value.toUpperCase())}
+                      placeholder="Örn: CIZGI10"
+                      className="w-full h-[36px] px-3 rounded border border-[#0abb87] text-[13px] font-extrabold font-mono bg-white text-[#08976d]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Başlık Başlangıcı</label>
+                    <input
+                      type="text"
+                      value={config.coupon_banner?.title_prefix || ""}
+                      onChange={(e) => updateNested("coupon_banner", "title_prefix", e.target.value)}
+                      placeholder="SEPETTE EKSTRA"
+                      className="w-full h-[36px] px-2.5 rounded border border-[#e2e5ec] text-[12.5px] bg-white font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Vurgulu Oran / Tutar</label>
+                    <input
+                      type="text"
+                      value={config.coupon_banner?.highlight_text || ""}
+                      onChange={(e) => updateNested("coupon_banner", "highlight_text", e.target.value)}
+                      placeholder="%10"
+                      className="w-full h-[36px] px-2.5 rounded border border-[#e2e5ec] text-[13px] bg-white font-extrabold text-[#e11d48]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Başlık Sonu</label>
+                    <input
+                      type="text"
+                      value={config.coupon_banner?.title_suffix || ""}
+                      onChange={(e) => updateNested("coupon_banner", "title_suffix", e.target.value)}
+                      placeholder="İNDİRİM"
+                      className="w-full h-[36px] px-2.5 rounded border border-[#e2e5ec] text-[12.5px] bg-white font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Orta Kampanya Açıklama Metni</label>
+                  <input
+                    type="text"
+                    value={config.coupon_banner?.description || ""}
+                    onChange={(e) => updateNested("coupon_banner", "description", e.target.value)}
+                    placeholder="Kupon kodunu sepette girmeniz yeterli..."
+                    className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12.5px] bg-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#48465b] mb-1">Kod Etiketi</label>
+                    <input
+                      type="text"
+                      value={config.coupon_banner?.code_label || "KOD"}
+                      onChange={(e) => updateNested("coupon_banner", "code_label", e.target.value)}
+                      className="w-full h-[34px] px-2.5 rounded border border-[#e2e5ec] text-[12px] bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#48465b] mb-1">Kopyala Buton Yazısı</label>
+                    <input
+                      type="text"
+                      value={config.coupon_banner?.copy_text || "KOPYALA"}
+                      onChange={(e) => updateNested("coupon_banner", "copy_text", e.target.value)}
+                      className="w-full h-[34px] px-2.5 rounded border border-[#e2e5ec] text-[12px] bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#48465b] mb-1">Kopyalandı Yazısı</label>
+                    <input
+                      type="text"
+                      value={config.coupon_banner?.copied_text || "KOPYALANDI"}
+                      onChange={(e) => updateNested("coupon_banner", "copied_text", e.target.value)}
+                      className="w-full h-[34px] px-2.5 rounded border border-[#e2e5ec] text-[12px] bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 pt-1">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#48465b] mb-1">Zemin Rengi</label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="color"
+                        value={config.coupon_banner?.bg_color || "#0b0b0c"}
+                        onChange={(e) => updateNested("coupon_banner", "bg_color", e.target.value)}
+                        className="w-8 h-8 rounded cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={config.coupon_banner?.bg_color || "#0b0b0c"}
+                        onChange={(e) => updateNested("coupon_banner", "bg_color", e.target.value)}
+                        className="w-full h-8 px-2 rounded border border-[#e2e5ec] text-[11.5px] font-mono bg-white"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#48465b] mb-1">Işıltı (Glow) Rengi</label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="color"
+                        value={config.coupon_banner?.glow_color || "#c81e2d"}
+                        onChange={(e) => updateNested("coupon_banner", "glow_color", e.target.value)}
+                        className="w-8 h-8 rounded cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={config.coupon_banner?.glow_color || "#c81e2d"}
+                        onChange={(e) => updateNested("coupon_banner", "glow_color", e.target.value)}
+                        className="w-full h-8 px-2 rounded border border-[#e2e5ec] text-[11.5px] font-mono bg-white"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#48465b] mb-1">Yüzde Vurgu Rengi</label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="color"
+                        value={config.coupon_banner?.accent_color || "#ff6a6a"}
+                        onChange={(e) => updateNested("coupon_banner", "accent_color", e.target.value)}
+                        className="w-8 h-8 rounded cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={config.coupon_banner?.accent_color || "#ff6a6a"}
+                        onChange={(e) => updateNested("coupon_banner", "accent_color", e.target.value)}
+                        className="w-full h-8 px-2 rounded border border-[#e2e5ec] text-[11.5px] font-mono bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sağ: Kupon Kopyalama Aksiyonu & Tanımlama Popup Ayarları */}
+              <div className="p-5 rounded-[8px] border border-[#e2e5ec] bg-[#fafbfe] space-y-4">
+                <div className="text-[14px] font-bold text-[#1e293b]">
+                  2. Kupon Kodu Tıklama Aksiyonu &amp; Tanımlama Popup Penceresi
+                </div>
+
+                <div className="space-y-2.5">
+                  <label className="flex items-center justify-between p-3 bg-white rounded-[6px] border border-[#e2e5ec] cursor-pointer">
+                    <div>
+                      <div className="text-[13px] font-bold text-[#1e293b]">
+                        Kupona Tıklandığında Ödeme Formuna Otomatik Tanımla
+                      </div>
+                      <div className="text-[11.5px] text-[#74788d]">
+                        Müşteri kuponu kopyaladığında Hızlı Ödeme (Checkout) formundaki kupon alanına otomatik yazılır.
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={config.coupon_banner?.auto_apply_checkout ?? true}
+                      onChange={(e) => updateNested("coupon_banner", "auto_apply_checkout", e.target.checked)}
+                      className="w-4 h-4 accent-[#0abb87]"
+                    />
+                  </label>
+
+                  <label className="flex items-center justify-between p-3 bg-white rounded-[6px] border border-[#e2e5ec] cursor-pointer">
+                    <div>
+                      <div className="text-[13px] font-bold text-[#1e293b]">
+                        Kupon Kopyalandığında &quot;Kupon Tanımlandı&quot; Popup&apos;ı Aç
+                      </div>
+                      <div className="text-[11.5px] text-[#74788d]">
+                        Butondaki yeşil &quot;KOPYALANDI&quot; animasyonuna ek olarak şık bir bilgilendirme ve yönlendirme popup&apos;ı gösterir.
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={config.coupon_banner?.show_popup_on_copy ?? true}
+                      onChange={(e) => updateNested("coupon_banner", "show_popup_on_copy", e.target.checked)}
+                      className="w-4 h-4 accent-[#0abb87]"
+                    />
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Popup Başlığı</label>
+                  <input
+                    type="text"
+                    value={config.coupon_banner?.popup_title || ""}
+                    onChange={(e) => updateNested("coupon_banner", "popup_title", e.target.value)}
+                    placeholder="Kupon Kodunuz Tanımlandı! 🎉"
+                    className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[13px] font-bold bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Popup Açıklama Mesajı</label>
+                  <textarea
+                    rows={3}
+                    value={config.coupon_banner?.popup_description || ""}
+                    onChange={(e) => updateNested("coupon_banner", "popup_description", e.target.value)}
+                    className="w-full p-2.5 rounded border border-[#e2e5ec] text-[12.5px] bg-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Popup Aksiyon Buton Metni</label>
+                    <input
+                      type="text"
+                      value={config.coupon_banner?.popup_btn_text || ""}
+                      onChange={(e) => updateNested("coupon_banner", "popup_btn_text", e.target.value)}
+                      placeholder="Alışverişe Başla & İndirimi Kullan"
+                      className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12.5px] bg-white font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">Popup Buton Yönlendirme Linki</label>
+                    <input
+                      type="text"
+                      value={config.coupon_banner?.popup_btn_link || "/store"}
+                      onChange={(e) => updateNested("coupon_banner", "popup_btn_link", e.target.value)}
+                      placeholder="/store"
+                      className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12.5px] font-mono bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

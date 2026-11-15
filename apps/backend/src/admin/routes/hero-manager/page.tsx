@@ -376,6 +376,18 @@ const HeroManagerPage = () => {
                 <button
                   type="button"
                   onClick={() => {
+                    setStudioSection("coupon_popup")
+                    setShowLiveHeroCustomizer(true)
+                  }}
+                  className="p-[14px] rounded-[5px] border border-[#0abb87] bg-[#eefbf5] hover:bg-[#d7f5e8] text-left text-[13px] font-bold text-[#08976d] flex items-center gap-2.5 transition cursor-pointer"
+                >
+                  <span className="text-[16px]">🎟️</span>
+                  <span>Hero Üstü Kupon &amp; Popup Ayarları</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
                     setStudioSection("carousel")
                     setShowLiveHeroCustomizer(true)
                   }}
@@ -1443,7 +1455,8 @@ const HeroManagerPage = () => {
 
       {/* 15. POPUP (/admin/store/popup - popupsTable) */}
       {activeTab === "popup" && (
-        <div id="subview-theme-popup" className="theme-subview max-w-[1140px] w-full mx-auto px-5 py-7">
+        <div id="subview-theme-popup" className="theme-subview max-w-[1260px] w-full mx-auto px-5 py-7">
+          <DesignStudio initialSection="coupon_popup" onToast={setToastMessage} />
           <div className="bg-white rounded-[4px] border border-[#ebedf2] p-[25px] shadow-2xs">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
               <div>

@@ -253,6 +253,30 @@ export const defaultData = {
     ssl_badge_text: "Tüm bilgileriniz 256bit SSL Sertifikası ile korunmaktadır.",
     copyright_text: "© 2026 Çizgi Butik Tüm Hakları Saklıdır",
   },
+
+  // Hero-Top Luxury Coupon Banner & Action Popup (BellButik Style)
+  coupon_banner: {
+    enabled: true,
+    eyebrow: "ÇİZGİ BUTİK'E ÖZEL",
+    title_prefix: "SEPETTE EKSTRA",
+    highlight_text: "%10",
+    title_suffix: "İNDİRİM",
+    description: "Kupon kodunu sepette girmeniz yeterli. Kampanya seçili yeni sezon ürünlerinde geçerlidir.",
+    code_label: "KOD",
+    code: "CIZGI10",
+    copy_text: "KOPYALA",
+    copied_text: "KOPYALANDI",
+    bg_color: "#09090b",
+    glow_color: "#c81e2d",
+    accent_color: "#ffb4b4",
+    auto_apply_checkout: true,
+    show_popup_on_copy: true,
+    popup_title: "Kupon Kodunuz Tanımlandı!",
+    popup_description:
+      "İndirim kuponunuz panoya kopyalandı ve ödeme adımınız için otomatik olarak kaydedildi. Sepette veya hızlı ödeme ekranında anında kullanabilirsiniz.",
+    popup_btn_text: "Alışverişe Devam Et",
+    popup_btn_link: "",
+  },
 }
 
 export function readHeroConfig() {
@@ -277,6 +301,7 @@ export function readHeroConfig() {
         product_detail_settings: { ...defaultData.product_detail_settings, ...(parsed.product_detail_settings || {}) },
         cart_settings: { ...defaultData.cart_settings, ...(parsed.cart_settings || {}) },
         checkout_settings: { ...defaultData.checkout_settings, ...(parsed.checkout_settings || {}) },
+        coupon_banner: { ...defaultData.coupon_banner, ...(parsed.coupon_banner || {}) },
       }
     }
   } catch (err) {
@@ -331,6 +356,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     checkout_settings: {
       ...config.checkout_settings,
       ...(incoming.checkout_settings || {}),
+    },
+    coupon_banner: {
+      ...config.coupon_banner,
+      ...(incoming.coupon_banner || {}),
     },
   }
 
