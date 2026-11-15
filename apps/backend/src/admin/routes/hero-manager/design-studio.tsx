@@ -235,6 +235,16 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
       popup_btn_link: "/store",
       auto_apply_checkout: true,
     },
+    category_tab_carousel: {
+      title: "Çizgi Collection",
+      view_all_text: "Tümünü Gör",
+      view_all_link: "/store",
+      accent_color: "#c91d82",
+      free_shipping_text: "HIZLI KARGO",
+      show_installment_badge: true,
+      show_coupon_badge: true,
+      sepette_badge_text: "Sepette Ekstra %10 İndirim",
+    },
   })
 
   // Logo & Corporate Config (/admin/logo-config)
@@ -276,6 +286,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
             cart_settings: { ...prev.cart_settings, ...(heroRes.config.cart_settings || {}) },
             checkout_settings: { ...prev.checkout_settings, ...(heroRes.config.checkout_settings || {}) },
             coupon_banner: { ...prev.coupon_banner, ...(heroRes.config.coupon_banner || {}) },
+            category_tab_carousel: { ...prev.category_tab_carousel, ...(heroRes.config.category_tab_carousel || {}) },
           }))
         }
         if (logoRes?.config) {
@@ -1594,13 +1605,15 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
               </div>
             </div>
 
-            {/* C. Yuvarlak Kategori Çemberleri */}
-            <div className="p-5 rounded-[8px] border border-[#ebedf2] bg-[#fafbfe] space-y-4">
+            {/* C. n11 Stili Kategori Tab & 5'li Ürün Carousel Ayarları */}
+            <div className="p-5 rounded-[8px] border border-[#ebedf2] bg-[#fafbfe] space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-[15.5px] font-bold text-[#1e293b]">⭕ Yuvarlak Kategori / Koleksiyon Çemberleri</h4>
+                  <h4 className="text-[15.5px] font-bold text-[#1e293b]">
+                    🏷️ n11 Stili Kategori Tab &amp; 5&apos;li Ürün Carousel Ayarları
+                  </h4>
                   <p className="text-[12px] text-[#74788d]">
-                    Ana sayfada ürün listesinin üstünde yer alan dairesel kategori filtreleme ve hızlı geçiş ikonları.
+                    Ana sayfada oval hap (Pill) kategori sekmeleri, &quot;Tümünü Gör &gt;&quot; bağlantısı ve 5&apos;li kaydırılabilir ürün vitrini ayarları.
                   </p>
                 </div>
                 <button
@@ -1616,8 +1629,100 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
                   }}
                   className="h-[34px] px-3.5 rounded bg-[#3d94fb] text-white text-[12px] font-bold cursor-pointer"
                 >
-                  + Yeni Kategori Çemberi Ekle
+                  + Yeni Kategori Tabı Ekle
                 </button>
+              </div>
+
+              {/* n11 Kategori Tab Carousel Başlık, Renk ve Rozet Ayarları */}
+              <div className="p-4 bg-white rounded-[8px] border border-[#e2e5ec] space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#48465b] mb-1">Bölüm Başlığı (Sol Üst)</label>
+                    <input
+                      type="text"
+                      value={config.category_tab_carousel?.title || "Yeni Sezon & Öne Çıkan Ürünler"}
+                      onChange={(e) => updateNested("category_tab_carousel", "title", e.target.value)}
+                      placeholder="Yeni Mağazalardan Ürünler"
+                      className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12.5px] font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#48465b] mb-1">Sağ Üst Link Metni</label>
+                    <input
+                      type="text"
+                      value={config.category_tab_carousel?.view_all_text || "Tümünü Gör"}
+                      onChange={(e) => updateNested("category_tab_carousel", "view_all_text", e.target.value)}
+                      className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12.5px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#48465b] mb-1">Kart Altı Siyah Bant Metni</label>
+                    <input
+                      type="text"
+                      value={config.category_tab_carousel?.free_shipping_text ?? "ÜCRETSİZ KARGO"}
+                      onChange={(e) => updateNested("category_tab_carousel", "free_shipping_text", e.target.value)}
+                      className="w-full h-[36px] px-3 rounded border border-[#e2e5ec] text-[12.5px] font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#48465b] mb-1">Aktif Tab &amp; Vurgu Rengi</label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="color"
+                        value={config.category_tab_carousel?.accent_color || "#c91d82"}
+                        onChange={(e) => updateNested("category_tab_carousel", "accent_color", e.target.value)}
+                        className="w-9 h-[36px] rounded border cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={config.category_tab_carousel?.accent_color || "#c91d82"}
+                        onChange={(e) => updateNested("category_tab_carousel", "accent_color", e.target.value)}
+                        className="w-full h-[36px] px-2 rounded border border-[#e2e5ec] text-[12px] font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Canlı n11 Pill Tab Önizlemesi */}
+                <div className="pt-2 border-t border-[#f1f3f9]">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-[15px] font-bold text-[#1f2937]">
+                      {config.category_tab_carousel?.title || "Yeni Sezon & Öne Çıkan Ürünler"}
+                    </span>
+                    <span
+                      className="text-[12.5px] font-semibold"
+                      style={{ color: config.category_tab_carousel?.accent_color || "#c91d82" }}
+                    >
+                      {config.category_tab_carousel?.view_all_text || "Tümünü Gör"} &gt;
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                    {["Tümü", "Kuponlu Ürün", "İndirimli Ürün", "Çok Al Az Öde", ...(config.categories || []).map((c: any) => c.name)].map(
+                      (tabName, i) => (
+                        <span
+                          key={i}
+                          className="h-[34px] px-4 rounded-full inline-flex items-center justify-center text-[12px] whitespace-nowrap"
+                          style={
+                            i === 0
+                              ? {
+                                  border: `1.5px solid ${config.category_tab_carousel?.accent_color || "#c91d82"}`,
+                                  backgroundColor: `${config.category_tab_carousel?.accent_color || "#c91d82"}12`,
+                                  fontWeight: 700,
+                                  color: "#111827",
+                                }
+                              : {
+                                  border: "1px solid #e2e5ec",
+                                  backgroundColor: "#ffffff",
+                                  color: "#374151",
+                                }
+                          }
+                        >
+                          {tabName}
+                        </span>
+                      )
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

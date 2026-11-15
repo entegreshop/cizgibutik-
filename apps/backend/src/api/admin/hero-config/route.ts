@@ -277,6 +277,18 @@ export const defaultData = {
     popup_btn_text: "Alışverişe Devam Et",
     popup_btn_link: "",
   },
+
+  // n11-Style Category Pill Tab & 5-Column Product Carousel Settings
+  category_tab_carousel: {
+    title: "Çizgi Collection",
+    view_all_text: "Tümünü Gör",
+    view_all_link: "/store",
+    accent_color: "#c91d82",
+    free_shipping_text: "HIZLI KARGO",
+    show_installment_badge: true,
+    show_coupon_badge: true,
+    sepette_badge_text: "Sepette Ekstra %10 İndirim",
+  },
 }
 
 export function readHeroConfig() {
@@ -302,6 +314,7 @@ export function readHeroConfig() {
         cart_settings: { ...defaultData.cart_settings, ...(parsed.cart_settings || {}) },
         checkout_settings: { ...defaultData.checkout_settings, ...(parsed.checkout_settings || {}) },
         coupon_banner: { ...defaultData.coupon_banner, ...(parsed.coupon_banner || {}) },
+        category_tab_carousel: { ...defaultData.category_tab_carousel, ...(parsed.category_tab_carousel || {}) },
       }
     }
   } catch (err) {
@@ -360,6 +373,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     coupon_banner: {
       ...config.coupon_banner,
       ...(incoming.coupon_banner || {}),
+    },
+    category_tab_carousel: {
+      ...config.category_tab_carousel,
+      ...(incoming.category_tab_carousel || {}),
     },
   }
 
