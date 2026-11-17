@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button, Heading } from "@medusajs/ui"
 
-const NEXT_PUBLIC_MEDUSA_BACKEND_URL = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
+const NEXT_PUBLIC_MEDUSA_BACKEND_URL = process.env.MEDUSA_BACKEND_URL || "https://api.cizgibutik.com"
 const NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 
 const defaultBannersList = [
@@ -31,7 +31,7 @@ async function getBannersConfig() {
     }
 
     const res = await fetch(`${NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/hero-config`, {
-      cache: "no-store", // Ensure real-time configuration loading
+      next: { revalidate: 60 }, // Ensure real-time configuration loading
       headers,
     })
     const data = await res.json()
@@ -42,8 +42,8 @@ async function getBannersConfig() {
   }
 }
 
-export default async function PromoBanners() {
-  const banners = await getBannersConfig()
+export default async function PromoBanners({ initialBanners }: { initialBanners?: any[] }) {
+  const banners = Array.isArray(initialBanners) && initialBanners.length > 0 ? initialBanners : await getBannersConfig()
 
   return (
     <div className="w-full bg-white py-12 border-b border-zinc-200">
@@ -127,4 +127,5 @@ export default async function PromoBanners() {
     </div>
   )
 }
+
 

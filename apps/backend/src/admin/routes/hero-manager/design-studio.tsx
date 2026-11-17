@@ -5,6 +5,7 @@ export type StudioSectionKey =
   | "hero"
   | "coupon_popup"
   | "vitrin"
+  | "category_tabs"
   | "carousel"
   | "buttons"
   | "header_footer"
@@ -98,6 +99,7 @@ const STUDIO_TABS: { key: StudioSectionKey; icon: string; label: string; badge?:
   { key: "hero", icon: "🎯", label: "Hero Banner & Slider" },
   { key: "coupon_popup", icon: "🎟️", label: "Hero Üstü Kupon & Popup", badge: "YENİ" },
   { key: "vitrin", icon: "🏪", label: "Vitrin, Banner & Kategoriler" },
+  { key: "category_tabs", icon: "⭕", label: "Yuvarlak Kategori Tab & Vitrin", badge: "YENİ" },
   { key: "carousel", icon: "🎠", label: "Carousel Blok Ayarları", badge: "YENİ" },
   { key: "buttons", icon: "🔘", label: "Buton Ayarları" },
   { key: "header_footer", icon: "🔝", label: "Header & Footer Ayarları" },
@@ -580,7 +582,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
 
   const uploadMediaFile = async (file: File, trackerKey: string, onUrl: (url: string, type: "image" | "video") => void) => {
     setUploadingKey(trackerKey)
-    const isVideo = file.type.startsWith("video/")
+    const isVideo = file.type.startsWith("video/") || /\.(mp4|mov|webm|m4v)$/i.test(file.name)
     const reader = new FileReader()
     reader.onload = async () => {
       try {
@@ -1340,7 +1342,13 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
                     <input
                       type="text"
                       value={config.media_url || ""}
-                      onChange={(e) => updateField("media_url", e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        updateField("media_url", val)
+                        if (/\.(mp4|mov|webm|m4v)(\?|$)/i.test(val)) {
+                          updateField("media_type", "video")
+                        }
+                      }}
                       placeholder="Görsel/Video URL veya aşağıdan yükleyin"
                       className="w-full h-[34px] px-2.5 rounded border border-[#e2e5ec] text-[12px] mb-2"
                     />
@@ -1349,7 +1357,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
                         {uploadingKey === "hero-desktop" ? "Yükleniyor..." : "📁 Dosya Seç & Yükle"}
                         <input
                           type="file"
-                          accept="image/*,video/mp4,video/webm"
+                          accept="image/*,video/mp4,video/webm,video/quicktime"
                           className="hidden"
                           onChange={(e) => {
                             const f = e.target.files?.[0]
@@ -1375,26 +1383,35 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
                   </div>
 
                   <div className="p-3.5 bg-white rounded-[6px] border border-[#e2e5ec]">
-                    <label className="block text-[12px] font-bold text-[#1e293b] mb-1.5">Mobil Özel Görsel (İsteğe Bağlı)</label>
+                    <label className="block text-[12px] font-bold text-[#1e293b] mb-1.5">Mobil Özel Görsel veya Video (İsteğe Bağlı)</label>
                     <input
                       type="text"
                       value={config.mobile_media_url || ""}
-                      onChange={(e) => updateField("mobile_media_url", e.target.value)}
-                      placeholder="Boş bırakılırsa masaüstü görseli kullanılır"
+                      onChange={(e) => {
+                        const val = e.target.value
+                        updateField("mobile_media_url", val)
+                        if (/\.(mp4|mov|webm|m4v)(\?|$)/i.test(val)) {
+                          updateField("media_type", "video")
+                        }
+                      }}
+                      placeholder="Boş bırakılırsa masaüstü görsel/videosu kullanılır"
                       className="w-full h-[34px] px-2.5 rounded border border-[#e2e5ec] text-[12px] mb-2"
                     />
                     <div className="flex items-center gap-2">
                       <label className="px-3 py-1.5 rounded bg-[#eef4ff] text-[#3d94fb] text-[12px] font-semibold cursor-pointer hover:bg-[#dbeafe]">
-                        {uploadingKey === "hero-mobile" ? "Yükleniyor..." : "📱 Mobil Görsel Yükle"}
+                        {uploadingKey === "hero-mobile" ? "Yükleniyor..." : "📱 Mobil Görsel/Video Yükle"}
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/*,video/mp4,video/webm,video/quicktime"
                           className="hidden"
                           onChange={(e) => {
                             const f = e.target.files?.[0]
                             if (f) {
-                              uploadMediaFile(f, "hero-mobile", (url) => {
+                              uploadMediaFile(f, "hero-mobile", (url, mType) => {
                                 updateField("mobile_media_url", url)
+                                if (mType === "video") {
+                                  updateField("media_type", "video")
+                                }
                               })
                             }
                           }}
@@ -1488,11 +1505,24 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
                 <div
                   className="relative flex-1 min-h-[290px] rounded-[10px] border border-[#e2e5ec] overflow-hidden flex flex-col items-center justify-center text-center p-6"
                   style={{
-                    backgroundImage: config.media_url ? `url(${config.media_url})` : "linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)",
+                    backgroundImage:
+                      config.media_url && !(config.media_type === "video" || /\.(mp4|mov|webm|m4v)(\?|$)/i.test(config.media_url))
+                        ? `url(${config.media_url})`
+                        : "linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                   }}
                 >
+                  {config.media_url && (config.media_type === "video" || /\.(mp4|mov|webm|m4v)(\?|$)/i.test(config.media_url)) && (
+                    <video
+                      src={config.media_url}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                    />
+                  )}
                   <div
                     className="absolute inset-0 pointer-events-none"
                     style={{ backgroundColor: `rgba(0,0,0,${(config.hero_overlay_opacity ?? 15) / 100})` }}
@@ -2642,6 +2672,148 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
                       }}
                       className="w-full h-[34px] px-2.5 rounded border border-[#e2e5ec] text-[12px]"
                     />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================
+            2B. YUVARLAK KATEGORİ TAB & 4'LÜ ÜRÜN VİTRİN AYARLARI
+        ========================================================= */}
+        {section === "category_tabs" && (
+          <div className="space-y-6">
+            <div className="p-5 rounded-[8px] border-2 border-[#7c3aed]/30 bg-[#faf7ff] space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#e9d5ff]">
+                <div>
+                  <h4 className="text-[16px] font-bold text-[#1e293b]">
+                    ⭕ Yuvarlak Kategori Tabları &amp; 4&apos;lü Ürün Vitrin Ayarları
+                  </h4>
+                  <p className="text-[12.5px] text-[#74788d] mt-0.5">
+                    Ana sayfadaki 4&apos;lü ürün listeleme alanının üstünde yer alan çift halkalı yuvarlak kategori sekmelerini (YENİ GELENLER, ÇOK SATANLAR, JEAN PANTOLON, TAYT, SWEAT, MONT &amp; KÜRK, KOMBİN, TSHIRT, GÖZLÜK, ÇANTA) ve ikonlarını yönetin.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 px-3.5 py-2 rounded-[6px] bg-white border border-[#e2e5ec] text-[12.5px] font-bold text-[#1e293b] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={config.show_category_circles ?? true}
+                      onChange={(e) => updateField("show_category_circles", e.target.checked)}
+                      className="w-4 h-4 accent-[#7c3aed]"
+                    />
+                    Yuvarlak Kategori Tabları Aktif
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next: CategoryCircle = {
+                        name: "Yeni Kategori",
+                        handle: "yeni-kategori",
+                        icon: `<svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14l1 11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2L5 8z"/></svg>`,
+                        active: true,
+                      }
+                      updateField("categories", [...(config.categories || []), next])
+                    }}
+                    className="h-[38px] px-4 rounded-[5px] bg-[#7c3aed] hover:opacity-95 text-white text-[12.5px] font-bold cursor-pointer"
+                  >
+                    + Yeni Yuvarlak Kategori Ekle
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+                {(config.categories || []).map((cat: CategoryCircle, idx: number) => (
+                  <div key={idx} className="p-4 bg-white rounded-[8px] border border-[#e2e5ec] space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2 py-0.5 rounded bg-[#f3e8ff] text-[#7c3aed] text-[11px] font-bold">
+                        Kategori #{idx + 1}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={cat.active !== false}
+                          onChange={(e) => {
+                            const next = [...config.categories]
+                            next[idx] = { ...cat, active: e.target.checked }
+                            updateField("categories", next)
+                          }}
+                          title="Aktif / Pasif"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = config.categories.filter((_: any, i: number) => i !== idx)
+                            updateField("categories", next)
+                          }}
+                          className="text-red-500 text-[11.5px] font-semibold hover:underline"
+                        >
+                          Sil
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#74788d] mb-0.5">Yuvarlak Tab Başlığı</label>
+                      <input
+                        type="text"
+                        value={cat.name || ""}
+                        onChange={(e) => {
+                          const next = [...config.categories]
+                          next[idx] = { ...cat, name: e.target.value }
+                          updateField("categories", next)
+                        }}
+                        className="w-full h-[34px] px-2.5 rounded border border-[#e2e5ec] text-[12.5px] font-bold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#74788d] mb-0.5">Kategori Handle (Slug)</label>
+                      <input
+                        type="text"
+                        value={cat.handle || ""}
+                        onChange={(e) => {
+                          const next = [...config.categories]
+                          next[idx] = { ...cat, handle: e.target.value }
+                          updateField("categories", next)
+                        }}
+                        className="w-full h-[34px] px-2.5 rounded border border-[#e2e5ec] text-[12px] font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#74788d] mb-0.5">İkon (SVG veya Görsel URL)</label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          value={cat.icon || ""}
+                          onChange={(e) => {
+                            const next = [...config.categories]
+                            next[idx] = { ...cat, icon: e.target.value }
+                            updateField("categories", next)
+                          }}
+                          className="flex-1 h-[32px] px-2 rounded border border-[#e2e5ec] text-[11px] font-mono"
+                        />
+                        <label className="px-2.5 py-1.5 rounded bg-[#eef4ff] text-[#3d94fb] text-[11px] font-semibold cursor-pointer shrink-0">
+                          📁
+                          <input
+                            type="file"
+                            accept="image/*,.svg"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0]
+                              if (f) {
+                                uploadMediaFile(f, `circle-cat-${idx}`, (url) => {
+                                  const next = [...config.categories]
+                                  next[idx] = { ...cat, icon: url }
+                                  updateField("categories", next)
+                                })
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

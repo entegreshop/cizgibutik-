@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
 import fs from "fs"
 import path from "path"
 import os from "os"
@@ -475,6 +476,50 @@ export const defaultData = {
     show_coupon_badge: true,
     sepette_badge_text: "Sepette Ekstra %10 İndirim",
   },
+
+  // Circular Category Tabs & 4-Column Category Showcase Settings
+  category_showcase: {
+    enabled: true,
+    eyebrow: "KATEGORİYE GÖRE SEÇİM",
+    title: "Kategorilere Göre Yeni Sezon Vitrini",
+    subtitle: "İstediğiniz kategoriyi seçerek ürünleri filtreleyin veya tüm yeni sezon koleksiyonunu inceleyin.",
+    view_all_text: "Tüm Mağaza Ürünlerini Gör",
+    view_all_link: "/store",
+    show_all_tab: true,
+    all_tab_label: "YENİ GELENLER",
+    default_active_category: "yeni-gelenler",
+    accent_color: "#7c3aed",
+    card_accent_color: "#15803d",
+    free_shipping_text: "HIZLI KARGO",
+    columns_desktop: 4,
+    max_products_per_category: 12,
+    show_count_badge: true,
+  },
+}
+
+function mergeHeroConfig(parsed: Record<string, any>) {
+  return {
+    ...defaultData,
+    ...parsed,
+    categories: Array.isArray(parsed.categories) && parsed.categories.length > 0 ? parsed.categories : defaultCategories,
+    banners: Array.isArray(parsed.banners) && parsed.banners.length > 0 ? parsed.banners : defaultBanners,
+    carousel_blocks: Array.isArray(parsed.carousel_blocks) ? parsed.carousel_blocks : defaultCarouselBlocks,
+    banner_carousels:
+      Array.isArray(parsed.banner_carousels) &&
+      parsed.banner_carousels.length > 0 &&
+      !(parsed.banner_carousels.length === 1 && parsed.banner_carousels[0]?.id === "banner-carousel-1")
+        ? parsed.banner_carousels
+        : defaultBannerCarousels,
+    trust_badges: Array.isArray(parsed.trust_badges) && parsed.trust_badges.length > 0 ? parsed.trust_badges : defaultTrustBadges,
+    header_settings: { ...defaultData.header_settings, ...(parsed.header_settings || {}) },
+    footer_settings: { ...defaultData.footer_settings, ...(parsed.footer_settings || {}) },
+    product_detail_settings: { ...defaultData.product_detail_settings, ...(parsed.product_detail_settings || {}) },
+    cart_settings: { ...defaultData.cart_settings, ...(parsed.cart_settings || {}) },
+    checkout_settings: { ...defaultData.checkout_settings, ...(parsed.checkout_settings || {}) },
+    coupon_banner: { ...defaultData.coupon_banner, ...(parsed.coupon_banner || {}) },
+    category_tab_carousel: { ...defaultData.category_tab_carousel, ...(parsed.category_tab_carousel || {}) },
+    category_showcase: { ...defaultData.category_showcase, ...(parsed.category_showcase || {}) },
+  }
 }
 
 export function readHeroConfig() {
@@ -487,31 +532,49 @@ export function readHeroConfig() {
     if (targetPath) {
       const content = fs.readFileSync(targetPath, "utf-8")
       const parsed = JSON.parse(content)
-      return {
-        ...defaultData,
-        ...parsed,
-        categories: Array.isArray(parsed.categories) && parsed.categories.length > 0 ? parsed.categories : defaultCategories,
-        banners: Array.isArray(parsed.banners) && parsed.banners.length > 0 ? parsed.banners : defaultBanners,
-        carousel_blocks: Array.isArray(parsed.carousel_blocks) ? parsed.carousel_blocks : defaultCarouselBlocks,
-        banner_carousels:
-          Array.isArray(parsed.banner_carousels) &&
-          parsed.banner_carousels.length > 0 &&
-          !(parsed.banner_carousels.length === 1 && parsed.banner_carousels[0]?.id === "banner-carousel-1")
-            ? parsed.banner_carousels
-            : defaultBannerCarousels,
-        trust_badges: Array.isArray(parsed.trust_badges) && parsed.trust_badges.length > 0 ? parsed.trust_badges : defaultTrustBadges,
-        header_settings: { ...defaultData.header_settings, ...(parsed.header_settings || {}) },
-        footer_settings: { ...defaultData.footer_settings, ...(parsed.footer_settings || {}) },
-        product_detail_settings: { ...defaultData.product_detail_settings, ...(parsed.product_detail_settings || {}) },
-        cart_settings: { ...defaultData.cart_settings, ...(parsed.cart_settings || {}) },
-        checkout_settings: { ...defaultData.checkout_settings, ...(parsed.checkout_settings || {}) },
-        coupon_banner: { ...defaultData.coupon_banner, ...(parsed.coupon_banner || {}) },
-        category_tab_carousel: { ...defaultData.category_tab_carousel, ...(parsed.category_tab_carousel || {}) },
-      }
+      return mergeHeroConfig(parsed)
     }
   } catch (err) {
     console.error("Error reading hero config in admin api:", err)
   }
+  return defaultData
+}
+
+export async function readHeroConfigWithFallback(scope?: any) {
+  const targetPath = fs.existsSync(configFilePath)
+    ? configFilePath
+    : fs.existsSync(legacyConfigFilePath)
+    ? legacyConfigFilePath
+    : null
+
+  if (targetPath) {
+    try {
+      const content = fs.readFileSync(targetPath, "utf-8")
+      const parsed = JSON.parse(content)
+      return mergeHeroConfig(parsed)
+    } catch {}
+  }
+
+  // If container was redeployed and configFilePath does not exist on disk yet, restore from store.metadata.hero_config
+  if (scope) {
+    try {
+      const storeModule = scope.resolve(Modules.STORE)
+      const stores = await storeModule.listStores({}, { select: ["id", "metadata"] })
+      const savedHeroConfig = stores[0]?.metadata?.hero_config as Record<string, any> | undefined
+      if (savedHeroConfig && typeof savedHeroConfig === "object") {
+        const merged = mergeHeroConfig(savedHeroConfig)
+        try {
+          const dir = path.dirname(configFilePath)
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true })
+          }
+          fs.writeFileSync(configFilePath, JSON.stringify(merged, null, 2), "utf-8")
+        } catch {}
+        return merged
+      }
+    } catch {}
+  }
+
   return defaultData
 }
 
@@ -530,14 +593,14 @@ function writeConfig(data: any) {
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const config = readHeroConfig()
-  res.json({ config })
+  const config = await readHeroConfigWithFallback(req.scope)
+  res.json({ success: true, config })
 }
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const body = (req.body as any) || {}
   const incoming = body.config && typeof body.config === "object" ? body.config : body
-  const config = readHeroConfig()
+  const config = await readHeroConfigWithFallback(req.scope)
 
   const updatedConfig = {
     ...config,
@@ -570,6 +633,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       ...config.category_tab_carousel,
       ...(incoming.category_tab_carousel || {}),
     },
+    category_showcase: {
+      ...config.category_showcase,
+      ...(incoming.category_showcase || {}),
+    },
   }
 
   // Keep primary hero fields synced with hero_slides[0] if hero_slides was updated
@@ -588,6 +655,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   }
 
   const success = writeConfig(updatedConfig)
+
+  // Also persist to store.metadata.hero_config so container rebuilds/redeploys never lose hero video & settings
+  try {
+    const storeModule = req.scope.resolve(Modules.STORE)
+    const stores = await storeModule.listStores({}, { select: ["id", "metadata"] })
+    if (stores[0]) {
+      await storeModule.updateStores(stores[0].id, {
+        metadata: {
+          ...(stores[0].metadata || {}),
+          hero_config: updatedConfig,
+        },
+      })
+    }
+  } catch (metaErr) {
+    console.warn("Could not persist hero_config to store metadata:", metaErr)
+  }
+
   if (success) {
     res.json({ success: true, config: updatedConfig })
   } else {
