@@ -346,11 +346,11 @@ async function fetchGoogleAnalyticsRealtimeApi(
   }
 }
 
-export async function getLiveGoogleAnalyticsSummary(fallbackActiveCarts = 0): Promise<{
+export async function getGaRealtimeStats(fallbackActiveCarts = 0): Promise<{
   count: number
   desktopPercent: number
   mobilePercent: number
-  source: "ga4_data_api" | "ga4_live_stream" | "active_carts"
+  source: string
   sessions: Array<{
     id: string
     device: "desktop" | "mobile"
@@ -454,6 +454,8 @@ export async function getLiveGoogleAnalyticsSummary(fallbackActiveCarts = 0): Pr
         : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   }
 }
+
+export const getLiveGoogleAnalyticsSummary = getGaRealtimeStats
 
 export function readConfig(): PixelConfig {
   try {
