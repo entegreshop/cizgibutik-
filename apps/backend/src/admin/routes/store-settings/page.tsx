@@ -138,6 +138,97 @@ const StoreSettingsPage = () => {
   const [uploadingField, setUploadingField] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
+  type MarketingSubTabId =
+    | "search_engines"
+    | "meta_pixel"
+    | "google_analytics"
+    | "google_ads"
+    | "google_tag_manager"
+    | "openai_ads"
+    | "tiktok_pixel"
+    | "yandex_metrica"
+    | "robots_txt"
+    | "llms_txt"
+    | "custom_scripts"
+    | "verification_files"
+
+  const [activeMarketingMenu, setActiveMarketingMenu] = useState<MarketingSubTabId>("search_engines")
+  const [pixelConfig, setPixelConfig] = useState<Record<string, any>>({
+    search_engines: {
+      active: true,
+      google_verification: "",
+      facebook_verification: "",
+      yandex_verification: "",
+      bing_verification: "",
+      pinterest_verification: "",
+    },
+    meta_pixel: {
+      active: true,
+      pixel_id: "538418662598444",
+      access_token: "",
+      test_event_code: "",
+      advanced_matching: true,
+    },
+    google_analytics: {
+      active: false,
+      measurement_id: "",
+      property_id: "",
+      service_account_json: "",
+      enhanced_ecommerce: true,
+    },
+    google_ads: {
+      active: false,
+      conversion_id: "",
+      conversion_label: "",
+      add_to_cart_label: "",
+      remarketing: true,
+    },
+    google_tag_manager: {
+      active: false,
+      gtm_id: "",
+    },
+    openai_ads: {
+      active: false,
+      pixel_id: "",
+      allow_shopping_bot: true,
+    },
+    tiktok_pixel: {
+      active: false,
+      pixel_id: "",
+      access_token: "",
+    },
+    yandex_metrica: {
+      active: false,
+      counter_id: "",
+      webvisor: true,
+    },
+    robots_txt: {
+      active: true,
+      content: "User-agent: *\nAllow: /\nDisallow: /checkout\nDisallow: /account\nSitemap: https://cizgibutik.com/sitemap.xml",
+    },
+    llms_txt: {
+      active: true,
+      content: "# Çizgi Butik (cizgibutik.com)\n> Kadın giyim, ikili takım, kombin, jean pantolon, tayt, sweat, mont & kürk, t-shirt, gözlük ve çanta koleksiyonları.\n\n- Mağaza: https://cizgibutik.com/tr\n- Tüm Ürünler: https://cizgibutik.com/tr/store",
+    },
+    custom_scripts: {
+      active: true,
+      head_scripts: "",
+      body_start_scripts: "",
+      body_end_scripts: "",
+    },
+    verification_files: [],
+  })
+
+  const updatePixelGroup = (group: string, key: string, value: any) => {
+    setPixelConfig((prev) => ({
+      ...prev,
+      [group]: {
+        ...(prev[group] || {}),
+        [key]: value,
+      },
+    }))
+  }
+
   const showToast = (msg: string) => {
     setToastMessage(msg)
     setTimeout(() => {
@@ -174,18 +265,51 @@ const StoreSettingsPage = () => {
         }
       })
       .catch(() => {})
+
+    fetch("/admin/pixel-settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.config) {
+          setPixelConfig((prev) => ({
+            ...prev,
+            ...data.config,
+            search_engines: { ...prev.search_engines, ...(data.config.search_engines || {}) },
+            meta_pixel: { ...prev.meta_pixel, ...(data.config.meta_pixel || {}) },
+            google_analytics: { ...prev.google_analytics, ...(data.config.google_analytics || {}) },
+            google_ads: { ...prev.google_ads, ...(data.config.google_ads || {}) },
+            google_tag_manager: { ...prev.google_tag_manager, ...(data.config.google_tag_manager || {}) },
+            openai_ads: { ...prev.openai_ads, ...(data.config.openai_ads || {}) },
+            tiktok_pixel: { ...prev.tiktok_pixel, ...(data.config.tiktok_pixel || {}) },
+            yandex_metrica: { ...prev.yandex_metrica, ...(data.config.yandex_metrica || {}) },
+            robots_txt: { ...prev.robots_txt, ...(data.config.robots_txt || {}) },
+            llms_txt: { ...prev.llms_txt, ...(data.config.llms_txt || {}) },
+            custom_scripts: { ...prev.custom_scripts, ...(data.config.custom_scripts || {}) },
+            verification_files: Array.isArray(data.config.verification_files)
+              ? data.config.verification_files
+              : prev.verification_files,
+          }))
+        }
+      })
+      .catch(() => {})
   }, [])
 
   const handleSave = async () => {
     setSaving(true)
     try {
-      const res = await fetch("/admin/logo-config", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ config }),
-      })
-      if (res.ok) {
-        showToast("Ayarlar başarıyla kaydedildi!")
+      const [resLogo, resPixel] = await Promise.all([
+        fetch("/admin/logo-config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ config }),
+        }),
+        fetch("/admin/pixel-settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pixelConfig),
+        }),
+      ])
+      if (resLogo.ok || resPixel.ok) {
+        showToast("Pazarlama, Pixel ve Mağaza ayarları başarıyla kaydedildi! ✔")
       } else {
         showToast("Kaydedilirken bir hata oluştu.")
       }
@@ -893,73 +1017,1177 @@ const StoreSettingsPage = () => {
           </div>
         )}
 
-        {/* 3. PAZARLAMA VE DOĞRULAMA */}
+        {/* 3. PAZARLAMA VE DOĞRULAMA (SILA BUTİK STİLİ 12 SEKMELİ YAN MENÜ & DETAY PANELİ) */}
         {activeTab === "marketing" && (
-          <div>
-            <div className="quka-card">
-              <h5>Google Servisleri & Doğrulama Kodları</h5>
-              <div className="quka-form-grid">
-                <div className="quka-field">
-                  <label>Google Analytics 4 (GA4) Ölçüm Kimliği</label>
-                  <input className="quka-input" defaultValue="G-BKM9284710" placeholder="G-XXXXXXXXXX" />
-                </div>
-                <div className="quka-field">
-                  <label>Google Tag Manager (GTM) Konteyner Kimliği</label>
-                  <input className="quka-input" defaultValue="GTM-K82PL9M" placeholder="GTM-XXXXXXX" />
-                </div>
-                <div className="quka-field">
-                  <label>Google Search Console HTML Meta Doğrulama Kodu</label>
-                  <input className="quka-input" defaultValue="google-site-verification=bkm_verified_token_2026" />
-                </div>
-                <div className="quka-field">
-                  <label>Google Ads Dönüşüm Kimliği (AW-ID)</label>
-                  <input className="quka-input" defaultValue="AW-849201948" />
-                </div>
-              </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "center",
+              gap: "22px",
+              maxWidth: "1080px",
+              margin: "0 auto",
+            }}
+          >
+            {/* Sol Dikey Menü (Sıla Butik Stili) */}
+            <div
+              style={{
+                width: "250px",
+                flexShrink: 0,
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "10px",
+                overflow: "hidden",
+                boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
+              }}
+            >
+              {(
+                [
+                  {
+                    id: "search_engines" as MarketingSubTabId,
+                    label: "Arama Motorları",
+                    active: pixelConfig.search_engines?.active !== false,
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="10.5" cy="10.5" r="6.5" stroke="#111827" strokeWidth="2.4" />
+                        <path d="M15.5 15.5 21 21" stroke="#111827" strokeWidth="2.8" strokeLinecap="round" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "meta_pixel" as MarketingSubTabId,
+                    label: "Facebook Pixel",
+                    active: Boolean(pixelConfig.meta_pixel?.active && pixelConfig.meta_pixel?.pixel_id),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="11" fill="#1877F2" />
+                        <path
+                          d="M15.36 15.28l.49-3.18h-3.05V10.04c0-.87.43-1.72 1.8-1.72h1.39V5.61s-1.26-.22-2.47-.22c-2.52 0-4.17 1.53-4.17 4.29v2.42H6.55v3.18h2.8v7.58a11.1 11.1 0 003.45 0v-7.58h2.56z"
+                          fill="#ffffff"
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "google_analytics" as MarketingSubTabId,
+                    label: "Google Analytics",
+                    active: Boolean(pixelConfig.google_analytics?.active && pixelConfig.google_analytics?.measurement_id),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <rect x="16" y="3" width="4.5" height="18" rx="2.25" fill="#F9AB00" />
+                        <rect x="9.5" y="9.5" width="4.5" height="11.5" rx="2.25" fill="#E37400" />
+                        <circle cx="5.25" cy="18.75" r="2.25" fill="#E37400" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "google_ads" as MarketingSubTabId,
+                    label: "Google Ads",
+                    active: Boolean(pixelConfig.google_ads?.active && pixelConfig.google_ads?.conversion_id),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M3.4 16.4 9.7 5.5a2.6 2.6 0 0 1 4.5 2.6L7.9 19a2.6 2.6 0 0 1-4.5-2.6Z"
+                          fill="#FBBC04"
+                        />
+                        <path
+                          d="M14.2 5.5 20.6 16.4a2.6 2.6 0 0 1-4.5 2.6L9.7 8.1a2.6 2.6 0 0 1 4.5-2.6Z"
+                          fill="#4285F4"
+                        />
+                        <circle cx="5.65" cy="17.7" r="2.6" fill="#34A853" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "google_tag_manager" as MarketingSubTabId,
+                    label: "Google Tag Manager",
+                    active: Boolean(pixelConfig.google_tag_manager?.active && pixelConfig.google_tag_manager?.gtm_id),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M13.7 3.3 20.7 10.3 13.7 17.3 10.2 13.8 17.2 6.8 13.7 3.3Z" fill="#8AB4F8" />
+                        <path d="M13.7 3.3 10.2 6.8 6.7 10.3 10.2 13.8 13.7 10.3 10.2 6.8 13.7 3.3Z" fill="#4285F4" />
+                        <path d="M3.3 10.3 10.3 3.3 13.8 6.8 6.8 13.8 3.3 10.3Z" fill="#4285F4" />
+                        <path d="M6.8 13.8 13.8 20.8 17.3 17.3 10.3 10.3 6.8 13.8Z" fill="#246FDB" />
+                        <circle cx="12" cy="19" r="2.2" fill="#8AB4F8" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "openai_ads" as MarketingSubTabId,
+                    label: "OpenAI Ads",
+                    active: Boolean(pixelConfig.openai_ads?.active),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#111827">
+                        <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365 2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5Z" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "tiktok_pixel" as MarketingSubTabId,
+                    label: "TikTok Pixel",
+                    active: Boolean(pixelConfig.tiktok_pixel?.active && pixelConfig.tiktok_pixel?.pixel_id),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6 0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64 0 3.33 2.76 5.7 5.69 5.7 3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48Z"
+                          fill="#FE2C55"
+                          transform="translate(0.7, 0.7)"
+                        />
+                        <path
+                          d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6 0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64 0 3.33 2.76 5.7 5.69 5.7 3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48Z"
+                          fill="#25F4EE"
+                          transform="translate(-0.7, -0.7)"
+                        />
+                        <path
+                          d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6 0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64 0 3.33 2.76 5.7 5.69 5.7 3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48Z"
+                          fill="#000000"
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "yandex_metrica" as MarketingSubTabId,
+                    label: "Yandex Metrika",
+                    active: Boolean(pixelConfig.yandex_metrica?.active && pixelConfig.yandex_metrica?.counter_id),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="12.5" width="4.8" height="8.5" rx="1.2" fill="#FF2600" />
+                        <rect x="9.6" y="7.5" width="4.8" height="13.5" rx="1.2" fill="#FFCC00" />
+                        <rect x="16.2" y="3" width="4.8" height="18" rx="1.2" fill="#0066FF" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "robots_txt" as MarketingSubTabId,
+                    label: "Robots.txt",
+                    active: Boolean(pixelConfig.robots_txt?.active !== false),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="1.9">
+                        <rect x="4" y="7" width="16" height="12" rx="3" />
+                        <circle cx="9" cy="13" r="1.4" fill="#1e293b" />
+                        <circle cx="15" cy="13" r="1.4" fill="#1e293b" />
+                        <path d="M12 3v4M9 3h6M2 11v4M22 11v4" strokeLinecap="round" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "llms_txt" as MarketingSubTabId,
+                    label: "LLMs.txt",
+                    active: Boolean(pixelConfig.llms_txt?.active !== false),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="1.9">
+                        <circle cx="6" cy="6" r="2.3" />
+                        <circle cx="18" cy="6" r="2.3" />
+                        <circle cx="6" cy="18" r="2.3" />
+                        <circle cx="18" cy="18" r="2.3" />
+                        <circle cx="12" cy="12" r="2.5" fill="#1e293b" />
+                        <path d="M8 7.5 10.2 10.2M16 7.5 13.8 10.2M8 16.5 10.2 13.8M16 16.5 13.8 13.8" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "custom_scripts" as MarketingSubTabId,
+                    label: "Scriptler",
+                    active: Boolean(pixelConfig.custom_scripts?.active !== false),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m8 8-5 4 5 4M16 8l5 4-5 4M13.5 6l-3 12" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "verification_files" as MarketingSubTabId,
+                    label: "Dosyalar",
+                    active: Boolean((pixelConfig.verification_files || []).length > 0),
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <path d="M14 2v6h6M8 13h8M8 17h6" />
+                      </svg>
+                    ),
+                  },
+                ]
+              ).map((item, idx, arr) => {
+                const isSelected = activeMarketingMenu === item.id
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveMarketingMenu(item.id)}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "12px 15px",
+                      background: isSelected ? "#f1f5f9" : "#ffffff",
+                      border: "none",
+                      borderBottom: idx < arr.length - 1 ? "1px solid #f1f5f9" : "none",
+                      borderLeft: isSelected ? "3px solid #2563eb" : "3px solid transparent",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "11px" }}>
+                      <span style={{ width: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {item.icon}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: isSelected ? 700 : 500,
+                          color: isSelected ? "#0f172a" : "#334155",
+                        }}
+                      >
+                        {item.label}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      {item.active && (
+                        <span
+                          style={{
+                            width: 7,
+                            height: 7,
+                            borderRadius: "50%",
+                            background: "#10b981",
+                          }}
+                          title="Aktif"
+                        />
+                      )}
+                      <span style={{ color: "#94a3b8", fontSize: "14px", fontWeight: 600 }}>›</span>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
 
-            <div className="quka-card">
-              <h5>Meta (Facebook & Instagram), TikTok ve Yandex Piksel</h5>
-              <div className="quka-form-grid">
-                <div className="quka-field">
-                  <label>Meta (Facebook) Pixel ID</label>
-                  <input className="quka-input" defaultValue="109284756192038" />
-                </div>
-                <div className="quka-field">
-                  <label>Meta Conversions API (CAPI) Erişim Anahtarı</label>
-                  <input className="quka-input" defaultValue="EAAGm0PX4ZCpsBA..." />
-                </div>
-                <div className="quka-field">
-                  <label>TikTok Pixel ID</label>
-                  <input className="quka-input" defaultValue="C8H2N9PL019283" />
-                </div>
-                <div className="quka-field">
-                  <label>Yandex Metrica Sayaç Numarası</label>
-                  <input className="quka-input" defaultValue="94827165" />
-                </div>
-              </div>
-            </div>
+            {/* Sağ İçerik Kartı (Sıla Butik Stili) */}
+            <div
+              style={{
+                flex: 1,
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "10px",
+                padding: "26px 28px",
+                boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
+              }}
+            >
+              {/* 1. ARAMA MOTORLARI */}
+              {activeMarketingMenu === "search_engines" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    Arama Motorları
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    E-ticaret sitenizin Google, Facebook, Yandex, Bing, Alexa ve Pinterest platformlarında doğrulanmasını ve daha hızlı indekslenebilmesini sağlar.
+                  </div>
 
-            <div className="quka-card">
-              <h5>Özel Script & Canlı Destek Kodları</h5>
-              <div className="quka-form-grid">
-                <div className="quka-field">
-                  <label>{"<head> ... </head>"} Arasına Eklenecek Özel Kodlar</label>
-                  <textarea
-                    className="quka-textarea"
-                    rows={5}
-                    defaultValue={`<!-- Özel Doğrulama ve Izleme Scriptleri -->`}
-                  />
+                  {/* Durum Toggle */}
+                  <div style={{ marginBottom: "20px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "8px" }}>
+                      Durum
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updatePixelGroup("search_engines", "active", !(pixelConfig.search_engines?.active !== false))
+                      }
+                      style={{
+                        width: "48px",
+                        height: "26px",
+                        borderRadius: "999px",
+                        background: pixelConfig.search_engines?.active !== false ? "#10b981" : "#cbd5e1",
+                        border: "none",
+                        padding: "3px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: pixelConfig.search_engines?.active !== false ? "flex-end" : "flex-start",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                    </button>
+                  </div>
+
+                  {[
+                    {
+                      key: "google_verification",
+                      label: "Google Doğrulama Kodu",
+                      metaName: "google-site-verification",
+                      placeholder: "Google Search Console doğrulama kodunu veya meta etiketini yapıştırın",
+                    },
+                    {
+                      key: "facebook_verification",
+                      label: "Facebook Doğrulama Kodu",
+                      metaName: "facebook-domain-verification",
+                      placeholder: "Facebook Business domain doğrulama kodunu yapıştırın",
+                    },
+                    {
+                      key: "yandex_verification",
+                      label: "Yandex Doğrulama Kodu",
+                      metaName: "yandex-verification",
+                      placeholder: "Yandex Webmaster doğrulama kodunu yapıştırın",
+                    },
+                    {
+                      key: "bing_verification",
+                      label: "Bing Doğrulama Kodu",
+                      metaName: "msvalidate.01",
+                      placeholder: "Bing Webmaster Tools doğrulama kodunu yapıştırın",
+                    },
+                    {
+                      key: "pinterest_verification",
+                      label: "Pinterest Doğrulama Kodu",
+                      metaName: "p:domain_verify",
+                      placeholder: "Pinterest domain doğrulama kodunu yapıştırın",
+                    },
+                  ].map((item) => (
+                    <div key={item.key} style={{ marginBottom: "18px" }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                        <span>{item.label}</span>
+                        <span style={{ width: 15, height: 15, borderRadius: "50%", border: "1px solid #94a3b8", color: "#64748b", fontSize: "10px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                          ?
+                        </span>
+                      </label>
+                      <input
+                        className="quka-input"
+                        value={pixelConfig.search_engines?.[item.key] || ""}
+                        onChange={(e) => updatePixelGroup("search_engines", item.key, e.target.value)}
+                        placeholder={item.placeholder}
+                      />
+                      <div style={{ fontSize: "11px", color: "#64748b", marginTop: "5px", fontFamily: "monospace" }}>
+                        {`<meta name="${item.metaName}" content="`}
+                        <strong style={{ color: "#0f172a" }}>
+                          {pixelConfig.search_engines?.[item.key] || "DOĞRULAMA KODU"}
+                        </strong>
+                        {`" />`}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="quka-field">
-                  <label>{"</body>"} Öncesine Eklenecek Özel Kodlar (Canlı Destek vb.)</label>
-                  <textarea
-                    className="quka-textarea"
-                    rows={5}
-                    defaultValue={`<!-- WhatsApp & Canlı Destek Widget -->`}
-                  />
+              )}
+
+              {/* 2. FACEBOOK (META) PIXEL & CONVERSIONS API */}
+              {activeMarketingMenu === "meta_pixel" && (
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+                    <h4 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                      Facebook (Meta) Pixel &amp; Conversions API (CAPI)
+                    </h4>
+                    <span
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: "999px",
+                        fontSize: "11.5px",
+                        fontWeight: 700,
+                        background:
+                          pixelConfig.meta_pixel?.active && pixelConfig.meta_pixel?.pixel_id
+                            ? "#dcfce7"
+                            : "#f1f5f9",
+                        color:
+                          pixelConfig.meta_pixel?.active && pixelConfig.meta_pixel?.pixel_id
+                            ? "#15803d"
+                            : "#64748b",
+                      }}
+                    >
+                      {pixelConfig.meta_pixel?.active && pixelConfig.meta_pixel?.pixel_id
+                        ? `● Pixel Aktif (${pixelConfig.meta_pixel.pixel_id})`
+                        : "Pasif"}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Facebook ve Instagram reklamlarınızın dönüşümlerini (PageView, ViewContent, AddToCart, InitiateCheckout, Purchase) hem tarayıcı (Browser Pixel) hem de sunucu tabanlı <strong>Meta Conversions API (CAPI)</strong> üzerinden iOS 14+ veri kaybı olmadan takip etmenizi sağlar.
+                  </div>
+
+                  {/* Durum Toggle */}
+                  <div style={{ marginBottom: "20px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "8px" }}>
+                      Durum
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updatePixelGroup("meta_pixel", "active", !pixelConfig.meta_pixel?.active)
+                      }
+                      style={{
+                        width: "48px",
+                        height: "26px",
+                        borderRadius: "999px",
+                        background: pixelConfig.meta_pixel?.active ? "#10b981" : "#cbd5e1",
+                        border: "none",
+                        padding: "3px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: pixelConfig.meta_pixel?.active ? "flex-end" : "flex-start",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                    </button>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      <span>Facebook (Meta) Pixel Kodu (Pixel ID)</span>
+                      <span style={{ width: 15, height: 15, borderRadius: "50%", border: "1px solid #94a3b8", color: "#64748b", fontSize: "10px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                        ?
+                      </span>
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.meta_pixel?.pixel_id || ""}
+                      onChange={(e) => {
+                        const val = e.target.value.trim()
+                        updatePixelGroup("meta_pixel", "pixel_id", val)
+                        if (val && !pixelConfig.meta_pixel?.active) {
+                          updatePixelGroup("meta_pixel", "active", true)
+                        }
+                      }}
+                      placeholder="Örn: 538418662598444"
+                    />
+                    <div style={{ fontSize: "11px", color: "#64748b", marginTop: "5px", fontFamily: "monospace" }}>
+                      {`fbq('init', '`}
+                      <strong style={{ color: "#0f172a" }}>
+                        {pixelConfig.meta_pixel?.pixel_id || "PIXEL_ID"}
+                      </strong>
+                      {`'); fbq('track', 'PageView');`}
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      <span>Meta Conversions API (CAPI) Erişim Anahtarı (Access Token)</span>
+                      <span style={{ width: 15, height: 15, borderRadius: "50%", border: "1px solid #94a3b8", color: "#64748b", fontSize: "10px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                        ?
+                      </span>
+                    </label>
+                    <textarea
+                      className="quka-textarea"
+                      rows={3}
+                      value={pixelConfig.meta_pixel?.access_token || ""}
+                      onChange={(e) => updatePixelGroup("meta_pixel", "access_token", e.target.value)}
+                      placeholder="EAAODcHOQT6cBTPcsXqjdbloqYaOLKRXU7tszmQGVxX06418Tz9gzyEvzbXQh3mYVQccmBTZBCQm..."
+                    />
+                    <div style={{ fontSize: "11px", color: "#64748b", marginTop: "5px" }}>
+                      Meta Olay Yöneticisi (Events Manager) &gt; Ayarlar &gt; Dönüşümler API&apos;si &gt; Erişim Anahtarı Oluştur bölümünden aldığınız EAA... ile başlayan token.
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      <span>Meta Test Etkinlik Kodu (Test Event Code - İsteğe Bağlı)</span>
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.meta_pixel?.test_event_code || ""}
+                      onChange={(e) => updatePixelGroup("meta_pixel", "test_event_code", e.target.value)}
+                      placeholder="Örn: TEST49281 (Sadece Olay Yöneticisinde test ederken doldurun)"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* 3. GOOGLE ANALYTICS (GA4) */}
+              {activeMarketingMenu === "google_analytics" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    Google Analytics (GA4)
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Ziyaretçi trafiğinizi, gerçek zamanlı aktif kullanıcıları ve e-ticaret dönüşümlerini Google Analytics 4 (GA4) üzerinden izlemenizi sağlar.
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "8px" }}>
+                      Durum
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updatePixelGroup("google_analytics", "active", !pixelConfig.google_analytics?.active)
+                      }
+                      style={{
+                        width: "48px",
+                        height: "26px",
+                        borderRadius: "999px",
+                        background: pixelConfig.google_analytics?.active ? "#10b981" : "#cbd5e1",
+                        border: "none",
+                        padding: "3px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: pixelConfig.google_analytics?.active ? "flex-end" : "flex-start",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                    </button>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      Google Analytics 4 (GA4) Ölçüm Kimliği (Measurement ID)
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.google_analytics?.measurement_id || ""}
+                      onChange={(e) => {
+                        const val = e.target.value.trim()
+                        updatePixelGroup("google_analytics", "measurement_id", val)
+                        if (val && !pixelConfig.google_analytics?.active) {
+                          updatePixelGroup("google_analytics", "active", true)
+                        }
+                      }}
+                      placeholder="G-XXXXXXXXXX"
+                    />
+                    <div style={{ fontSize: "11px", color: "#64748b", marginTop: "5px", fontFamily: "monospace" }}>
+                      {`gtag('config', '`}
+                      <strong style={{ color: "#0f172a" }}>
+                        {pixelConfig.google_analytics?.measurement_id || "G-XXXXXXXXXX"}
+                      </strong>
+                      {`');`}
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      GA4 Mülk Kimliği (Property ID - İsteğe Bağlı)
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.google_analytics?.property_id || ""}
+                      onChange={(e) => updatePixelGroup("google_analytics", "property_id", e.target.value)}
+                      placeholder="Örn: 412983712"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 4. GOOGLE ADS */}
+              {activeMarketingMenu === "google_ads" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    Google Ads
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Google Arama, Alışveriş (Shopping) ve Performance Max reklam kampanyalarınızın satış dönüşümlerini ve ROAS değerini ölçmenizi sağlar.
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "8px" }}>
+                      Durum
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updatePixelGroup("google_ads", "active", !pixelConfig.google_ads?.active)
+                      }
+                      style={{
+                        width: "48px",
+                        height: "26px",
+                        borderRadius: "999px",
+                        background: pixelConfig.google_ads?.active ? "#10b981" : "#cbd5e1",
+                        border: "none",
+                        padding: "3px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: pixelConfig.google_ads?.active ? "flex-end" : "flex-start",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                    </button>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      Google Ads Dönüşüm Kimliği (AW-ID)
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.google_ads?.conversion_id || ""}
+                      onChange={(e) => {
+                        const val = e.target.value.trim()
+                        updatePixelGroup("google_ads", "conversion_id", val)
+                        if (val && !pixelConfig.google_ads?.active) {
+                          updatePixelGroup("google_ads", "active", true)
+                        }
+                      }}
+                      placeholder="AW-XXXXXXXXX"
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      Satın Alma (Purchase) Dönüşüm Etiketi (Conversion Label)
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.google_ads?.conversion_label || ""}
+                      onChange={(e) => updatePixelGroup("google_ads", "conversion_label", e.target.value)}
+                      placeholder="Örn: AbCdEfGhIjKlMnOpQr"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 5. GOOGLE TAG MANAGER */}
+              {activeMarketingMenu === "google_tag_manager" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    Google Tag Manager
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Tüm izleme etiketlerinizi ve gelişmiş e-ticaret `dataLayer` olaylarını Google Tag Manager (GTM) konteyneri üzerinden yönetmenizi sağlar.
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "8px" }}>
+                      Durum
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updatePixelGroup("google_tag_manager", "active", !pixelConfig.google_tag_manager?.active)
+                      }
+                      style={{
+                        width: "48px",
+                        height: "26px",
+                        borderRadius: "999px",
+                        background: pixelConfig.google_tag_manager?.active ? "#10b981" : "#cbd5e1",
+                        border: "none",
+                        padding: "3px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: pixelConfig.google_tag_manager?.active ? "flex-end" : "flex-start",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                    </button>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      GTM Konteyner Kimliği (Container ID)
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.google_tag_manager?.gtm_id || ""}
+                      onChange={(e) => {
+                        const val = e.target.value.trim()
+                        updatePixelGroup("google_tag_manager", "gtm_id", val)
+                        if (val && !pixelConfig.google_tag_manager?.active) {
+                          updatePixelGroup("google_tag_manager", "active", true)
+                        }
+                      }}
+                      placeholder="GTM-XXXXXXX"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 6. OPENAI ADS */}
+              {activeMarketingMenu === "openai_ads" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    OpenAI Ads &amp; ChatGPT Shopping
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Ürünlerinizin OpenAI / ChatGPT Shopping aramalarında önerilmesini ve yapay zeka kaynaklı alışveriş dönüşümlerinin izlenmesini sağlar.
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "8px" }}>
+                      Durum
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updatePixelGroup("openai_ads", "active", !pixelConfig.openai_ads?.active)
+                      }
+                      style={{
+                        width: "48px",
+                        height: "26px",
+                        borderRadius: "999px",
+                        background: pixelConfig.openai_ads?.active ? "#10b981" : "#cbd5e1",
+                        border: "none",
+                        padding: "3px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: pixelConfig.openai_ads?.active ? "flex-end" : "flex-start",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                    </button>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      OpenAI Reklam / İzleme Kimliği (Pixel ID)
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.openai_ads?.pixel_id || ""}
+                      onChange={(e) => {
+                        const val = e.target.value.trim()
+                        updatePixelGroup("openai_ads", "pixel_id", val)
+                        if (val && !pixelConfig.openai_ads?.active) {
+                          updatePixelGroup("openai_ads", "active", true)
+                        }
+                      }}
+                      placeholder="Örn: OAI-XXXXXXXXXX"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 7. TIKTOK PIXEL */}
+              {activeMarketingMenu === "tiktok_pixel" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    TikTok Pixel
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    TikTok reklam kampanyalarınızdan gelen ziyaretçilerin ürün inceleme, sepete ekleme ve satın alma davranışlarını izlemenizi sağlar.
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "8px" }}>
+                      Durum
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updatePixelGroup("tiktok_pixel", "active", !pixelConfig.tiktok_pixel?.active)
+                      }
+                      style={{
+                        width: "48px",
+                        height: "26px",
+                        borderRadius: "999px",
+                        background: pixelConfig.tiktok_pixel?.active ? "#10b981" : "#cbd5e1",
+                        border: "none",
+                        padding: "3px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: pixelConfig.tiktok_pixel?.active ? "flex-end" : "flex-start",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                    </button>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      TikTok Pixel Kodu (Pixel ID)
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.tiktok_pixel?.pixel_id || ""}
+                      onChange={(e) => {
+                        const val = e.target.value.trim()
+                        updatePixelGroup("tiktok_pixel", "pixel_id", val)
+                        if (val && !pixelConfig.tiktok_pixel?.active) {
+                          updatePixelGroup("tiktok_pixel", "active", true)
+                        }
+                      }}
+                      placeholder="Örn: C8H2N9PL019283"
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      TikTok Events API Erişim Anahtarı (Access Token - İsteğe Bağlı)
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.tiktok_pixel?.access_token || ""}
+                      onChange={(e) => updatePixelGroup("tiktok_pixel", "access_token", e.target.value)}
+                      placeholder="TikTok Events API Access Token"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 8. YANDEX METRİKA */}
+              {activeMarketingMenu === "yandex_metrica" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    Yandex Metrika
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Yandex Metrika ve Webvisor ile ziyaretçilerinizin tıklama ısı haritalarını (heatmap) ve oturum video kayıtlarını izlemenizi sağlar.
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "8px" }}>
+                      Durum
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updatePixelGroup("yandex_metrica", "active", !pixelConfig.yandex_metrica?.active)
+                      }
+                      style={{
+                        width: "48px",
+                        height: "26px",
+                        borderRadius: "999px",
+                        background: pixelConfig.yandex_metrica?.active ? "#10b981" : "#cbd5e1",
+                        border: "none",
+                        padding: "3px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: pixelConfig.yandex_metrica?.active ? "flex-end" : "flex-start",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                    </button>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      Yandex Metrika Sayaç Numarası (Counter ID)
+                    </label>
+                    <input
+                      className="quka-input"
+                      value={pixelConfig.yandex_metrica?.counter_id || ""}
+                      onChange={(e) => {
+                        const val = e.target.value.trim()
+                        updatePixelGroup("yandex_metrica", "counter_id", val)
+                        if (val && !pixelConfig.yandex_metrica?.active) {
+                          updatePixelGroup("yandex_metrica", "active", true)
+                        }
+                      }}
+                      placeholder="Örn: 94827165"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 9. ROBOTS.TXT */}
+              {activeMarketingMenu === "robots_txt" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    Robots.txt
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Arama motoru botlarının (`Googlebot`, `Bingbot`, `YandexBot`) mağazanızdaki hangi sayfaları tarayıp indeksleyeceğini belirleyen `/robots.txt` dosyasını yönetin.
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      Robots.txt İçeriği (https://cizgibutik.com/robots.txt)
+                    </label>
+                    <textarea
+                      className="quka-textarea"
+                      rows={8}
+                      style={{ fontFamily: "monospace", fontSize: "12.5px" }}
+                      value={pixelConfig.robots_txt?.content || ""}
+                      onChange={(e) => updatePixelGroup("robots_txt", "content", e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 10. LLMS.TXT */}
+              {activeMarketingMenu === "llms_txt" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    LLMs.txt (Yapay Zeka Motorları Tanıtım Dosyası)
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    ChatGPT, Claude, Gemini ve Perplexity gibi büyük dil modellerinin mağazanızı ve kategorilerinizi doğru tanımasını sağlayan `/llms.txt` standardı.
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      LLMs.txt İçeriği (https://cizgibutik.com/llms.txt)
+                    </label>
+                    <textarea
+                      className="quka-textarea"
+                      rows={8}
+                      style={{ fontFamily: "monospace", fontSize: "12.5px" }}
+                      value={pixelConfig.llms_txt?.content || ""}
+                      onChange={(e) => updatePixelGroup("llms_txt", "content", e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 11. SCRİPTLER */}
+              {activeMarketingMenu === "custom_scripts" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    Özel Scriptler &amp; Canlı Destek Kodları
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Mağazanızın `&lt;head&gt;` veya `&lt;body&gt;` etiketleri arasına harici doğrulama kodları, canlı destek widget&apos;ları veya özel izleme scriptleri ekleyebilirsiniz.
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      {"<head> ... </head>"} Arasına Eklenecek Özel Kodlar
+                    </label>
+                    <textarea
+                      className="quka-textarea"
+                      rows={5}
+                      style={{ fontFamily: "monospace", fontSize: "12px" }}
+                      value={pixelConfig.custom_scripts?.head_scripts || ""}
+                      onChange={(e) => updatePixelGroup("custom_scripts", "head_scripts", e.target.value)}
+                      placeholder="<!-- Özel Head Script veya Meta Etiketleri -->"
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                      {"</body>"} Öncesine Eklenecek Özel Kodlar (Canlı Destek vb.)
+                    </label>
+                    <textarea
+                      className="quka-textarea"
+                      rows={5}
+                      style={{ fontFamily: "monospace", fontSize: "12px" }}
+                      value={pixelConfig.custom_scripts?.body_end_scripts || ""}
+                      onChange={(e) => updatePixelGroup("custom_scripts", "body_end_scripts", e.target.value)}
+                      placeholder="<!-- Canlı Destek veya Özel İzleme Scriptleri -->"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 12. DOSYALAR */}
+              {activeMarketingMenu === "verification_files" && (
+                <div>
+                  <h4 style={{ margin: "0 0 14px 0", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
+                    Doğrulama Dosyaları (HTML / TXT)
+                  </h4>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: "6px",
+                      padding: "12px 15px",
+                      fontSize: "12.5px",
+                      color: "#475569",
+                      lineHeight: 1.5,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Google, Facebook, Yandex veya ödeme kuruluşlarının kök dizine yüklenmesini istediği `.html` veya `.txt` doğrulama dosyalarını buradan ekleyebilirsiniz.
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "10px 16px",
+                        borderRadius: "6px",
+                        background: "#2563eb",
+                        color: "#fff",
+                        fontSize: "12.5px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      <span>📄 Doğrulama Dosyası Seç (.html / .txt)</span>
+                      <input
+                        type="file"
+                        accept=".html,.htm,.txt,.xml"
+                        style={{ display: "none" }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+                          const reader = new FileReader()
+                          reader.onload = () => {
+                            const content = String(reader.result || "")
+                            const nextFiles = [
+                              ...(pixelConfig.verification_files || []),
+                              {
+                                filename: file.name,
+                                content,
+                                uploaded_at: new Date().toLocaleDateString("tr-TR"),
+                              },
+                            ]
+                            setPixelConfig((prev) => ({ ...prev, verification_files: nextFiles }))
+                            showToast(`${file.name} eklendi. Kaydet butonuna basarak yayınlayın.`)
+                          }
+                          reader.readAsText(file)
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  {(pixelConfig.verification_files || []).length > 0 ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {(pixelConfig.verification_files || []).map((f: any, i: number) => (
+                        <div
+                          key={i}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "10px 14px",
+                            borderRadius: "6px",
+                            border: "1px solid #e2e8f0",
+                            background: "#f8fafc",
+                          }}
+                        >
+                          <div>
+                            <strong style={{ fontSize: "13px", color: "#0f172a" }}>{f.filename}</strong>
+                            <span style={{ fontSize: "11.5px", color: "#64748b", marginLeft: "10px" }}>
+                              {f.uploaded_at}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = (pixelConfig.verification_files || []).filter((_: any, idx: number) => idx !== i)
+                              setPixelConfig((prev) => ({ ...prev, verification_files: next }))
+                            }}
+                            style={{
+                              border: "none",
+                              background: "#fee2e2",
+                              color: "#dc2626",
+                              padding: "4px 10px",
+                              borderRadius: "4px",
+                              fontSize: "11.5px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Sil
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: "12.5px", color: "#64748b" }}>
+                      Henüz yüklenmiş bir doğrulama dosyası bulunmuyor.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
