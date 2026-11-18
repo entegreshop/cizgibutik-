@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
 import fs from "fs"
 import path from "path"
 
@@ -49,7 +50,22 @@ export function readLogoConfig() {
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   try {
-    const config = readLogoConfig()
+    let config: Record<string, any> = readLogoConfig()
+    if (!fs.existsSync(configFilePath) && req.scope) {
+      try {
+        const storeModule = req.scope.resolve(Modules.STORE)
+        const stores = await storeModule.listStores({}, { select: ["id", "metadata"] })
+        const saved = stores[0]?.metadata?.logo_config
+        if (saved && typeof saved === "object") {
+          config = { ...defaultLogoConfig, ...saved }
+          const uploadsDir = path.dirname(configFilePath)
+          if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true })
+          }
+          fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2))
+        }
+      } catch {}
+    }
     res.json({ config })
   } catch (error: any) {
     res.status(500).json({ message: "Failed to read logo config", error: error.message })
@@ -98,6 +114,22 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     fs.writeFileSync(configFilePath, JSON.stringify(merged, null, 2))
+
+    if (req.scope) {
+      try {
+        const storeModule = req.scope.resolve(Modules.STORE)
+        const stores = await storeModule.listStores({}, { select: ["id", "metadata"] })
+        if (stores[0]) {
+          await storeModule.updateStores(stores[0].id, {
+            metadata: {
+              ...(stores[0].metadata || {}),
+              logo_config: merged,
+            },
+          })
+        }
+      } catch {}
+    }
+
     res.json({ success: true, config: merged })
   } catch (error: any) {
     res.status(500).json({ message: "Failed to save logo config", error: error.message })

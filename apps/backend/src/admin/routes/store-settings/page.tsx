@@ -138,6 +138,337 @@ const StoreSettingsPage = () => {
   const [uploadingField, setUploadingField] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
+  type PrintTemplateId =
+    | "einvoice"
+    | "invoice"
+    | "shipping"
+    | "receipt"
+    | "product_1"
+    | "product_2"
+    | "product_3"
+    | "product_4"
+
+  const PRINT_TEMPLATE_CARDS: Array<{
+    id: PrintTemplateId
+    title: string
+    description: string
+    kind: "einvoice" | "order" | "receipt" | "product"
+  }> = [
+    {
+      id: "einvoice",
+      title: "E-Fatura / E-Arşiv Şablonu",
+      description: "Elektronik faturalarda e-fatura veya e-arşiv şablonları geçerli olmaktadır.",
+      kind: "einvoice",
+    },
+    {
+      id: "invoice",
+      title: "Fatura Şablonu",
+      description: "Matbu(Kağıt) faturalar için geçerlidir.",
+      kind: "order",
+    },
+    {
+      id: "shipping",
+      title: "Kargo Fişi Şablonu",
+      description: "Siparişlerin kargo teslimat etiketleri.",
+      kind: "order",
+    },
+    {
+      id: "receipt",
+      title: "Fiş Şablonu",
+      description: "Siparişler için kullanabileceğiniz ekstra fiş şablonu.",
+      kind: "receipt",
+    },
+    {
+      id: "product_1",
+      title: "Ürün Şablonu 1",
+      description: "Ürünlerin barkod vb. çıktıları için kullanılabilecek şablon.",
+      kind: "product",
+    },
+    {
+      id: "product_2",
+      title: "Ürün Şablonu 2",
+      description: "Ürünlerin barkod vb. çıktıları için kullanılabilecek şablon.",
+      kind: "product",
+    },
+    {
+      id: "product_3",
+      title: "Ürün Şablonu 3",
+      description: "Ürünlerin barkod vb. çıktıları için kullanılabilecek şablon.",
+      kind: "product",
+    },
+    {
+      id: "product_4",
+      title: "Ürün Şablonu 4",
+      description: "Ürünlerin barkod vb. çıktıları için kullanılabilecek şablon.",
+      kind: "product",
+    },
+  ]
+
+  const ORDER_PRINT_FIELDS: Array<{ key: string; label: string }> = [
+    { key: "firma_logosu", label: "Firma Logosu" },
+    { key: "teslimat_unvani", label: "Teslimat Ünvanı" },
+    { key: "teslimat_adresi", label: "Teslimat Adresi" },
+    { key: "posta_kodu", label: "Posta Kodu" },
+    { key: "fatura_sahibi_unvani", label: "Fatura Sahibi Ünvanı" },
+    { key: "fatura_adresi", label: "Fatura Adresi" },
+    { key: "uye_adi_soyadi", label: "Üye Adı - Soyadı" },
+    { key: "vergi_dairesi", label: "Vergi Dairesi" },
+    { key: "vergi_tck_no", label: "Vergi/TCK Numarası" },
+    { key: "musteri_cep_telefonu", label: "Müşteri Cep Telefonu" },
+    { key: "siparis_no", label: "Sipariş No" },
+    { key: "siparis_tarihi", label: "Sipariş Tarihi" },
+    { key: "fatura_tarihi", label: "Fatura Tarihi" },
+    { key: "fatura_saati", label: "Fatura Saati" },
+    { key: "fatura_sevk_tarihi", label: "Fatura Sevk Tarihi" },
+    { key: "urun_listesi", label: "Ürün Listesi" },
+    { key: "urun_gorseli", label: "Ürün Görseli" },
+    { key: "urun_barkod_gorseli", label: "Ürün Barkod Görseli" },
+    { key: "urun_kodu", label: "Ürün Kodu" },
+    { key: "urun_depo_yer_kodu", label: "Ürün Depo Yer Kodu" },
+    { key: "urun_barkodu", label: "Ürün Barkodu" },
+    { key: "urun_adi", label: "Ürün Adı" },
+    { key: "urun_adi_varyant", label: "Ürün Adı + Varyant" },
+    { key: "urun_adi_xml", label: "Ürün Adı + XML" },
+    { key: "urun_adi_varyant_xml", label: "Ürün Adı + Varyant + XML" },
+    { key: "urun_birimi", label: "Ürün Birimi" },
+    { key: "urun_kdv", label: "Ürün KDV" },
+    { key: "urun_miktari", label: "Ürün Miktarı" },
+    { key: "urun_fiyati", label: "Ürün Fiyatı" },
+    { key: "urun_fiyati_kdv_dahil", label: "Ürün Fiyatı (KDV Dahil)" },
+    { key: "urun_toplam_tutari", label: "Ürün Toplam Tutarı" },
+    { key: "urun_toplam_tutari_kdv_dahil", label: "Ürün Toplam Tutarı (KDV Dahil)" },
+    { key: "fatura_ara_toplam", label: "Fatura Ara Toplam" },
+    { key: "fatura_iskonto_orani", label: "Fatura İskonto Oranı" },
+    { key: "fatura_net_toplam", label: "Fatura Net Toplam" },
+    { key: "fatura_kdv_toplamlari", label: "Fatura KDV Toplamları" },
+    { key: "fatura_genel_toplam", label: "Fatura Genel Toplam" },
+    { key: "fatura_genel_toplami_yaziyla", label: "Fatura Genel Toplamı Yazıyla" },
+    { key: "siparis_barkodu", label: "Sipariş Barkodu" },
+    { key: "siparis_qr_kod", label: "Sipariş QR Kod" },
+    { key: "odeme_tipi", label: "Ödeme Tipi" },
+    { key: "kargo_firmasi", label: "Kargo Firması" },
+    { key: "siparis_notu", label: "Sipariş Notu" },
+  ]
+
+  const PRODUCT_PRINT_FIELDS: Array<{ key: string; label: string }> = [
+    { key: "firma_logosu", label: "Firma Logosu" },
+    { key: "urun_adi", label: "Ürün Adı" },
+    { key: "fatura_adi", label: "Fatura Adı" },
+    { key: "urun_kodu", label: "Ürün Kodu" },
+    { key: "urun_barkodu", label: "Ürün Barkodu" },
+    { key: "urun_linki_qr_kod", label: "Ürün Linki QR Kod" },
+    { key: "mpn", label: "Üretici Parça Numarası (MPN)" },
+    { key: "kisa_aciklama", label: "Kısa Açıklama (Ön Detay)" },
+    { key: "marka", label: "Marka" },
+    { key: "kategori", label: "Kategori" },
+    { key: "kategori_agaci", label: "Kategori Ağacı" },
+    { key: "urun_aciklamasi", label: "Ürün Açıklaması" },
+    { key: "kdv_orani", label: "KDV Oranı" },
+    { key: "alis_fiyati", label: "Alış Fiyatı" },
+    { key: "piyasa_fiyati", label: "Piyasa Fiyatı" },
+    { key: "satis_fiyati", label: "Satış Fiyatı" },
+    { key: "hizli_satis_fiyati", label: "Hızlı Satış Fiyatı" },
+    { key: "bayi_fiyati_1", label: "Bayi Fiyatı 1" },
+    { key: "bayi_fiyati_2", label: "Bayi Fiyatı 2" },
+    { key: "bayi_fiyati_3", label: "Bayi Fiyatı 3" },
+    { key: "bayi_fiyati_4", label: "Bayi Fiyatı 4" },
+    { key: "stok_miktari", label: "Stok Miktarı" },
+    { key: "miktar_birimi", label: "Miktar Birimi" },
+    { key: "desi", label: "Desi" },
+    { key: "urun_resmi", label: "Ürün Resmi" },
+    { key: "yerli_uretim_logosu", label: "Yerli Üretim Logosu" },
+    { key: "ozel_kod_1", label: "Özel Kod 1" },
+    { key: "ozel_kod_2", label: "Özel Kod 2" },
+    { key: "ozel_kod_3", label: "Özel Kod 3" },
+    { key: "depo_yer_kodu", label: "Depo Yer Kodu" },
+    { key: "varyant_bilgisi", label: "Varyant Bilgisi" },
+    { key: "ozel_not_1", label: "Özel Not 1" },
+    { key: "ozel_not_2", label: "Özel Not 2" },
+    { key: "ozel_not_3", label: "Özel Not 3" },
+    { key: "ozel_not_4", label: "Özel Not 4" },
+  ]
+
+  const DEFAULT_PRINT_TEMPLATES: Record<PrintTemplateId, any> = {
+    einvoice: {
+      name: "E-Fatura / E-Arşiv Şablonu",
+      active: true,
+      showGtipExportOnly: false,
+      showOriginExportOnly: false,
+      companyLogoUrl: "",
+      companyLogoShow: true,
+      signatureLogoUrl: "",
+      signatureLogoShow: true,
+      showOrderBarcode: true,
+      showEttnQr: true,
+      showSkuLine: true,
+      showVariantLine: true,
+      showDiscountLine: true,
+      fixedNote: "İade ve değişim işlemlerinde bu faturanın ibraz edilmesi zorunludur.",
+      customNote: "Siparişiniz Çizgi Butik güvencesiyle özenle hazırlanmıştır.",
+      ibanBankName: "Garanti BBVA",
+      ibanNumber: "TR00 0006 2000 0000 0000 0000 00",
+    },
+    invoice: {
+      paperSampleFile: "",
+      paperSize: "A4",
+      paperOrientation: "Dikey",
+      widthCm: "21.00",
+      heightCm: "29.70",
+      copies: "1",
+      fields: {
+        firma_logosu: true,
+        teslimat_unvani: true,
+        teslimat_adresi: true,
+        fatura_sahibi_unvani: true,
+        vergi_dairesi: true,
+        vergi_tck_no: true,
+        musteri_cep_telefonu: true,
+        siparis_no: true,
+        fatura_tarihi: true,
+        urun_listesi: true,
+        urun_kodu: true,
+        urun_adi_varyant: true,
+        urun_kdv: true,
+        urun_miktari: true,
+        urun_fiyati_kdv_dahil: true,
+        urun_toplam_tutari_kdv_dahil: true,
+        fatura_ara_toplam: true,
+        fatura_kdv_toplamlari: true,
+        fatura_genel_toplam: true,
+      },
+    },
+    shipping: {
+      paperSampleFile: "",
+      paperSize: "A5",
+      paperOrientation: "Dikey",
+      widthCm: "14.80",
+      heightCm: "21.00",
+      copies: "1",
+      fields: {
+        firma_logosu: true,
+        teslimat_unvani: true,
+        teslimat_adresi: true,
+        musteri_cep_telefonu: true,
+        urun_listesi: true,
+        urun_gorseli: true,
+        urun_kodu: true,
+        urun_adi_varyant: true,
+        urun_miktari: true,
+        fatura_genel_toplam: true,
+      },
+    },
+    receipt: {
+      paperSampleFile: "",
+      paperSize: "Özel",
+      paperOrientation: "Dikey",
+      widthCm: "5.00",
+      heightCm: "10.00",
+      copies: "1",
+      fields: {
+        firma_logosu: true,
+        siparis_no: true,
+        urun_listesi: true,
+        urun_adi: true,
+        urun_miktari: true,
+        urun_fiyati_kdv_dahil: true,
+        urun_toplam_tutari_kdv_dahil: true,
+        fatura_genel_toplam: true,
+      },
+    },
+    product_1: {
+      paperSampleFile: "",
+      paperSize: "Özel",
+      paperOrientation: "Yatay",
+      widthCm: "10.00",
+      heightCm: "6.00",
+      copies: "1",
+      fields: {
+        urun_adi: true,
+        urun_kodu: true,
+        urun_barkodu: true,
+        kdv_orani: true,
+        satis_fiyati: true,
+      },
+    },
+    product_2: {
+      paperSampleFile: "",
+      paperSize: "Özel",
+      paperOrientation: "Yatay",
+      widthCm: "10.00",
+      heightCm: "6.00",
+      copies: "1",
+      fields: {
+        firma_logosu: true,
+        urun_adi: true,
+        urun_kodu: true,
+        urun_barkodu: true,
+        varyant_bilgisi: true,
+        satis_fiyati: true,
+      },
+    },
+    product_3: {
+      paperSampleFile: "",
+      paperSize: "Özel",
+      paperOrientation: "Yatay",
+      widthCm: "10.00",
+      heightCm: "6.00",
+      copies: "1",
+      fields: {
+        urun_adi: true,
+        urun_kodu: true,
+        urun_barkodu: true,
+        piyasa_fiyati: true,
+        satis_fiyati: true,
+      },
+    },
+    product_4: {
+      paperSampleFile: "",
+      paperSize: "Özel",
+      paperOrientation: "Yatay",
+      widthCm: "10.00",
+      heightCm: "6.00",
+      copies: "1",
+      fields: {
+        urun_adi: true,
+        urun_kodu: true,
+        urun_barkodu: true,
+        urun_linki_qr_kod: true,
+        satis_fiyati: true,
+      },
+    },
+  }
+
+  const [printTemplates, setPrintTemplates] = useState<Record<PrintTemplateId, any>>(DEFAULT_PRINT_TEMPLATES)
+  const [activePrintModal, setActivePrintModal] = useState<PrintTemplateId | null>(null)
+  const [activePrintModalTab, setActivePrintModalTab] = useState<"general" | "designer">("general")
+  const [openEinvoiceSection, setOpenEinvoiceSection] = useState<string | null>(null)
+
+  const updatePrintTemplate = (id: PrintTemplateId, patch: Record<string, any>) => {
+    setPrintTemplates((prev) => ({
+      ...prev,
+      [id]: {
+        ...(prev[id] || {}),
+        ...patch,
+      },
+    }))
+  }
+
+  const togglePrintTemplateField = (id: PrintTemplateId, fieldKey: string) => {
+    setPrintTemplates((prev) => {
+      const currentFields = prev[id]?.fields || {}
+      return {
+        ...prev,
+        [id]: {
+          ...(prev[id] || {}),
+          fields: {
+            ...currentFields,
+            [fieldKey]: !currentFields[fieldKey],
+          },
+        },
+      }
+    })
+  }
+
   type MarketingSubTabId =
     | "search_engines"
     | "meta_pixel"
@@ -262,6 +593,24 @@ const StoreSettingsPage = () => {
               ...(data.config.socialLinks || {}),
             },
           })
+          if (data.config.print_templates && typeof data.config.print_templates === "object") {
+            setPrintTemplates((prev) => {
+              const next: Record<string, any> = { ...prev }
+              for (const k of Object.keys(prev) as PrintTemplateId[]) {
+                if (data.config.print_templates[k]) {
+                  next[k] = {
+                    ...prev[k],
+                    ...data.config.print_templates[k],
+                    fields: {
+                      ...(prev[k]?.fields || {}),
+                      ...(data.config.print_templates[k]?.fields || {}),
+                    },
+                  }
+                }
+              }
+              return next as Record<PrintTemplateId, any>
+            })
+          }
         }
       })
       .catch(() => {})
@@ -300,7 +649,12 @@ const StoreSettingsPage = () => {
         fetch("/admin/logo-config", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ config }),
+          body: JSON.stringify({
+            config: {
+              ...config,
+              print_templates: printTemplates,
+            },
+          }),
         }),
         fetch("/admin/pixel-settings", {
           method: "POST",
@@ -309,7 +663,7 @@ const StoreSettingsPage = () => {
         }),
       ])
       if (resLogo.ok || resPixel.ok) {
-        showToast("Pazarlama, Pixel ve Mağaza ayarları başarıyla kaydedildi! ✔")
+        showToast("Tüm ayarlar ve yazdırma şablonları başarıyla kaydedildi! ✔")
       } else {
         showToast("Kaydedilirken bir hata oluştu.")
       }
@@ -318,6 +672,11 @@ const StoreSettingsPage = () => {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleSavePrintModal = async () => {
+    await handleSave()
+    setActivePrintModal(null)
   }
 
   const handleFileUpload = async (field: "logoUrl" | "faviconUrl", file: File) => {
@@ -2194,81 +2553,1168 @@ const StoreSettingsPage = () => {
 
         {/* 4. YAZDIRMA ETİKETLERİ */}
         {activeTab === "prints" && (
-          <div>
+          <div style={{ maxWidth: 980, margin: "8px auto 32px auto" }}>
+            {/* 8 Clickable Template Cards Grid (Sıla Butik /admin/settings/prints Layout) */}
             <div
-              className="quka-card"
               style={{
-                background: "#eff6ff",
-                borderColor: "#bfdbfe",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
+                gap: 18,
               }}
             >
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: "#1e3a8a", marginBottom: 4 }}>
-                  Kargo Barkod, Sipariş Fişi ve Fatura Yazdırma Şablonları
-                </div>
-                <div style={{ fontSize: 12.5, color: "#1e40af" }}>
-                  Termal barkod yazıcı (100x100mm) veya standart A4 / A5 lazer yazıcılar için çıktı şablonlarını özelleştirebilirsiniz.
-                </div>
-              </div>
-              <button
-                type="button"
-                className="quka-btn-primary"
-                onClick={() => showToast("Test şablonu yazdırma penceresi hazırlandı.")}
-              >
-                🖨️ Test Çıktısı Al
-              </button>
-            </div>
-
-            <div className="quka-form-grid">
-              {[
-                {
-                  title: "Kargo Barkod Etiketi (100x100mm Termal)",
-                  desc: "Yurtiçi, Aras, MNG, Sürat ve HepsiJet barkodlu termal kargo etiketi.",
-                  size: "100mm x 100mm (Zebra / Argox Uyumlu)",
-                },
-                {
-                  title: "Sipariş Hazırlama / Toplama Fişi (A4)",
-                  desc: "Depo personeli için ürün raf kodu, fotoğraf, varyant ve adet listesi.",
-                  size: "A4 Dikey (210mm x 297mm)",
-                },
-                {
-                  title: "Kutu İçi Sevk ve İade Bilgi Fişi (A5)",
-                  desc: "Müşteri paketinin içine konulan sipariş özeti ve kolay iade kodu fişi.",
-                  size: "A5 Yatay (148mm x 210mm)",
-                },
-                {
-                  title: "Raf & Ürün Barkod Etiketi (60x40mm)",
-                  desc: "Depo rafları ve ürün paketleri için EAN-13 / Code-128 barkod etiketi.",
-                  size: "60mm x 40mm Termal",
-                },
-              ].map((tpl) => (
-                <div key={tpl.title} className="quka-card" style={{ marginBottom: 0 }}>
-                  <h5>{tpl.title}</h5>
-                  <p style={{ fontSize: 12.5, color: "#475569", margin: "0 0 12px 0" }}>{tpl.desc}</p>
+              {PRINT_TEMPLATE_CARDS.map((card) => (
+                <div
+                  key={card.id}
+                  onClick={() => {
+                    setActivePrintModal(card.id)
+                    setActivePrintModalTab("general")
+                    setOpenEinvoiceSection(null)
+                  }}
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid #eef2f6",
+                    borderRadius: 6,
+                    padding: "20px 22px",
+                    boxShadow: "0 2px 10px rgba(15, 23, 42, 0.04)",
+                    cursor: "pointer",
+                    transition: "all 0.18s ease",
+                    minHeight: 112,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-start",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = "0 8px 22px rgba(15, 23, 42, 0.09)"
+                    e.currentTarget.style.borderColor = "#cbd5e1"
+                    e.currentTarget.style.transform = "translateY(-1px)"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = "0 2px 10px rgba(15, 23, 42, 0.04)"
+                    e.currentTarget.style.borderColor = "#eef2f6"
+                    e.currentTarget.style.transform = "translateY(0)"
+                  }}
+                >
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      paddingTop: 12,
-                      borderTop: "1px solid #f1f5f9",
+                      fontSize: 13.5,
+                      fontWeight: 700,
+                      color: "#1e293b",
+                      marginBottom: 8,
                     }}
                   >
-                    <span className="quka-badge-muted">{tpl.size}</span>
-                    <button
-                      type="button"
-                      className="quka-btn-outline"
-                      onClick={() => showToast(`${tpl.title} düzenleme ekranı açıldı.`)}
-                    >
-                      Şablonu Düzenle
-                    </button>
+                    {card.title}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: "#64748b",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {card.description}
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* MODAL OVERLAY FOR SELECTED PRINT TEMPLATE */}
+            {activePrintModal && (() => {
+              const selectedCard = PRINT_TEMPLATE_CARDS.find((c) => c.id === activePrintModal)
+              if (!selectedCard) return null
+              const tpl = printTemplates[activePrintModal] || {}
+              const fields = tpl.fields || {}
+
+              // Compute aspect-ratio box dimensions for Genel Bilgiler red outline preview
+              const getPaperPreviewBox = () => {
+                if (tpl.paperSize === "Özel") {
+                  const w = Math.max(1, parseFloat(tpl.widthCm || "10") || 10)
+                  const h = Math.max(1, parseFloat(tpl.heightCm || "6") || 6)
+                  const maxSide = 240
+                  if (w >= h) {
+                    return { width: maxSide, height: Math.round((h / w) * maxSide) }
+                  } else {
+                    return { width: Math.round((w / h) * maxSide), height: maxSide }
+                  }
+                }
+                const isLandscape = tpl.paperOrientation === "Yatay"
+                const baseW = tpl.paperSize === "A4" ? 150 : tpl.paperSize === "A6" ? 115 : 132
+                const baseH = Math.round(baseW * 1.414)
+                return isLandscape
+                  ? { width: baseH, height: baseW }
+                  : { width: baseW, height: baseH }
+              }
+
+              const paperBox = getPaperPreviewBox()
+
+              return (
+                <div
+                  onClick={() => setActivePrintModal(null)}
+                  style={{
+                    position: "fixed",
+                    inset: 0,
+                    background: "rgba(15, 23, 42, 0.58)",
+                    zIndex: 9999,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 20,
+                  }}
+                >
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      width: "100%",
+                      maxWidth: selectedCard.kind === "einvoice" ? 560 : 940,
+                      background: "#ffffff",
+                      borderRadius: 6,
+                      overflow: "hidden",
+                      boxShadow: "0 24px 60px rgba(0, 0, 0, 0.28)",
+                      display: "flex",
+                      flexDirection: "column",
+                      maxHeight: "92vh",
+                    }}
+                  >
+                    {/* Blue Modal Header */}
+                    <div
+                      style={{
+                        background: "#0d6efd",
+                        color: "#ffffff",
+                        padding: "14px 20px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 11, opacity: 0.9, fontWeight: 500, marginBottom: 2 }}>
+                          Yazdırma Etiketleri
+                        </div>
+                        <div style={{ fontSize: 15, fontWeight: 700 }}>
+                          {selectedCard.title}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActivePrintModal(null)}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          color: "#ffffff",
+                          fontSize: 18,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          lineHeight: 1,
+                          padding: 4,
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {/* CASE 1: E-Fatura / E-Arşiv Şablonu Modal */}
+                    {selectedCard.kind === "einvoice" ? (
+                      <>
+                        <div
+                          style={{
+                            padding: "20px 22px",
+                            overflowY: "auto",
+                            flex: 1,
+                          }}
+                        >
+                          {/* Top Row: Şablon Adı & Şablon Durumu */}
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "1fr 1fr",
+                              gap: 20,
+                              alignItems: "start",
+                              marginBottom: 16,
+                            }}
+                          >
+                            <div>
+                              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                                Şablon Adı
+                              </label>
+                              <input
+                                className="quka-input"
+                                value={tpl.name || "E-Fatura / E-Arşiv Şablonu"}
+                                onChange={(e) => updatePrintTemplate("einvoice", { name: e.target.value })}
+                              />
+                            </div>
+                            <div>
+                              <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, color: "#334155", marginBottom: 8 }}>
+                                Şablon Durumu
+                                <span
+                                  title="Elektronik fatura şablonunun aktiflik durumu"
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: 14,
+                                    height: 14,
+                                    borderRadius: "50%",
+                                    border: "1px solid #94a3b8",
+                                    fontSize: 9.5,
+                                    color: "#64748b",
+                                  }}
+                                >
+                                  ?
+                                </span>
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => updatePrintTemplate("einvoice", { active: !tpl.active })}
+                                style={{
+                                  width: 44,
+                                  height: 24,
+                                  borderRadius: 999,
+                                  border: "none",
+                                  cursor: "pointer",
+                                  background: tpl.active ? "#10b981" : "#cbd5e1",
+                                  position: "relative",
+                                  transition: "background 0.2s",
+                                  padding: 0,
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    position: "absolute",
+                                    top: 2,
+                                    left: tpl.active ? 22 : 2,
+                                    width: 20,
+                                    height: 20,
+                                    borderRadius: "50%",
+                                    background: "#fff",
+                                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                                    transition: "left 0.2s",
+                                  }}
+                                />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Export Checkboxes */}
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 18 }}>
+                            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#334155", cursor: "pointer" }}>
+                              <input
+                                type="checkbox"
+                                checked={Boolean(tpl.showGtipExportOnly)}
+                                onChange={(e) => updatePrintTemplate("einvoice", { showGtipExportOnly: e.target.checked })}
+                              />
+                              GTİP Kodlarını sadece e-ihracaat faturalarında göster.
+                            </label>
+                            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#334155", cursor: "pointer" }}>
+                              <input
+                                type="checkbox"
+                                checked={Boolean(tpl.showOriginExportOnly)}
+                                onChange={(e) => updatePrintTemplate("einvoice", { showOriginExportOnly: e.target.checked })}
+                              />
+                              Ürün menşei bilgilerini sadece e-ihracaat faturalarında göster.
+                            </label>
+                          </div>
+
+                          {/* 7 Collapsible Accordions */}
+                          {[
+                            { id: "firma_logosu", title: "Firma Logosu" },
+                            { id: "imza_logosu", title: "İmza Logosu" },
+                            { id: "barkodlar", title: "Barkodlar" },
+                            { id: "urun_satirlari", title: "Ürün Satırları" },
+                            { id: "sabit_notlar", title: "Sabit Notlar" },
+                            { id: "ozel_notlar", title: "Özel Notlar" },
+                            { id: "iban_bilgisi", title: "IBAN Bilgisi" },
+                          ].map((acc) => {
+                            const isOpen = openEinvoiceSection === acc.id
+                            return (
+                              <div
+                                key={acc.id}
+                                style={{
+                                  border: "1px solid #e2e8f0",
+                                  borderRadius: 4,
+                                  marginBottom: 10,
+                                  background: "#f8fafc",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                <div
+                                  onClick={() => setOpenEinvoiceSection(isOpen ? null : acc.id)}
+                                  style={{
+                                    padding: "11px 14px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    cursor: "pointer",
+                                    fontSize: 12.5,
+                                    fontWeight: 600,
+                                    color: "#334155",
+                                  }}
+                                >
+                                  <span>{acc.title}</span>
+                                  <span style={{ fontSize: 11, color: "#64748b", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+                                    ⌄
+                                  </span>
+                                </div>
+                                {isOpen && (
+                                  <div style={{ padding: "12px 14px", background: "#ffffff", borderTop: "1px solid #e2e8f0", fontSize: 12 }}>
+                                    {acc.id === "firma_logosu" && (
+                                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={tpl.companyLogoShow !== false}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { companyLogoShow: e.target.checked })}
+                                          />
+                                          Fatura üzerinde firma logosunu göster
+                                        </label>
+                                        <div>
+                                          <div style={{ marginBottom: 4, fontWeight: 600, color: "#475569" }}>Logo Görsel URL</div>
+                                          <input
+                                            className="quka-input"
+                                            placeholder="https://cizgibutik.com/cizgi-logo.png"
+                                            value={tpl.companyLogoUrl || config.logoUrl || ""}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { companyLogoUrl: e.target.value })}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                    {acc.id === "imza_logosu" && (
+                                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={tpl.signatureLogoShow !== false}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { signatureLogoShow: e.target.checked })}
+                                          />
+                                          Yetkili kaşe ve imza görselini göster
+                                        </label>
+                                        <div>
+                                          <div style={{ marginBottom: 4, fontWeight: 600, color: "#475569" }}>İmza / Kaşe Görsel URL</div>
+                                          <input
+                                            className="quka-input"
+                                            placeholder="Kaşe / imza görsel bağlantısı"
+                                            value={tpl.signatureLogoUrl || ""}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { signatureLogoUrl: e.target.value })}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                    {acc.id === "barkodlar" && (
+                                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={tpl.showOrderBarcode !== false}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { showOrderBarcode: e.target.checked })}
+                                          />
+                                          Sipariş barkodunu e-fatura üzerinde göster
+                                        </label>
+                                        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={tpl.showEttnQr !== false}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { showEttnQr: e.target.checked })}
+                                          />
+                                          GİB ETTN Karekodunu (QR) göster
+                                        </label>
+                                      </div>
+                                    )}
+                                    {acc.id === "urun_satirlari" && (
+                                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={tpl.showSkuLine !== false}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { showSkuLine: e.target.checked })}
+                                          />
+                                          Stok Kodu (SKU) sütununu göster
+                                        </label>
+                                        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={tpl.showVariantLine !== false}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { showVariantLine: e.target.checked })}
+                                          />
+                                          Ürün adında renk / beden varyant bilgisini göster
+                                        </label>
+                                        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={tpl.showDiscountLine !== false}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { showDiscountLine: e.target.checked })}
+                                          />
+                                          İskonto oranı ve tutarını göster
+                                        </label>
+                                      </div>
+                                    )}
+                                    {acc.id === "sabit_notlar" && (
+                                      <div>
+                                        <div style={{ marginBottom: 4, fontWeight: 600, color: "#475569" }}>Fatura Altı Sabit Not</div>
+                                        <textarea
+                                          className="quka-textarea"
+                                          rows={3}
+                                          value={tpl.fixedNote || ""}
+                                          onChange={(e) => updatePrintTemplate("einvoice", { fixedNote: e.target.value })}
+                                        />
+                                      </div>
+                                    )}
+                                    {acc.id === "ozel_notlar" && (
+                                      <div>
+                                        <div style={{ marginBottom: 4, fontWeight: 600, color: "#475569" }}>Özel Sipariş / Kargo Notu</div>
+                                        <textarea
+                                          className="quka-textarea"
+                                          rows={3}
+                                          value={tpl.customNote || ""}
+                                          onChange={(e) => updatePrintTemplate("einvoice", { customNote: e.target.value })}
+                                        />
+                                      </div>
+                                    )}
+                                    {acc.id === "iban_bilgisi" && (
+                                      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 10 }}>
+                                        <div>
+                                          <div style={{ marginBottom: 4, fontWeight: 600, color: "#475569" }}>Banka Adı</div>
+                                          <input
+                                            className="quka-input"
+                                            value={tpl.ibanBankName || ""}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { ibanBankName: e.target.value })}
+                                          />
+                                        </div>
+                                        <div>
+                                          <div style={{ marginBottom: 4, fontWeight: 600, color: "#475569" }}>IBAN Numarası</div>
+                                          <input
+                                            className="quka-input"
+                                            value={tpl.ibanNumber || ""}
+                                            onChange={(e) => updatePrintTemplate("einvoice", { ibanNumber: e.target.value })}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+
+                        {/* Modal Footer for E-Fatura: Önizle (Left) & Kaydet (Right) */}
+                        <div
+                          style={{
+                            padding: "12px 22px",
+                            borderTop: "1px solid #e2e8f0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            background: "#ffffff",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const w = window.open("", "_blank", "width=820,height=920")
+                              if (w) {
+                                w.document.write(`
+                                  <html><head><title>E-Arşiv Fatura Önizleme - Çizgi Butik</title>
+                                  <style>body{font-family:Arial,sans-serif;padding:32px;color:#1e293b}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #cbd5e1;padding:8px;font-size:12px;text-align:left}</style>
+                                  </head><body>
+                                  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0f172a;padding-bottom:16px">
+                                    <div><h2 style="margin:0">ÇİZGİ BUTİK</h2><p style="font-size:12px;margin:4px 0">${config.address}</p></div>
+                                    <div style="text-align:right"><strong>e-ARŞİV FATURA</strong><br/><span style="font-size:11px">ETTN: ${crypto.randomUUID ? crypto.randomUUID() : "FTR-2026-00001"}</span></div>
+                                  </div>
+                                  <table><thead><tr><th>Stok Kodu</th><th>Mal Hizmet</th><th>Miktar</th><th>Birim Fiyat</th><th>KDV</th><th>Toplam</th></tr></thead>
+                                  <tbody><tr><td>STK0001</td><td>Üç Şerit Fermuarlı Modal İkili Takım (Siyah, L)</td><td>1 Adet</td><td>2.200,00 TL</td><td>%10</td><td>2.200,00 TL</td></tr></tbody></table>
+                                  <p style="margin-top:20px;font-size:12px"><strong>Not:</strong> ${tpl.fixedNote || ""}</p>
+                                  <p style="font-size:12px"><strong>IBAN:</strong> ${tpl.ibanBankName || ""} - ${tpl.ibanNumber || ""}</p>
+                                  <script>setTimeout(()=>window.print(),300)</script>
+                                  </body></html>
+                                `)
+                                w.document.close()
+                              }
+                            }}
+                            style={{
+                              background: "#e2e8f0",
+                              color: "#1e293b",
+                              border: "none",
+                              borderRadius: 4,
+                              padding: "8px 16px",
+                              fontSize: 12.5,
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                            }}
+                          >
+                            👁 Önizle
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleSavePrintModal}
+                            style={{
+                              background: "#10b981",
+                              color: "#ffffff",
+                              border: "none",
+                              borderRadius: 4,
+                              padding: "8px 18px",
+                              fontSize: 12.5,
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                            }}
+                          >
+                            ✔ Kaydet
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      /* CASE 2: Fatura, Kargo Fişi, Fiş Şablonu & Ürün Şablonları 1..4 (2-Tab Modal) */
+                      <>
+                        {/* Sub-Tabs Bar: Genel Bilgiler | Şablon Tasarlama Aracı */}
+                        <div
+                          style={{
+                            background: "#e5e7eb",
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "6px 12px 0 12px",
+                            gap: 4,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setActivePrintModalTab("general")}
+                            style={{
+                              background: activePrintModalTab === "general" ? "#ffffff" : "transparent",
+                              color: activePrintModalTab === "general" ? "#0f172a" : "#475569",
+                              border: "none",
+                              borderRadius: "4px 4px 0 0",
+                              padding: "9px 18px",
+                              fontSize: 12.5,
+                              fontWeight: activePrintModalTab === "general" ? 700 : 500,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Genel Bilgiler
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setActivePrintModalTab("designer")}
+                            style={{
+                              background: activePrintModalTab === "designer" ? "#ffffff" : "transparent",
+                              color: activePrintModalTab === "designer" ? "#0f172a" : "#475569",
+                              border: "none",
+                              borderRadius: "4px 4px 0 0",
+                              padding: "9px 18px",
+                              fontSize: 12.5,
+                              fontWeight: activePrintModalTab === "designer" ? 700 : 500,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Şablon Tasarlama Aracı
+                          </button>
+                        </div>
+
+                        {/* Tab Content Area */}
+                        <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1, minHeight: 420 }}>
+                          {activePrintModalTab === "general" ? (
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "1.3fr 1fr",
+                                gap: 36,
+                                alignItems: "start",
+                              }}
+                            >
+                              {/* Left: Form Inputs */}
+                              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                                {/* Kağıt Örneği */}
+                                <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", alignItems: "center", gap: 12 }}>
+                                  <label style={{ fontSize: 12, color: "#475569", textAlign: "right", fontWeight: 500 }}>
+                                    Kağıt Örneği
+                                  </label>
+                                  <div
+                                    style={{
+                                      border: "1px solid #cbd5e1",
+                                      borderRadius: 4,
+                                      padding: "5px 8px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 8,
+                                      background: "#ffffff",
+                                    }}
+                                  >
+                                    <label
+                                      style={{
+                                        background: "#f1f5f9",
+                                        border: "1px solid #94a3b8",
+                                        borderRadius: 3,
+                                        padding: "3px 10px",
+                                        fontSize: 12,
+                                        color: "#0f172a",
+                                        cursor: "pointer",
+                                        fontWeight: 500,
+                                      }}
+                                    >
+                                      Dosya Seç
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        style={{ display: "none" }}
+                                        onChange={(e) => {
+                                          const f = e.target.files?.[0]
+                                          if (f) {
+                                            updatePrintTemplate(activePrintModal, { paperSampleFile: f.name })
+                                          }
+                                        }}
+                                      />
+                                    </label>
+                                    <span style={{ fontSize: 12, color: "#475569" }}>
+                                      {tpl.paperSampleFile || "Dosya seçilmedi"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Kağıt Ebatı */}
+                                <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", alignItems: "center", gap: 12 }}>
+                                  <label style={{ fontSize: 12, color: "#475569", textAlign: "right", fontWeight: 500 }}>
+                                    Kağıt Ebatı <span style={{ color: "#ef4444" }}>*</span>
+                                  </label>
+                                  <select
+                                    className="quka-select"
+                                    value={tpl.paperSize || "A5"}
+                                    onChange={(e) => updatePrintTemplate(activePrintModal, { paperSize: e.target.value })}
+                                  >
+                                    <option value="A4">A4</option>
+                                    <option value="A5">A5</option>
+                                    <option value="A6">A6</option>
+                                    <option value="Özel">Özel</option>
+                                  </select>
+                                </div>
+
+                                {/* Conditional: Özel Genişlik & Yükseklik (cm) OR Kağıt Düzeni */}
+                                {tpl.paperSize === "Özel" ? (
+                                  <>
+                                    <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", alignItems: "center", gap: 12 }}>
+                                      <label style={{ fontSize: 12, color: "#475569", textAlign: "right", fontWeight: 500 }}>
+                                        Kağıt Genişliği (cm) <span style={{ color: "#ef4444" }}>*</span>
+                                      </label>
+                                      <input
+                                        className="quka-input"
+                                        value={tpl.widthCm || "10.00"}
+                                        onChange={(e) => updatePrintTemplate(activePrintModal, { widthCm: e.target.value })}
+                                      />
+                                    </div>
+                                    <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", alignItems: "center", gap: 12 }}>
+                                      <label style={{ fontSize: 12, color: "#475569", textAlign: "right", fontWeight: 500 }}>
+                                        Kağıt Yüksekliği (cm) <span style={{ color: "#ef4444" }}>*</span>
+                                      </label>
+                                      <input
+                                        className="quka-input"
+                                        value={tpl.heightCm || "6.00"}
+                                        onChange={(e) => updatePrintTemplate(activePrintModal, { heightCm: e.target.value })}
+                                      />
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", alignItems: "center", gap: 12 }}>
+                                    <label style={{ fontSize: 12, color: "#475569", textAlign: "right", fontWeight: 500 }}>
+                                      Kağıt Düzeni <span style={{ color: "#ef4444" }}>*</span>
+                                    </label>
+                                    <select
+                                      className="quka-select"
+                                      value={tpl.paperOrientation || "Dikey"}
+                                      onChange={(e) => updatePrintTemplate(activePrintModal, { paperOrientation: e.target.value })}
+                                    >
+                                      <option value="Dikey">Dikey</option>
+                                      <option value="Yatay">Yatay</option>
+                                    </select>
+                                  </div>
+                                )}
+
+                                {/* Kopya */}
+                                <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", alignItems: "center", gap: 12 }}>
+                                  <label style={{ fontSize: 12, color: "#475569", textAlign: "right", fontWeight: 500 }}>
+                                    Kopya <span style={{ color: "#ef4444" }}>*</span>
+                                  </label>
+                                  <select
+                                    className="quka-select"
+                                    value={tpl.copies || "1"}
+                                    onChange={(e) => updatePrintTemplate(activePrintModal, { copies: e.target.value })}
+                                  >
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              {/* Right: Dynamic Red-Bordered Paper Aspect-Ratio Box */}
+                              <div style={{ display: "flex", justifyContent: "center", paddingTop: 4 }}>
+                                <div
+                                  style={{
+                                    width: paperBox.width,
+                                    height: paperBox.height,
+                                    border: "1px solid #f87171",
+                                    background: "#ffffff",
+                                    transition: "all 0.25s ease",
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            /* Şablon Tasarlama Aracı Tab */
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 250px",
+                                gap: 20,
+                                alignItems: "start",
+                              }}
+                            >
+                              {/* Left Gray Canvas Area with Live Interactive Template Preview */}
+                              <div
+                                style={{
+                                  background: "#d4d4d8",
+                                  padding: 24,
+                                  minHeight: 430,
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "flex-start",
+                                  overflow: "auto",
+                                }}
+                              >
+                                {/* A) Kargo Fişi / Fatura Şablonu Preview */}
+                                {selectedCard.kind === "order" && (
+                                  <div
+                                    style={{
+                                      width: 390,
+                                      minHeight: 420,
+                                      background: "#ffffff",
+                                      padding: "16px 18px",
+                                      boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+                                      fontFamily: "Arial, sans-serif",
+                                      color: "#1e293b",
+                                    }}
+                                  >
+                                    {fields.firma_logosu && (
+                                      <div style={{ textAlign: "center", fontSize: 28, fontWeight: 400, letterSpacing: "0.08em", marginBottom: 10 }}>
+                                        ÇİZGİ BUTİK
+                                      </div>
+                                    )}
+                                    {fields.teslimat_unvani && (
+                                      <div
+                                        style={{
+                                          border: "1.5px solid #1e293b",
+                                          padding: "7px 10px",
+                                          textAlign: "center",
+                                          fontWeight: 700,
+                                          fontSize: 15,
+                                          marginBottom: 8,
+                                        }}
+                                      >
+                                        Teslimat Adı Örnek LTD. ŞTİ.
+                                      </div>
+                                    )}
+                                    {fields.musteri_cep_telefonu && (
+                                      <div
+                                        style={{
+                                          border: "1.5px solid #1e293b",
+                                          padding: "7px 10px",
+                                          textAlign: "center",
+                                          fontWeight: 700,
+                                          fontSize: 15,
+                                          marginBottom: 8,
+                                        }}
+                                      >
+                                        0500 000 00 00
+                                      </div>
+                                    )}
+                                    {fields.teslimat_adresi && (
+                                      <div
+                                        style={{
+                                          border: "1.5px solid #1e293b",
+                                          padding: "10px 12px",
+                                          textAlign: "center",
+                                          fontWeight: 700,
+                                          fontSize: 13.5,
+                                          lineHeight: 1.45,
+                                          marginBottom: 10,
+                                        }}
+                                      >
+                                        Teslimat Adres Mahallesi Örnek Sok. No: 3 Daire: 11
+                                        <br />
+                                        İlçe, İl
+                                      </div>
+                                    )}
+                                    {fields.siparis_no && (
+                                      <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6, textAlign: "right" }}>
+                                        Sipariş No: #CB-10492
+                                      </div>
+                                    )}
+                                    {fields.urun_listesi && (
+                                      <div
+                                        style={{
+                                          border: "1.5px solid #1e293b",
+                                          padding: "8px 10px",
+                                          fontSize: 10.5,
+                                        }}
+                                      >
+                                        {Array.from({ length: 10 }).map((_, idx) => (
+                                          <div
+                                            key={idx}
+                                            style={{
+                                              display: "grid",
+                                              gridTemplateColumns: "46px 76px 1fr 38px",
+                                              gap: 6,
+                                              padding: "3.5px 0",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            <span>{fields.urun_gorseli ? "Görsel" : ""}</span>
+                                            <span>{fields.urun_kodu ? "STK0000000" : ""}</span>
+                                            <span>
+                                              {fields.urun_adi_varyant
+                                                ? "Ürün adı (Beyaz, L)"
+                                                : fields.urun_adi
+                                                ? "Ürün adı"
+                                                : ""}
+                                            </span>
+                                            <span style={{ textAlign: "right", fontWeight: 700 }}>
+                                              {fields.urun_miktari ? "1.00" : ""}
+                                            </span>
+                                          </div>
+                                        ))}
+                                        {fields.fatura_genel_toplam && (
+                                          <div
+                                            style={{
+                                              borderTop: "1px solid #cbd5e1",
+                                              marginTop: 6,
+                                              paddingTop: 6,
+                                              textAlign: "right",
+                                              fontWeight: 700,
+                                              fontSize: 11.5,
+                                            }}
+                                          >
+                                            Genel Toplam: 2.200,00 TL
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* B) Fiş Şablonu (Thermal Receipt 5x10cm) Preview */}
+                                {selectedCard.kind === "receipt" && (
+                                  <div
+                                    style={{
+                                      width: 210,
+                                      background: "#ffffff",
+                                      padding: "10px 8px",
+                                      boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+                                      fontFamily: "Arial, sans-serif",
+                                      color: "#1e293b",
+                                      border: "1px solid #94a3b8",
+                                    }}
+                                  >
+                                    {fields.firma_logosu && (
+                                      <div
+                                        style={{
+                                          textAlign: "center",
+                                          fontSize: 22,
+                                          fontWeight: 600,
+                                          letterSpacing: "0.02em",
+                                          borderBottom: "1px solid #64748b",
+                                          paddingBottom: 6,
+                                          marginBottom: 4,
+                                        }}
+                                      >
+                                        ÇİZGİ BUTİK
+                                      </div>
+                                    )}
+                                    {fields.siparis_no && (
+                                      <div
+                                        style={{
+                                          textAlign: "center",
+                                          fontSize: 11,
+                                          fontWeight: 700,
+                                          borderBottom: "1px solid #64748b",
+                                          paddingBottom: 4,
+                                          marginBottom: 6,
+                                        }}
+                                      >
+                                        FAT00000000
+                                      </div>
+                                    )}
+                                    {fields.urun_listesi && (
+                                      <div
+                                        style={{
+                                          border: "1px solid #64748b",
+                                          padding: "4px",
+                                          fontSize: 8.5,
+                                          marginBottom: 6,
+                                        }}
+                                      >
+                                        <div
+                                          style={{
+                                            borderBottom: "1px solid #64748b",
+                                            paddingBottom: 2,
+                                            marginBottom: 4,
+                                            fontFamily: "monospace",
+                                            fontSize: 8.5,
+                                          }}
+                                        >
+                                          _Ürün_______Ad.__Fiyat__Tutar_
+                                        </div>
+                                        {Array.from({ length: 10 }).map((_, idx) => (
+                                          <div
+                                            key={idx}
+                                            style={{
+                                              display: "grid",
+                                              gridTemplateColumns: "1fr 26px 34px 34px",
+                                              padding: "2px 0",
+                                              fontSize: 8,
+                                            }}
+                                          >
+                                            <span>Ürün adı</span>
+                                            <span style={{ textAlign: "right" }}>1.00</span>
+                                            <span style={{ textAlign: "right" }}>100.00</span>
+                                            <span style={{ textAlign: "right" }}>100.00</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {fields.fatura_genel_toplam && (
+                                      <div
+                                        style={{
+                                          borderTop: "1px solid #64748b",
+                                          borderBottom: "1px solid #64748b",
+                                          padding: "5px 2px",
+                                          display: "flex",
+                                          justifyContent: "space-between",
+                                          fontSize: 9.5,
+                                          fontWeight: 700,
+                                          marginBottom: 8,
+                                        }}
+                                      >
+                                        <span>Genel Toplam:</span>
+                                        <span>300.00</span>
+                                      </div>
+                                    )}
+                                    <div
+                                      style={{
+                                        border: "1px solid #64748b",
+                                        padding: "7px 4px",
+                                        textAlign: "center",
+                                        fontSize: 10,
+                                        fontWeight: 600,
+                                      }}
+                                    >
+                                      TEŞEKKÜR EDERİZ
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* C) Ürün Şablonu 1..4 (Barcode Label 10x6cm) Preview */}
+                                {selectedCard.kind === "product" && (
+                                  <div
+                                    style={{
+                                      width: 340,
+                                      minHeight: 205,
+                                      background: "#ffffff",
+                                      padding: "12px 18px",
+                                      boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+                                      fontFamily: "Arial, sans-serif",
+                                      color: "#0f172a",
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      alignItems: "center",
+                                      position: "relative",
+                                    }}
+                                  >
+                                    {fields.kdv_orani && (
+                                      <div
+                                        style={{
+                                          alignSelf: "flex-end",
+                                          border: "1px solid #e2e8f0",
+                                          padding: "2px 26px",
+                                          fontSize: 10,
+                                          fontWeight: 700,
+                                          marginBottom: 4,
+                                          marginRight: 18,
+                                        }}
+                                      >
+                                        %18
+                                      </div>
+                                    )}
+                                    {fields.urun_barkodu && (
+                                      <div style={{ textAlign: "center", marginBottom: 6 }}>
+                                        <svg width="248" height="54" viewBox="0 0 248 54">
+                                          {[
+                                            2, 6, 12, 15, 22, 26, 30, 38, 42, 48, 52, 58, 64, 68, 74, 80, 84, 90, 96,
+                                            102, 106, 112, 118, 122, 128, 134, 140, 144, 150, 156, 160, 166, 172, 178,
+                                            182, 188, 194, 200, 204, 210, 216, 222, 226, 232, 238, 242,
+                                          ].map((x, i) => (
+                                            <rect
+                                              key={x}
+                                              x={x}
+                                              y={2}
+                                              width={i % 3 === 0 ? 3.2 : i % 2 === 0 ? 2 : 1.2}
+                                              height={40}
+                                              fill="#000000"
+                                            />
+                                          ))}
+                                          <text
+                                            x="124"
+                                            y="52"
+                                            textAnchor="middle"
+                                            fontSize="10"
+                                            fontWeight="700"
+                                            fill="#000"
+                                          >
+                                            979501401535665
+                                          </text>
+                                        </svg>
+                                      </div>
+                                    )}
+                                    {fields.urun_adi && (
+                                      <div
+                                        style={{
+                                          width: "92%",
+                                          border: "1px solid #e2e8f0",
+                                          padding: "6px 8px",
+                                          textAlign: "center",
+                                          fontSize: 10.5,
+                                          marginBottom: 4,
+                                        }}
+                                      >
+                                        Örnek Ürün Adı
+                                      </div>
+                                    )}
+                                    {fields.urun_kodu && (
+                                      <div
+                                        style={{
+                                          width: "92%",
+                                          border: "1px solid #f1f5f9",
+                                          padding: "2px 8px",
+                                          textAlign: "center",
+                                          fontSize: 10,
+                                          color: "#334155",
+                                          marginBottom: 4,
+                                        }}
+                                      >
+                                        ABC000000
+                                      </div>
+                                    )}
+                                    {fields.satis_fiyati && (
+                                      <div
+                                        style={{
+                                          border: "1px solid #e2e8f0",
+                                          padding: "5px 24px",
+                                          fontSize: 14,
+                                          fontWeight: 600,
+                                          marginTop: 2,
+                                        }}
+                                      >
+                                        119,90 TL
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Right Scrollable Field Checklist */}
+                              <div
+                                style={{
+                                  maxHeight: 430,
+                                  overflowY: "auto",
+                                  paddingRight: 6,
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: 4,
+                                }}
+                              >
+                                {(selectedCard.kind === "product" ? PRODUCT_PRINT_FIELDS : ORDER_PRINT_FIELDS).map(
+                                  (f) => {
+                                    const isChecked = Boolean(fields[f.key])
+                                    return (
+                                      <label
+                                        key={f.key}
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: 8,
+                                          fontSize: 11.5,
+                                          color: "#334155",
+                                          cursor: "pointer",
+                                          userSelect: "none",
+                                          padding: "1.5px 0",
+                                        }}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          onChange={() => togglePrintTemplateField(activePrintModal, f.key)}
+                                          style={{
+                                            width: 14,
+                                            height: 14,
+                                            accentColor: "#6366f1",
+                                            cursor: "pointer",
+                                          }}
+                                        />
+                                        <span>{f.label}</span>
+                                      </label>
+                                    )
+                                  }
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Full-Width Bottom Green Save Bar (Matching Screenshots 3-8) */}
+                        <button
+                          type="button"
+                          onClick={handleSavePrintModal}
+                          style={{
+                            width: "100%",
+                            background: "#16c76c",
+                            color: "#ffffff",
+                            border: "none",
+                            padding: "12px 20px",
+                            fontSize: 13,
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: 16,
+                              height: 16,
+                              borderRadius: "50%",
+                              background: "#ffffff",
+                              color: "#16c76c",
+                              fontSize: 10,
+                              fontWeight: 900,
+                            }}
+                          >
+                            ✓
+                          </span>
+                          Kaydet
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         )}
 
