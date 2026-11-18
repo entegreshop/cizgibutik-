@@ -288,6 +288,31 @@ const StoreSettingsPage = () => {
     { key: "ozel_not_4", label: "Özel Not 4" },
   ]
 
+  const CIZGI_BUTIK_LOGO_DATA_URI = "data:image/png;base64,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"
+
+  const makeDefaultOrderLayouts = () => ({
+    firma_logosu: { x: 145, y: 14, width: 270, height: 54, borderWidth: 1, borderColor: "#e2e8f0", borderStyle: "Solid", fontSize: 22, underline: false, bold: true, italic: false, textAlign: "Ortala" },
+    teslimat_unvani: { x: 20, y: 76, width: 520, height: 42, borderWidth: 2, borderColor: "#000000", borderStyle: "Solid", fontSize: 20, underline: false, bold: true, italic: false, textAlign: "Ortala" },
+    musteri_cep_telefonu: { x: 20, y: 123, width: 520, height: 42, borderWidth: 2, borderColor: "#000000", borderStyle: "Solid", fontSize: 20, underline: false, bold: true, italic: false, textAlign: "Ortala" },
+    teslimat_adresi: { x: 20, y: 170, width: 520, height: 100, borderWidth: 2, borderColor: "#000000", borderStyle: "Solid", fontSize: 20, underline: false, bold: true, italic: false, textAlign: "Ortala" },
+    urun_listesi: { x: 20, y: 276, width: 520, height: 245, borderWidth: 2, borderColor: "#000000", borderStyle: "Solid", fontSize: 12, underline: false, bold: false, italic: false, textAlign: "Sola Yasla" },
+  })
+
+  const makeDefaultReceiptLayouts = () => ({
+    firma_logosu: { x: 12, y: 10, width: 206, height: 44, borderWidth: 0, borderColor: "#000000", borderStyle: "None", fontSize: 18, underline: false, bold: true, italic: false, textAlign: "Ortala" },
+    siparis_no: { x: 12, y: 58, width: 206, height: 26, borderWidth: 1, borderColor: "#000000", borderStyle: "Solid", fontSize: 12, underline: false, bold: true, italic: false, textAlign: "Ortala" },
+    urun_listesi: { x: 12, y: 90, width: 206, height: 215, borderWidth: 1, borderColor: "#000000", borderStyle: "Solid", fontSize: 10, underline: false, bold: false, italic: false, textAlign: "Sola Yasla" },
+    fatura_genel_toplam: { x: 12, y: 312, width: 206, height: 28, borderWidth: 1, borderColor: "#000000", borderStyle: "Solid", fontSize: 11, underline: false, bold: true, italic: false, textAlign: "Sola Yasla" },
+  })
+
+  const makeDefaultProductLayouts = () => ({
+    kdv_orani: { x: 230, y: 10, width: 95, height: 24, borderWidth: 1, borderColor: "#e2e8f0", borderStyle: "Solid", fontSize: 11, underline: false, bold: true, italic: false, textAlign: "Ortala" },
+    urun_barkodu: { x: 35, y: 38, width: 290, height: 64, borderWidth: 0, borderColor: "#000000", borderStyle: "None", fontSize: 11, underline: false, bold: true, italic: false, textAlign: "Ortala" },
+    urun_adi: { x: 20, y: 108, width: 320, height: 32, borderWidth: 1, borderColor: "#e2e8f0", borderStyle: "Solid", fontSize: 12, underline: false, bold: false, italic: false, textAlign: "Ortala" },
+    urun_kodu: { x: 20, y: 144, width: 320, height: 24, borderWidth: 1, borderColor: "#f1f5f9", borderStyle: "Solid", fontSize: 11, underline: false, bold: false, italic: false, textAlign: "Ortala" },
+    satis_fiyati: { x: 105, y: 172, width: 150, height: 34, borderWidth: 1, borderColor: "#cbd5e1", borderStyle: "Solid", fontSize: 16, underline: false, bold: true, italic: false, textAlign: "Ortala" },
+  })
+
   const DEFAULT_PRINT_TEMPLATES: Record<PrintTemplateId, any> = {
     einvoice: {
       name: "E-Fatura / E-Arşiv Şablonu",
@@ -319,23 +344,15 @@ const StoreSettingsPage = () => {
         firma_logosu: true,
         teslimat_unvani: true,
         teslimat_adresi: true,
-        fatura_sahibi_unvani: true,
-        vergi_dairesi: true,
-        vergi_tck_no: true,
         musteri_cep_telefonu: true,
-        siparis_no: true,
-        fatura_tarihi: true,
         urun_listesi: true,
+        urun_gorseli: true,
         urun_kodu: true,
         urun_adi_varyant: true,
-        urun_kdv: true,
         urun_miktari: true,
-        urun_fiyati_kdv_dahil: true,
-        urun_toplam_tutari_kdv_dahil: true,
-        fatura_ara_toplam: true,
-        fatura_kdv_toplamlari: true,
         fatura_genel_toplam: true,
       },
+      layouts: makeDefaultOrderLayouts(),
     },
     shipping: {
       paperSampleFile: "",
@@ -356,6 +373,7 @@ const StoreSettingsPage = () => {
         urun_miktari: true,
         fatura_genel_toplam: true,
       },
+      layouts: makeDefaultOrderLayouts(),
     },
     receipt: {
       paperSampleFile: "",
@@ -374,6 +392,7 @@ const StoreSettingsPage = () => {
         urun_toplam_tutari_kdv_dahil: true,
         fatura_genel_toplam: true,
       },
+      layouts: makeDefaultReceiptLayouts(),
     },
     product_1: {
       paperSampleFile: "",
@@ -389,6 +408,7 @@ const StoreSettingsPage = () => {
         kdv_orani: true,
         satis_fiyati: true,
       },
+      layouts: makeDefaultProductLayouts(),
     },
     product_2: {
       paperSampleFile: "",
@@ -405,6 +425,7 @@ const StoreSettingsPage = () => {
         varyant_bilgisi: true,
         satis_fiyati: true,
       },
+      layouts: makeDefaultProductLayouts(),
     },
     product_3: {
       paperSampleFile: "",
@@ -420,6 +441,7 @@ const StoreSettingsPage = () => {
         piyasa_fiyati: true,
         satis_fiyati: true,
       },
+      layouts: makeDefaultProductLayouts(),
     },
     product_4: {
       paperSampleFile: "",
@@ -435,6 +457,7 @@ const StoreSettingsPage = () => {
         urun_linki_qr_kod: true,
         satis_fiyati: true,
       },
+      layouts: makeDefaultProductLayouts(),
     },
   }
 
@@ -442,6 +465,16 @@ const StoreSettingsPage = () => {
   const [activePrintModal, setActivePrintModal] = useState<PrintTemplateId | null>(null)
   const [activePrintModalTab, setActivePrintModalTab] = useState<"general" | "designer">("general")
   const [openEinvoiceSection, setOpenEinvoiceSection] = useState<string | null>(null)
+  const [hoveredPrintBlock, setHoveredPrintBlock] = useState<string | null>(null)
+  const [editingPrintBlock, setEditingPrintBlock] = useState<string | null>(null)
+  const [dragPrintBlock, setDragPrintBlock] = useState<{
+    modalId: PrintTemplateId
+    fieldKey: string
+    startX: number
+    startY: number
+    origX: number
+    origY: number
+  } | null>(null)
 
   const updatePrintTemplate = (id: PrintTemplateId, patch: Record<string, any>) => {
     setPrintTemplates((prev) => ({
@@ -453,17 +486,95 @@ const StoreSettingsPage = () => {
     }))
   }
 
+  const updatePrintBlockLayout = (
+    id: PrintTemplateId,
+    fieldKey: string,
+    patch: Record<string, any>
+  ) => {
+    setPrintTemplates((prev) => {
+      const curLayouts = prev[id]?.layouts || {}
+      const curBlock = curLayouts[fieldKey] || {
+        x: 20,
+        y: 20,
+        width: 280,
+        height: 40,
+        borderWidth: 1,
+        borderColor: "#000000",
+        borderStyle: "Solid",
+        fontSize: 16,
+        underline: false,
+        bold: true,
+        italic: false,
+        textAlign: "Ortala",
+      }
+      return {
+        ...prev,
+        [id]: {
+          ...(prev[id] || {}),
+          layouts: {
+            ...curLayouts,
+            [fieldKey]: {
+              ...curBlock,
+              ...patch,
+            },
+          },
+        },
+      }
+    })
+  }
+
+  useEffect(() => {
+    if (!dragPrintBlock) return
+    const handleMouseMove = (e: MouseEvent) => {
+      const dx = e.clientX - dragPrintBlock.startX
+      const dy = e.clientY - dragPrintBlock.startY
+      updatePrintBlockLayout(dragPrintBlock.modalId, dragPrintBlock.fieldKey, {
+        x: Math.round(dragPrintBlock.origX + dx),
+        y: Math.round(dragPrintBlock.origY + dy),
+      })
+    }
+    const handleMouseUp = () => {
+      setDragPrintBlock(null)
+    }
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mouseup", handleMouseUp)
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("mouseup", handleMouseUp)
+    }
+  }, [dragPrintBlock])
+
   const togglePrintTemplateField = (id: PrintTemplateId, fieldKey: string) => {
     setPrintTemplates((prev) => {
       const currentFields = prev[id]?.fields || {}
+      const currentLayouts = prev[id]?.layouts || {}
+      const nextChecked = !currentFields[fieldKey]
+      const nextLayouts = { ...currentLayouts }
+      if (nextChecked && !nextLayouts[fieldKey]) {
+        nextLayouts[fieldKey] = {
+          x: 24,
+          y: 36,
+          width: 320,
+          height: 40,
+          borderWidth: 1,
+          borderColor: "#000000",
+          borderStyle: "Solid",
+          fontSize: 16,
+          underline: false,
+          bold: true,
+          italic: false,
+          textAlign: "Ortala",
+        }
+      }
       return {
         ...prev,
         [id]: {
           ...(prev[id] || {}),
           fields: {
             ...currentFields,
-            [fieldKey]: !currentFields[fieldKey],
+            [fieldKey]: nextChecked,
           },
+          layouts: nextLayouts,
         },
       }
     })
@@ -604,6 +715,10 @@ const StoreSettingsPage = () => {
                     fields: {
                       ...(prev[k]?.fields || {}),
                       ...(data.config.print_templates[k]?.fields || {}),
+                    },
+                    layouts: {
+                      ...(prev[k]?.layouts || {}),
+                      ...(data.config.print_templates[k]?.layouts || {}),
                     },
                   }
                 }
@@ -3263,217 +3378,110 @@ const StoreSettingsPage = () => {
                               </div>
                             </div>
                           ) : (
-                            /* Şablon Tasarlama Aracı Tab */
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns: "1fr 250px",
-                                gap: 20,
-                                alignItems: "start",
-                              }}
-                            >
-                              {/* Left Gray Canvas Area with Live Interactive Template Preview */}
-                              <div
-                                style={{
-                                  background: "#d4d4d8",
-                                  padding: 24,
-                                  minHeight: 430,
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "flex-start",
-                                  overflow: "auto",
-                                }}
-                              >
-                                {/* A) Kargo Fişi / Fatura Şablonu Preview */}
-                                {selectedCard.kind === "order" && (
-                                  <div
-                                    style={{
-                                      width: 390,
-                                      minHeight: 420,
-                                      background: "#ffffff",
-                                      padding: "16px 18px",
-                                      boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
-                                      fontFamily: "Arial, sans-serif",
-                                      color: "#1e293b",
-                                    }}
-                                  >
-                                    {fields.firma_logosu && (
-                                      <div style={{ textAlign: "center", fontSize: 28, fontWeight: 400, letterSpacing: "0.08em", marginBottom: 10 }}>
-                                        ÇİZGİ BUTİK
-                                      </div>
-                                    )}
-                                    {fields.teslimat_unvani && (
-                                      <div
-                                        style={{
-                                          border: "1.5px solid #1e293b",
-                                          padding: "7px 10px",
-                                          textAlign: "center",
-                                          fontWeight: 700,
-                                          fontSize: 15,
-                                          marginBottom: 8,
-                                        }}
-                                      >
-                                        Teslimat Adı Örnek LTD. ŞTİ.
-                                      </div>
-                                    )}
-                                    {fields.musteri_cep_telefonu && (
-                                      <div
-                                        style={{
-                                          border: "1.5px solid #1e293b",
-                                          padding: "7px 10px",
-                                          textAlign: "center",
-                                          fontWeight: 700,
-                                          fontSize: 15,
-                                          marginBottom: 8,
-                                        }}
-                                      >
-                                        0500 000 00 00
-                                      </div>
-                                    )}
-                                    {fields.teslimat_adresi && (
-                                      <div
-                                        style={{
-                                          border: "1.5px solid #1e293b",
-                                          padding: "10px 12px",
-                                          textAlign: "center",
-                                          fontWeight: 700,
-                                          fontSize: 13.5,
-                                          lineHeight: 1.45,
-                                          marginBottom: 10,
-                                        }}
-                                      >
-                                        Teslimat Adres Mahallesi Örnek Sok. No: 3 Daire: 11
-                                        <br />
-                                        İlçe, İl
-                                      </div>
-                                    )}
-                                    {fields.siparis_no && (
-                                      <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6, textAlign: "right" }}>
-                                        Sipariş No: #CB-10492
-                                      </div>
-                                    )}
-                                    {fields.urun_listesi && (
-                                      <div
-                                        style={{
-                                          border: "1.5px solid #1e293b",
-                                          padding: "8px 10px",
-                                          fontSize: 10.5,
-                                        }}
-                                      >
-                                        {Array.from({ length: 10 }).map((_, idx) => (
-                                          <div
-                                            key={idx}
-                                            style={{
-                                              display: "grid",
-                                              gridTemplateColumns: "46px 76px 1fr 38px",
-                                              gap: 6,
-                                              padding: "3.5px 0",
-                                              alignItems: "center",
-                                            }}
-                                          >
-                                            <span>{fields.urun_gorseli ? "Görsel" : ""}</span>
-                                            <span>{fields.urun_kodu ? "STK0000000" : ""}</span>
-                                            <span>
-                                              {fields.urun_adi_varyant
-                                                ? "Ürün adı (Beyaz, L)"
-                                                : fields.urun_adi
-                                                ? "Ürün adı"
-                                                : ""}
-                                            </span>
-                                            <span style={{ textAlign: "right", fontWeight: 700 }}>
-                                              {fields.urun_miktari ? "1.00" : ""}
-                                            </span>
-                                          </div>
-                                        ))}
-                                        {fields.fatura_genel_toplam && (
-                                          <div
-                                            style={{
-                                              borderTop: "1px solid #cbd5e1",
-                                              marginTop: 6,
-                                              paddingTop: 6,
-                                              textAlign: "right",
-                                              fontWeight: 700,
-                                              fontSize: 11.5,
-                                            }}
-                                          >
-                                            Genel Toplam: 2.200,00 TL
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
+                            /* Şablon Tasarlama Aracı Tab (Interactive Mouse Drag-and-Drop + Style Inspector Popup) */
+                            (() => {
+                              const layouts = tpl.layouts || {}
+                              const listFields =
+                                selectedCard.kind === "product" ? PRODUCT_PRINT_FIELDS : ORDER_PRINT_FIELDS
+                              const subItemKeys = [
+                                "urun_gorseli",
+                                "urun_barkod_gorseli",
+                                "urun_kodu",
+                                "urun_depo_yer_kodu",
+                                "urun_adi",
+                                "urun_adi_varyant",
+                                "urun_adi_xml",
+                                "urun_adi_varyant_xml",
+                                "urun_birimi",
+                                "urun_kdv",
+                                "urun_miktari",
+                                "urun_fiyati",
+                                "urun_fiyati_kdv_dahil",
+                                "urun_toplam_tutari",
+                                "urun_toplam_tutari_kdv_dahil",
+                              ]
 
-                                {/* B) Fiş Şablonu (Thermal Receipt 5x10cm) Preview */}
-                                {selectedCard.kind === "receipt" && (
-                                  <div
-                                    style={{
-                                      width: 210,
-                                      background: "#ffffff",
-                                      padding: "10px 8px",
-                                      boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
-                                      fontFamily: "Arial, sans-serif",
-                                      color: "#1e293b",
-                                      border: "1px solid #94a3b8",
-                                    }}
-                                  >
-                                    {fields.firma_logosu && (
-                                      <div
-                                        style={{
-                                          textAlign: "center",
-                                          fontSize: 22,
-                                          fontWeight: 600,
-                                          letterSpacing: "0.02em",
-                                          borderBottom: "1px solid #64748b",
-                                          paddingBottom: 6,
-                                          marginBottom: 4,
-                                        }}
-                                      >
-                                        ÇİZGİ BUTİK
-                                      </div>
-                                    )}
-                                    {fields.siparis_no && (
-                                      <div
-                                        style={{
-                                          textAlign: "center",
-                                          fontSize: 11,
-                                          fontWeight: 700,
-                                          borderBottom: "1px solid #64748b",
-                                          paddingBottom: 4,
-                                          marginBottom: 6,
-                                        }}
-                                      >
-                                        FAT00000000
-                                      </div>
-                                    )}
-                                    {fields.urun_listesi && (
-                                      <div
-                                        style={{
-                                          border: "1px solid #64748b",
-                                          padding: "4px",
-                                          fontSize: 8.5,
-                                          marginBottom: 6,
-                                        }}
-                                      >
+                              const activeBlockKeys = Object.keys(fields).filter((k) => {
+                                if (!fields[k]) return false
+                                if (selectedCard.kind !== "product" && subItemKeys.includes(k)) return false
+                                if (selectedCard.kind === "order" && k === "fatura_genel_toplam") return false
+                                return true
+                              })
+
+                              const sheetW =
+                                selectedCard.kind === "order"
+                                  ? 560
+                                  : selectedCard.kind === "receipt"
+                                  ? 230
+                                  : 360
+                              const sheetH =
+                                selectedCard.kind === "order"
+                                  ? 540
+                                  : selectedCard.kind === "receipt"
+                                  ? 390
+                                  : 220
+
+                              const getFieldLabel = (key: string) => {
+                                const found = listFields.find((x) => x.key === key)
+                                return found ? found.label : key
+                              }
+
+                              const renderBlockContent = (key: string) => {
+                                if (key === "firma_logosu") {
+                                  return (
+                                    <img
+                                      src={CIZGI_BUTIK_LOGO_DATA_URI}
+                                      alt="Çizgi Butik"
+                                      style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "contain",
+                                        pointerEvents: "none",
+                                      }}
+                                    />
+                                  )
+                                }
+                                if (key === "teslimat_unvani") return "Teslimat Adı Örnek LTD. ŞTİ."
+                                if (key === "musteri_cep_telefonu") return "0500 000 00 00"
+                                if (key === "teslimat_adresi") {
+                                  return (
+                                    <div>
+                                      Teslimat Adres Mahallesi Örnek Sok. No: 3 Daire: 11
+                                      <br />
+                                      İlçe, İl
+                                    </div>
+                                  )
+                                }
+                                if (key === "siparis_no") return "FAT00000000"
+                                if (key === "fatura_genel_toplam" && selectedCard.kind === "receipt") {
+                                  return (
+                                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                      <span>Genel Toplam:</span>
+                                      <span>300.00</span>
+                                    </div>
+                                  )
+                                }
+                                if (key === "urun_listesi") {
+                                  if (selectedCard.kind === "receipt") {
+                                    return (
+                                      <div style={{ width: "100%", fontSize: 9 }}>
                                         <div
                                           style={{
-                                            borderBottom: "1px solid #64748b",
+                                            borderBottom: "1px solid #000",
                                             paddingBottom: 2,
                                             marginBottom: 4,
                                             fontFamily: "monospace",
-                                            fontSize: 8.5,
                                           }}
                                         >
                                           _Ürün_______Ad.__Fiyat__Tutar_
                                         </div>
-                                        {Array.from({ length: 10 }).map((_, idx) => (
+                                        {Array.from({ length: 9 }).map((_, idx) => (
                                           <div
                                             key={idx}
                                             style={{
                                               display: "grid",
-                                              gridTemplateColumns: "1fr 26px 34px 34px",
-                                              padding: "2px 0",
-                                              fontSize: 8,
+                                              gridTemplateColumns: "1fr 28px 36px 36px",
+                                              padding: "1.5px 0",
                                             }}
                                           >
                                             <span>Ürün adı</span>
@@ -3483,192 +3491,508 @@ const StoreSettingsPage = () => {
                                           </div>
                                         ))}
                                       </div>
-                                    )}
-                                    {fields.fatura_genel_toplam && (
-                                      <div
-                                        style={{
-                                          borderTop: "1px solid #64748b",
-                                          borderBottom: "1px solid #64748b",
-                                          padding: "5px 2px",
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          fontSize: 9.5,
-                                          fontWeight: 700,
-                                          marginBottom: 8,
-                                        }}
-                                      >
-                                        <span>Genel Toplam:</span>
-                                        <span>300.00</span>
-                                      </div>
-                                    )}
-                                    <div
-                                      style={{
-                                        border: "1px solid #64748b",
-                                        padding: "7px 4px",
-                                        textAlign: "center",
-                                        fontSize: 10,
-                                        fontWeight: 600,
-                                      }}
-                                    >
-                                      TEŞEKKÜR EDERİZ
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* C) Ürün Şablonu 1..4 (Barcode Label 10x6cm) Preview */}
-                                {selectedCard.kind === "product" && (
-                                  <div
-                                    style={{
-                                      width: 340,
-                                      minHeight: 205,
-                                      background: "#ffffff",
-                                      padding: "12px 18px",
-                                      boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
-                                      fontFamily: "Arial, sans-serif",
-                                      color: "#0f172a",
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      alignItems: "center",
-                                      position: "relative",
-                                    }}
-                                  >
-                                    {fields.kdv_orani && (
-                                      <div
-                                        style={{
-                                          alignSelf: "flex-end",
-                                          border: "1px solid #e2e8f0",
-                                          padding: "2px 26px",
-                                          fontSize: 10,
-                                          fontWeight: 700,
-                                          marginBottom: 4,
-                                          marginRight: 18,
-                                        }}
-                                      >
-                                        %18
-                                      </div>
-                                    )}
-                                    {fields.urun_barkodu && (
-                                      <div style={{ textAlign: "center", marginBottom: 6 }}>
-                                        <svg width="248" height="54" viewBox="0 0 248 54">
-                                          {[
-                                            2, 6, 12, 15, 22, 26, 30, 38, 42, 48, 52, 58, 64, 68, 74, 80, 84, 90, 96,
-                                            102, 106, 112, 118, 122, 128, 134, 140, 144, 150, 156, 160, 166, 172, 178,
-                                            182, 188, 194, 200, 204, 210, 216, 222, 226, 232, 238, 242,
-                                          ].map((x, i) => (
-                                            <rect
-                                              key={x}
-                                              x={x}
-                                              y={2}
-                                              width={i % 3 === 0 ? 3.2 : i % 2 === 0 ? 2 : 1.2}
-                                              height={40}
-                                              fill="#000000"
-                                            />
-                                          ))}
-                                          <text
-                                            x="124"
-                                            y="52"
-                                            textAnchor="middle"
-                                            fontSize="10"
-                                            fontWeight="700"
-                                            fill="#000"
-                                          >
-                                            979501401535665
-                                          </text>
-                                        </svg>
-                                      </div>
-                                    )}
-                                    {fields.urun_adi && (
-                                      <div
-                                        style={{
-                                          width: "92%",
-                                          border: "1px solid #e2e8f0",
-                                          padding: "6px 8px",
-                                          textAlign: "center",
-                                          fontSize: 10.5,
-                                          marginBottom: 4,
-                                        }}
-                                      >
-                                        Örnek Ürün Adı
-                                      </div>
-                                    )}
-                                    {fields.urun_kodu && (
-                                      <div
-                                        style={{
-                                          width: "92%",
-                                          border: "1px solid #f1f5f9",
-                                          padding: "2px 8px",
-                                          textAlign: "center",
-                                          fontSize: 10,
-                                          color: "#334155",
-                                          marginBottom: 4,
-                                        }}
-                                      >
-                                        ABC000000
-                                      </div>
-                                    )}
-                                    {fields.satis_fiyati && (
-                                      <div
-                                        style={{
-                                          border: "1px solid #e2e8f0",
-                                          padding: "5px 24px",
-                                          fontSize: 14,
-                                          fontWeight: 600,
-                                          marginTop: 2,
-                                        }}
-                                      >
-                                        119,90 TL
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Right Scrollable Field Checklist */}
-                              <div
-                                style={{
-                                  maxHeight: 430,
-                                  overflowY: "auto",
-                                  paddingRight: 6,
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: 4,
-                                }}
-                              >
-                                {(selectedCard.kind === "product" ? PRODUCT_PRINT_FIELDS : ORDER_PRINT_FIELDS).map(
-                                  (f) => {
-                                    const isChecked = Boolean(fields[f.key])
-                                    return (
-                                      <label
-                                        key={f.key}
-                                        style={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                          gap: 8,
-                                          fontSize: 11.5,
-                                          color: "#334155",
-                                          cursor: "pointer",
-                                          userSelect: "none",
-                                          padding: "1.5px 0",
-                                        }}
-                                      >
-                                        <input
-                                          type="checkbox"
-                                          checked={isChecked}
-                                          onChange={() => togglePrintTemplateField(activePrintModal, f.key)}
-                                          style={{
-                                            width: 14,
-                                            height: 14,
-                                            accentColor: "#6366f1",
-                                            cursor: "pointer",
-                                          }}
-                                        />
-                                        <span>{f.label}</span>
-                                      </label>
                                     )
                                   }
-                                )}
-                              </div>
-                            </div>
+                                  return (
+                                    <div style={{ width: "100%", fontSize: 11, padding: "4px 6px" }}>
+                                      {Array.from({ length: 10 }).map((_, idx) => (
+                                        <div
+                                          key={idx}
+                                          style={{
+                                            display: "grid",
+                                            gridTemplateColumns: "60px 95px 1fr 45px",
+                                            gap: 8,
+                                            padding: "3px 0",
+                                            alignItems: "center",
+                                          }}
+                                        >
+                                          <span>{fields.urun_gorseli ? "Görsel" : ""}</span>
+                                          <span>{fields.urun_kodu ? "STK0000000" : ""}</span>
+                                          <span>
+                                            {fields.urun_adi_varyant
+                                              ? "Ürün adı (Beyaz, L)"
+                                              : fields.urun_adi
+                                              ? "Ürün adı"
+                                              : ""}
+                                          </span>
+                                          <span style={{ textAlign: "right", fontWeight: 700 }}>
+                                            {fields.urun_miktari ? "1.00" : ""}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )
+                                }
+                                if (key === "kdv_orani") return "%18"
+                                if (key === "urun_barkodu") {
+                                  return (
+                                    <svg width="100%" height="100%" viewBox="0 0 248 54" preserveAspectRatio="none">
+                                      {[
+                                        2, 6, 12, 15, 22, 26, 30, 38, 42, 48, 52, 58, 64, 68, 74, 80, 84, 90, 96,
+                                        102, 106, 112, 118, 122, 128, 134, 140, 144, 150, 156, 160, 166, 172, 178,
+                                        182, 188, 194, 200, 204, 210, 216, 222, 226, 232, 238, 242,
+                                      ].map((x, i) => (
+                                        <rect
+                                          key={x}
+                                          x={x}
+                                          y={2}
+                                          width={i % 3 === 0 ? 3.2 : i % 2 === 0 ? 2 : 1.2}
+                                          height={38}
+                                          fill="#000000"
+                                        />
+                                      ))}
+                                      <text
+                                        x="124"
+                                        y="51"
+                                        textAnchor="middle"
+                                        fontSize="10.5"
+                                        fontWeight="700"
+                                        fill="#000"
+                                      >
+                                        979501401535665
+                                      </text>
+                                    </svg>
+                                  )
+                                }
+                                if (key === "urun_adi") return "Örnek Ürün Adı"
+                                if (key === "urun_kodu") return "ABC000000"
+                                if (key === "satis_fiyati") return "119,90 TL"
+                                return getFieldLabel(key)
+                              }
+
+                              const activeEditLayout =
+                                editingPrintBlock && layouts[editingPrintBlock]
+                                  ? layouts[editingPrintBlock]
+                                  : null
+
+                              return (
+                                <div
+                                  style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "1fr 245px",
+                                    gap: 18,
+                                    alignItems: "start",
+                                  }}
+                                >
+                                  {/* Left Gray Canvas Area with Draggable Blocks & Floating Style Inspector */}
+                                  <div
+                                    style={{
+                                      background: "#d4d4d8",
+                                      padding: 18,
+                                      minHeight: 470,
+                                      maxHeight: 510,
+                                      overflow: "auto",
+                                      display: "flex",
+                                      justifyContent: "center",
+                                      alignItems: "flex-start",
+                                      position: "relative",
+                                      userSelect: "none",
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: sheetW,
+                                        minHeight: sheetH,
+                                        background: "#ffffff",
+                                        position: "relative",
+                                        boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+                                        fontFamily: "Arial, sans-serif",
+                                      }}
+                                    >
+                                      {activeBlockKeys.map((k) => {
+                                        const lay = layouts[k] || {
+                                          x: 20,
+                                          y: 20,
+                                          width: 280,
+                                          height: 40,
+                                          borderWidth: 1,
+                                          borderColor: "#000000",
+                                          borderStyle: "Solid",
+                                          fontSize: 15,
+                                          underline: false,
+                                          bold: true,
+                                          italic: false,
+                                          textAlign: "Ortala",
+                                        }
+                                        const isHoveredOrSelected =
+                                          hoveredPrintBlock === k || editingPrintBlock === k
+                                        const alignCss =
+                                          lay.textAlign === "Sola Yasla"
+                                            ? "left"
+                                            : lay.textAlign === "Sağa Yasla"
+                                            ? "right"
+                                            : "center"
+                                        const justifyCss =
+                                          lay.textAlign === "Sola Yasla"
+                                            ? "flex-start"
+                                            : lay.textAlign === "Sağa Yasla"
+                                            ? "flex-end"
+                                            : "center"
+                                        const bStyle =
+                                          lay.borderStyle === "None" || Number(lay.borderWidth) === 0
+                                            ? "none"
+                                            : `${lay.borderWidth}px ${String(lay.borderStyle || "solid").toLowerCase()} ${lay.borderColor || "#000000"}`
+
+                                        return (
+                                          <div
+                                            key={k}
+                                            onMouseEnter={() => setHoveredPrintBlock(k)}
+                                            onMouseLeave={() =>
+                                              setHoveredPrintBlock((prev) => (prev === k ? null : prev))
+                                            }
+                                            onMouseDown={(e) => {
+                                              e.preventDefault()
+                                              setDragPrintBlock({
+                                                modalId: activePrintModal,
+                                                fieldKey: k,
+                                                startX: e.clientX,
+                                                startY: e.clientY,
+                                                origX: Number(lay.x) || 0,
+                                                origY: Number(lay.y) || 0,
+                                              })
+                                            }}
+                                            style={{
+                                              position: "absolute",
+                                              left: lay.x,
+                                              top: lay.y,
+                                              width: lay.width,
+                                              height: lay.height,
+                                              border: bStyle,
+                                              outline: isHoveredOrSelected ? "1px dashed #94a3b8" : "none",
+                                              fontSize: lay.fontSize,
+                                              fontWeight: lay.bold ? 700 : 400,
+                                              fontStyle: lay.italic ? "italic" : "normal",
+                                              textDecoration: lay.underline ? "underline" : "none",
+                                              textAlign: alignCss as any,
+                                              display: "flex",
+                                              alignItems: k === "urun_listesi" ? "flex-start" : "center",
+                                              justifyContent: justifyCss,
+                                              background: "transparent",
+                                              color: "#1e293b",
+                                              lineHeight: 1.35,
+                                              padding: "4px 6px",
+                                              cursor: "move",
+                                              boxSizing: "border-box",
+                                            }}
+                                          >
+                                            {renderBlockContent(k)}
+
+                                            {/* Top-Right Red Circular Edit Button (Appears on Hover / Active) */}
+                                            {isHoveredOrSelected && (
+                                              <button
+                                                type="button"
+                                                title="Alan Ayarlarını Düzenle"
+                                                onMouseDown={(e) => e.stopPropagation()}
+                                                onClick={(e) => {
+                                                  e.stopPropagation()
+                                                  setEditingPrintBlock(k)
+                                                }}
+                                                style={{
+                                                  position: "absolute",
+                                                  top: -11,
+                                                  right: -11,
+                                                  width: 23,
+                                                  height: 23,
+                                                  borderRadius: "50%",
+                                                  background: "#d9383a",
+                                                  color: "#ffffff",
+                                                  border: "none",
+                                                  display: "inline-flex",
+                                                  alignItems: "center",
+                                                  justifyContent: "center",
+                                                  cursor: "pointer",
+                                                  zIndex: 30,
+                                                  boxShadow: "0 2px 6px rgba(0,0,0,0.28)",
+                                                  padding: 0,
+                                                }}
+                                              >
+                                                <svg
+                                                  width="12"
+                                                  height="12"
+                                                  viewBox="0 0 24 24"
+                                                  fill="none"
+                                                  stroke="currentColor"
+                                                  strokeWidth="2.4"
+                                                  strokeLinecap="round"
+                                                  strokeLinejoin="round"
+                                                >
+                                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                                </svg>
+                                              </button>
+                                            )}
+                                          </div>
+                                        )
+                                      })}
+                                    </div>
+
+                                    {/* Floating #6c757d Style Inspector Popup (Matching Screenshot 4) */}
+                                    {editingPrintBlock && activeEditLayout && (
+                                      <div
+                                        onClick={(e) => e.stopPropagation()}
+                                        style={{
+                                          position: "absolute",
+                                          top: 48,
+                                          left: "50%",
+                                          transform: "translateX(-35%)",
+                                          width: 315,
+                                          background: "#ffffff",
+                                          border: "1px solid #94a3b8",
+                                          borderRadius: 3,
+                                          boxShadow: "0 16px 38px rgba(0,0,0,0.32)",
+                                          zIndex: 80,
+                                        }}
+                                      >
+                                        <div
+                                          style={{
+                                            background: "#6c757d",
+                                            color: "#ffffff",
+                                            padding: "8px 12px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            fontSize: 12,
+                                            fontWeight: 600,
+                                          }}
+                                        >
+                                          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                            <svg
+                                              width="13"
+                                              height="13"
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth="2.2"
+                                            >
+                                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                            </svg>
+                                            {getFieldLabel(editingPrintBlock)}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={() => setEditingPrintBlock(null)}
+                                            style={{
+                                              background: "#ffffff",
+                                              color: "#6c757d",
+                                              border: "none",
+                                              borderRadius: 2,
+                                              width: 18,
+                                              height: 18,
+                                              fontSize: 11,
+                                              fontWeight: 800,
+                                              cursor: "pointer",
+                                              lineHeight: 1,
+                                            }}
+                                          >
+                                            ✕
+                                          </button>
+                                        </div>
+
+                                        <div
+                                          style={{
+                                            maxHeight: 330,
+                                            overflowY: "auto",
+                                            padding: "12px 14px",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: 9,
+                                            fontSize: 11.5,
+                                            color: "#334155",
+                                          }}
+                                        >
+                                          <div style={{ display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: 10 }}>
+                                            <label style={{ textAlign: "right" }}>Genişlik (px)</label>
+                                            <input
+                                              className="quka-input"
+                                              type="number"
+                                              value={activeEditLayout.width}
+                                              onChange={(e) =>
+                                                updatePrintBlockLayout(activePrintModal, editingPrintBlock, {
+                                                  width: Number(e.target.value) || 20,
+                                                })
+                                              }
+                                            />
+                                          </div>
+                                          <div style={{ display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: 10 }}>
+                                            <label style={{ textAlign: "right" }}>Yükseklik (px)</label>
+                                            <input
+                                              className="quka-input"
+                                              type="number"
+                                              value={activeEditLayout.height}
+                                              onChange={(e) =>
+                                                updatePrintBlockLayout(activePrintModal, editingPrintBlock, {
+                                                  height: Number(e.target.value) || 20,
+                                                })
+                                              }
+                                            />
+                                          </div>
+                                          <div style={{ display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: 10 }}>
+                                            <label style={{ textAlign: "right" }}>Kenarlık Kalınlığı (px)</label>
+                                            <input
+                                              className="quka-input"
+                                              type="number"
+                                              value={activeEditLayout.borderWidth}
+                                              onChange={(e) =>
+                                                updatePrintBlockLayout(activePrintModal, editingPrintBlock, {
+                                                  borderWidth: Number(e.target.value) || 0,
+                                                })
+                                              }
+                                            />
+                                          </div>
+                                          <div style={{ display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: 10 }}>
+                                            <label style={{ textAlign: "right" }}>Kenarlık Rengi</label>
+                                            <input
+                                              className="quka-input"
+                                              value={activeEditLayout.borderColor || "#000000"}
+                                              onChange={(e) =>
+                                                updatePrintBlockLayout(activePrintModal, editingPrintBlock, {
+                                                  borderColor: e.target.value,
+                                                })
+                                              }
+                                            />
+                                          </div>
+                                          <div style={{ display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: 10 }}>
+                                            <label style={{ textAlign: "right" }}>Kenarlık Tipi</label>
+                                            <select
+                                              className="quka-select"
+                                              value={activeEditLayout.borderStyle || "Solid"}
+                                              onChange={(e) =>
+                                                updatePrintBlockLayout(activePrintModal, editingPrintBlock, {
+                                                  borderStyle: e.target.value,
+                                                })
+                                              }
+                                            >
+                                              <option value="Solid">Solid</option>
+                                              <option value="Dashed">Dashed</option>
+                                              <option value="Dotted">Dotted</option>
+                                              <option value="None">None</option>
+                                            </select>
+                                          </div>
+                                          <div style={{ display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: 10 }}>
+                                            <label style={{ textAlign: "right" }}>Yazı Boyutu (px)</label>
+                                            <input
+                                              className="quka-input"
+                                              type="number"
+                                              value={activeEditLayout.fontSize}
+                                              onChange={(e) =>
+                                                updatePrintBlockLayout(activePrintModal, editingPrintBlock, {
+                                                  fontSize: Number(e.target.value) || 12,
+                                                })
+                                              }
+                                            />
+                                          </div>
+                                          <div style={{ display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "start", gap: 10 }}>
+                                            <label style={{ textAlign: "right", paddingTop: 2 }}>Yazı Stili</label>
+                                            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                                              <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                                                <input
+                                                  type="checkbox"
+                                                  checked={Boolean(activeEditLayout.underline)}
+                                                  onChange={(e) =>
+                                                    updatePrintBlockLayout(activePrintModal, editingPrintBlock, {
+                                                      underline: e.target.checked,
+                                                    })
+                                                  }
+                                                  style={{ accentColor: "#6366f1" }}
+                                                />
+                                                Altı Çizili
+                                              </label>
+                                              <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                                                <input
+                                                  type="checkbox"
+                                                  checked={Boolean(activeEditLayout.bold)}
+                                                  onChange={(e) =>
+                                                    updatePrintBlockLayout(activePrintModal, editingPrintBlock, {
+                                                      bold: e.target.checked,
+                                                    })
+                                                  }
+                                                  style={{ accentColor: "#6366f1" }}
+                                                />
+                                                Kalın
+                                              </label>
+                                              <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                                                <input
+                                                  type="checkbox"
+                                                  checked={Boolean(activeEditLayout.italic)}
+                                                  onChange={(e) =>
+                                                    updatePrintBlockLayout(activePrintModal, editingPrintBlock, {
+                                                      italic: e.target.checked,
+                                                    })
+                                                  }
+                                                  style={{ accentColor: "#6366f1" }}
+                                                />
+                                                İtalic
+                                              </label>
+                                            </div>
+                                          </div>
+                                          <div style={{ display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: 10 }}>
+                                            <label style={{ textAlign: "right" }}>Yazı Hizası</label>
+                                            <select
+                                              className="quka-select"
+                                              value={activeEditLayout.textAlign || "Ortala"}
+                                              onChange={(e) =>
+                                                updatePrintBlockLayout(activePrintModal, editingPrintBlock, {
+                                                  textAlign: e.target.value,
+                                                })
+                                              }
+                                            >
+                                              <option value="Ortala">Ortala</option>
+                                              <option value="Sola Yasla">Sola Yasla</option>
+                                              <option value="Sağa Yasla">Sağa Yasla</option>
+                                            </select>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Right Scrollable Field Checklist */}
+                                  <div
+                                    style={{
+                                      maxHeight: 470,
+                                      overflowY: "auto",
+                                      paddingRight: 6,
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      gap: 4,
+                                    }}
+                                  >
+                                    {listFields.map((f) => {
+                                      const isChecked = Boolean(fields[f.key])
+                                      return (
+                                        <label
+                                          key={f.key}
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 8,
+                                            fontSize: 11.5,
+                                            color: "#334155",
+                                            cursor: "pointer",
+                                            userSelect: "none",
+                                            padding: "1.5px 0",
+                                          }}
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={() => togglePrintTemplateField(activePrintModal, f.key)}
+                                            style={{
+                                              width: 14,
+                                              height: 14,
+                                              accentColor: "#6366f1",
+                                              cursor: "pointer",
+                                            }}
+                                          />
+                                          <span>{f.label}</span>
+                                        </label>
+                                      )
+                                    })}
+                                  </div>
+                                </div>
+                              )
+                            })()
                           )}
                         </div>
 
