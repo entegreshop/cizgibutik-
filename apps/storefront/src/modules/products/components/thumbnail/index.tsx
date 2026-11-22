@@ -1,6 +1,8 @@
+"use client"
+
 import { Container, clx } from "@medusajs/ui"
 import Image from "next/image"
-import React from "react"
+import React, { useEffect, useState } from "react"
 
 import PlaceholderImage from "@modules/common/icons/placeholder-image"
 
@@ -12,6 +14,8 @@ type ThumbnailProps = {
   isFeatured?: boolean
   className?: string
   "data-testid"?: string
+  alt?: string
+  title?: string
 }
 
 const Thumbnail: React.FC<ThumbnailProps> = ({
@@ -21,6 +25,8 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   isFeatured,
   className,
   "data-testid": dataTestid,
+  alt,
+  title,
 }) => {
   const initialImage = thumbnail || images?.[0]?.url
 
@@ -41,7 +47,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
       )}
       data-testid={dataTestid}
     >
-      <ImageOrPlaceholder image={initialImage} size={size} />
+      <ImageOrPlaceholder image={initialImage} size={size} alt={alt} title={title} />
     </Container>
   )
 }
@@ -49,20 +55,44 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
 const ImageOrPlaceholder = ({
   image,
   size,
-}: Pick<ThumbnailProps, "size"> & { image?: string }) => {
-  return image ? (
-    <Image
-      src={image}
-      alt="Thumbnail"
-      className="absolute inset-0 object-cover object-center"
+  alt,
+  title,
+}: Pick<ThumbnailProps, "size"> & { image?: string; alt?: string; title?: string }) => {
+  const [defaultImage, setDefaultImage] = useState<string | null>(null)
+  const [loading, setLoading] = useState(!image)
+
+  useEffect(() => {
+    if (!image) {
+      const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "https://api.cizgibutik.com"
+      fetch(`${backendUrl}/store/logo-config`)
+        .then(res => res.json())
+        .then(data => {
+          if (data?.config?.defaultImage) {
+            setDefaultImage(data.config.defaultImage)
+          }
+          setLoading(false)
+        })
+        .catch(() => setLoading(false))
+    }
+  }, [image])
+
+  const finalImage = image || defaultImage
+
+  return finalImage ? (
+    <img
+      src={finalImage}
+      alt={alt || "Çizgi Butik Kadın Giyim Ürünü"}
+      title={title || alt || "Çizgi Butik"}
+      className="absolute inset-0 w-full h-full object-cover object-center"
       draggable={false}
-      quality={50}
-      sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
-      fill
     />
   ) : (
-    <div className="w-full h-full absolute inset-0 flex items-center justify-center">
-      <PlaceholderImage size={size === "small" ? 16 : 24} />
+    <div className="w-full h-full absolute inset-0 flex items-center justify-center bg-zinc-100">
+      {loading ? (
+        <div className="w-6 h-6 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin"></div>
+      ) : (
+        <PlaceholderImage size={size === "small" ? 16 : 24} />
+      )}
     </div>
   )
 }
