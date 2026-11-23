@@ -373,15 +373,12 @@ export async function syncCartShippingMethods(scope: any, cartId: string, paymen
     const effectiveShippingKurus = calculateEffectiveShippingKurus(subtotalKurus, shippingConfig, detectedMethod)
 
     if (cart.shipping_methods && cart.shipping_methods.length > 0) {
-      const updates = cart.shipping_methods
-        .filter((sm: any) => Number(sm.amount) !== effectiveShippingKurus)
-        .map((sm: any) => ({
-          id: sm.id,
-          amount: effectiveShippingKurus
-        }))
-
-      if (updates.length > 0) {
-        await cartModule.updateShippingMethods(updates)
+      for (const sm of cart.shipping_methods) {
+        if (Number(sm.amount) !== effectiveShippingKurus) {
+          try {
+            await (cartModule as any).updateShippingMethods(sm.id, { amount: effectiveShippingKurus })
+          } catch {}
+        }
       }
     }
 

@@ -20,16 +20,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     try {
       const promotionModule = req.scope.resolve<any>(Modules.PROMOTION)
       if (promotionModule) {
-        const autoPromos = await promotionModule.listPromotions({ is_automatic: true })
-        if (autoPromos && autoPromos.length > 0) {
-          for (const ap of autoPromos) {
-            try {
-              await promotionModule.updatePromotions({ id: ap.id, is_automatic: false })
-              console.log(`[AutoPromo] Disabled auto promo: ${ap.code || ap.id}`)
-            } catch (uErr) {
+        const allPromos = await promotionModule.listPromotions({})
+        if (allPromos && allPromos.length > 0) {
+          for (const ap of allPromos) {
+            if (ap.is_automatic) {
               try {
-                await (promotionModule as any).updatePromotions(ap.id, { is_automatic: false })
-              } catch {}
+                await promotionModule.updatePromotions({ id: ap.id, is_automatic: false })
+                console.log(`[AutoPromo] Disabled auto promo: ${ap.code || ap.id}`)
+              } catch (uErr) {
+                try {
+                  await (promotionModule as any).updatePromotions(ap.id, { is_automatic: false })
+                } catch {}
+              }
             }
           }
         }
@@ -37,6 +39,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     } catch (promoErr) {
       console.warn("Promotion auto check note:", promoErr)
     }
+
+    try {
+      const { Pool } = await import("pg")
+      if (process.env.DATABASE_URL) {
+        const directPool = new Pool({ connectionString: process.env.DATABASE_URL })
+        await directPool.query("UPDATE promotion SET is_automatic = false WHERE is_automatic = true").catch(() => {})
+        await directPool.end().catch(() => {})
+      }
+    } catch {}
 
     // 1.1. Get Payment settings from admin config (with fallback defaults)
     const paymentConfig = readPaymentConfig()
@@ -84,6 +95,29 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       }
     }
 
+    const isCodMethod = body.method_id === "cod" || body.method_id === "cash_on_delivery" || body.method_id === "cod_cash"
+    const isCodCcMethod = body.method_id === "cod_cc" || body.method_id === "cash_on_delivery_cc" || body.method_id === "card_on_delivery"
+
+    // For COD methods, shipping adjustments must NEVER exist (shipping is never free for COD)
+    if (isCodMethod || isCodCcMethod) {
+      try {
+        const codShipAdjIds: string[] = []
+        for (const sm of cart.shipping_methods || []) {
+          for (const adj of (sm as any).adjustments || []) {
+            if (adj.id) codShipAdjIds.push(adj.id)
+          }
+        }
+        if (codShipAdjIds.length > 0) {
+          await (cartModule as any).deleteShippingMethodAdjustments(codShipAdjIds)
+        }
+        for (const sm of cart.shipping_methods || []) {
+          await (cartModule as any).updateShippingMethods(sm.id, { amount: 15000 })
+        }
+      } catch (codSmErr) {
+        console.warn("COD shipping sync note:", codSmErr)
+      }
+    }
+
     const COD_ITEM_TITLE = "Kapıda Ödeme Ek Hizmet Bedeli"
     const COD_CC_ITEM_TITLE = "Kapıda Kredi Kartı Ek Hizmet Bedeli"
 
@@ -96,8 +130,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     // 3. Evaluate logic (COD Fee should NOT be a line item product, it is stored in metadata)
-    const isCodMethod = body.method_id === "cod" || body.method_id === "cash_on_delivery" || body.method_id === "cod_cash"
-    const isCodCcMethod = body.method_id === "cod_cc" || body.method_id === "cash_on_delivery_cc" || body.method_id === "card_on_delivery"
 
     let feeTL = 0
     let feeKurus = 0

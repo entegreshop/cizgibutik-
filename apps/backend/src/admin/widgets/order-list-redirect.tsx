@@ -799,9 +799,26 @@ const SiparisYonetimiPage = () => {
 
       const isCodMethod = metaOption === "cash_on_delivery" || metaOption === "card_on_delivery" || o.metadata?.is_cod === true || payMethod.includes("Kapıda")
 
-      // Discount (Only count if customer used coupon or discount_total exists)
-      const rawDiscount = Number(o.discount_total || 0)
-      const discountVal = rawDiscount > 0 ? (rawDiscount / 100) : 0
+      // Discount (Only count if customer entered a real coupon)
+      const couponCode = (o.metadata?.coupon_code || o.metadata?.coupon || o.metadata?.promo_code || "") as string
+      const hasRealCoupon = Boolean(couponCode && couponCode.trim() !== "")
+
+      const itemsDiscountVal = (o.items || []).reduce((acc: number, it: any) => {
+        const itemDisc = it.discount_total !== undefined ? Number(it.discount_total) : 0
+        return acc + (itemDisc / 100)
+      }, 0)
+
+      let discountVal = 0
+      if (hasRealCoupon) {
+        if (itemsDiscountVal > 0) {
+          discountVal = itemsDiscountVal
+        } else {
+          const rawDiscount = Number(o.discount_total || 0) / 100
+          if (rawDiscount > 0 && Math.abs(rawDiscount - 150) > 0.01) {
+            discountVal = rawDiscount
+          }
+        }
+      }
 
       // Shipping total (Use shipping method amount, shipping_total, metadata, or standard 150 TL)
       const rawShipping = o.shipping_methods?.[0]?.amount !== undefined 
@@ -810,9 +827,9 @@ const SiparisYonetimiPage = () => {
       const metaShipping = o.metadata?.shipping_fee !== undefined ? Number(o.metadata.shipping_fee) : null
 
       let shippingVal = 0
-      if (rawShipping !== null) {
+      if (rawShipping !== null && rawShipping > 0) {
         shippingVal = rawShipping / 100
-      } else if (metaShipping !== null) {
+      } else if (metaShipping !== null && metaShipping > 0) {
         shippingVal = metaShipping
       } else if (isCodMethod || (subtotalVal - discountVal < 3000)) {
         shippingVal = 150
@@ -825,8 +842,7 @@ const SiparisYonetimiPage = () => {
       const paymentFeeVal = rawFee > 0 ? rawFee : (isCodMethod ? 40 : 0)
 
       const calculatedTotal = Math.max(0, subtotalVal - discountVal) + shippingVal + paymentFeeVal
-      const rawTotalVal = (o.total || 0) / 100
-      const totalVal = (rawTotalVal > 0 && Math.abs(rawTotalVal - calculatedTotal) < 1) ? rawTotalVal : calculatedTotal
+      const totalVal = calculatedTotal
 
       // Map shipping option/carrier
       const carrierName = o.shipping_methods?.[0]?.name || "Diğer Kargo"
