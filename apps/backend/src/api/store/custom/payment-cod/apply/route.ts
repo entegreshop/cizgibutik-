@@ -71,8 +71,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       }
     }
 
-    // 4. Sync cart shipping methods amount with effective shipping settings (0 if disabled or free threshold met)
-    const effectiveShippingKurus = await syncCartShippingMethods(req.scope, body.cart_id)
+    // 4. Sync cart shipping methods amount with effective shipping settings (150 TL for COD, or free threshold for online)
+    const effectiveShippingKurus = await syncCartShippingMethods(req.scope, body.cart_id, body.method_id)
 
     res.json({ success: true, effective_shipping_kurus: effectiveShippingKurus })
   } catch (error: any) {

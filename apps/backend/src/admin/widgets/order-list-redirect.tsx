@@ -825,7 +825,7 @@ const SiparisYonetimiPage = () => {
           last_name: o.customer?.last_name || o.shipping_address?.last_name || "",
           phone: o.customer?.phone || o.shipping_address?.phone || "",
           email: o.customer?.email || o.email || "",
-          ip: o.metadata?.ip_address || "127.0.0.1",
+          ip: o.metadata?.ip_address || (o.metadata?.client_ip as string) || o.customer?.ip || "-",
           member_no: o.customer?.id ? `U-${o.customer.id.slice(-4).toUpperCase()}` : "Misafir",
           is_visitor: !o.customer?.id
         },
@@ -4290,14 +4290,14 @@ const SiparisYonetimiPage = () => {
                         <span>Trafik Kaynağı: </span>
                         <span className="text-slate-900 font-semibold">
                           {(activeOrderDetails.metadata?.traffic_source as string) ||
-                            "Sosyal Ağ"}
+                            "Doğrudan (Direct)"}
                         </span>
                       </div>
                       <div>
                         <span>Yönlendiren: </span>
                         <span className="text-[#1565c0] font-medium">
                           {(activeOrderDetails.metadata?.referrer as string) ||
-                            "instagram.com"}
+                            "Doğrudan Giriş"}
                         </span>
                       </div>
                     </div>
@@ -4306,14 +4306,14 @@ const SiparisYonetimiPage = () => {
                         <span>Cihaz: </span>
                         <span className="text-slate-900 font-semibold">
                           {(activeOrderDetails.metadata?.device_type as string) ||
-                            "Akıllı Telefon - iOS - Safari"}
+                            "-"}
                         </span>
                       </div>
                       <div>
                         <span>Oturum Süresi: </span>
                         <span className="text-slate-900 font-semibold">
                           {(activeOrderDetails.metadata?.session_duration as string) ||
-                            "04:18 dk"}
+                            "-"}
                         </span>
                       </div>
                     </div>
@@ -4324,21 +4324,21 @@ const SiparisYonetimiPage = () => {
                       <div>
                         <span>utm_source: </span>
                         <span className="text-slate-900 font-semibold">
-                          {(activeOrderDetails.metadata?.utm_source as string) || "meta"}
+                          {(activeOrderDetails.metadata?.utm_source as string) || "-"}
                         </span>
                       </div>
                       <div>
                         <span>utm_medium: </span>
                         <span className="text-slate-900 font-semibold">
                           {(activeOrderDetails.metadata?.utm_medium as string) ||
-                            "paid-social"}
+                            "-"}
                         </span>
                       </div>
                       <div>
                         <span>utm_campaign: </span>
                         <span className="text-slate-900 font-semibold">
                           {(activeOrderDetails.metadata?.utm_campaign as string) ||
-                            "CBO|SALES|R-TARGET"}
+                            "-"}
                         </span>
                       </div>
                       <div>

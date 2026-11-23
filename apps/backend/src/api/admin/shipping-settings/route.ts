@@ -8,11 +8,11 @@ const configFilePath = path.join(process.cwd(), "uploads", "shipping-settings.js
 const defaultData = {
   systemType: "advanced", // "advanced" | "simple"
   standardShippingEnabled: true,
-  standardShippingFee: 100,
+  standardShippingFee: 150,
   standardShippingCurrency: "TL",
   standardShippingCartType: "Tüm sepetlere ekle",
   freeShippingEnabled: true,
-  freeShippingThreshold: 500,
+  freeShippingThreshold: 3000,
   freeShippingCurrency: "TL",
   regions: [
     {
@@ -238,16 +238,30 @@ function writeConfig(data: any) {
   }
 }
 
-export function calculateEffectiveShippingKurus(itemsNetKurus: number, shippingConfig?: any): number {
+export function calculateEffectiveShippingKurus(itemsNetKurus: number, shippingConfig?: any, paymentMethod?: string): number {
   const cfg = shippingConfig || readConfig()
   if (!cfg || cfg.standardShippingEnabled === false) {
     return 0
   }
+  const standardFeeKurus = Math.max(0, Math.round(Number(cfg.standardShippingFee ?? 150) * 100))
+
+  // Kapıda ödeme (Nakit veya Kredi Kartı) seçildiğinde kargo bedava kuralı uygulanmaz, 150 TL kargo ücreti her zaman eklenir!
+  const isCod =
+    paymentMethod === "cash_on_delivery" ||
+    paymentMethod === "card_on_delivery" ||
+    paymentMethod === "cod_cc" ||
+    paymentMethod === "cod" ||
+    String(paymentMethod).toLowerCase().includes("kapıda")
+
+  if (isCod) {
+    return standardFeeKurus
+  }
+
   const itemsNetTl = itemsNetKurus / 100
-  if (cfg.freeShippingEnabled && itemsNetTl >= Number(cfg.freeShippingThreshold || 0)) {
+  if (cfg.freeShippingEnabled && itemsNetTl >= Number(cfg.freeShippingThreshold || 3000)) {
     return 0
   }
-  return Math.max(0, Math.round(Number(cfg.standardShippingFee ?? 0) * 100))
+  return standardFeeKurus
 }
 
 export async function syncMedusaShippingOptionPrices(scope: any, shippingConfig?: any): Promise<void> {
@@ -338,7 +352,7 @@ export async function syncMedusaShippingOptionPrices(scope: any, shippingConfig?
   }
 }
 
-export async function syncCartShippingMethods(scope: any, cartId: string): Promise<number> {
+export async function syncCartShippingMethods(scope: any, cartId: string, paymentMethod?: string): Promise<number> {
   const shippingConfig = readConfig()
   try {
     const { Modules } = await import("@medusajs/framework/utils")
@@ -347,11 +361,16 @@ export async function syncCartShippingMethods(scope: any, cartId: string): Promi
       relations: ["items", "shipping_methods"]
     })
 
+    const detectedMethod =
+      paymentMethod ||
+      (cart.metadata?.secilen_odeme_yontemi as string) ||
+      (cart.metadata?.payment_option as string)
+
     const subtotalKurus = (cart.items || [])
       .filter((i: any) => !i.title?.includes("Kapıda") && !i.metadata?.is_cod_fee)
       .reduce((acc: number, item: any) => acc + (Number(item.unit_price || 0) * Number(item.quantity || 1)), 0)
 
-    const effectiveShippingKurus = calculateEffectiveShippingKurus(subtotalKurus, shippingConfig)
+    const effectiveShippingKurus = calculateEffectiveShippingKurus(subtotalKurus, shippingConfig, detectedMethod)
 
     if (cart.shipping_methods && cart.shipping_methods.length > 0) {
       const updates = cart.shipping_methods
@@ -369,7 +388,7 @@ export async function syncCartShippingMethods(scope: any, cartId: string): Promi
     return effectiveShippingKurus
   } catch (err) {
     console.warn("syncCartShippingMethods warning:", err)
-    return calculateEffectiveShippingKurus(0, shippingConfig)
+    return calculateEffectiveShippingKurus(0, shippingConfig, paymentMethod)
   }
 }
 
