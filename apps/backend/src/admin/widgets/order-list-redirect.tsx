@@ -767,7 +767,9 @@ const SiparisYonetimiPage = () => {
   // Map Medusa V2 Real orders to our CustomOrder structure
   const mappedRealOrders = useMemo(() => {
     return realOrders.map((o: any) => {
-      const itemsMapped: OrderItem[] = (o.items || []).map((item: any) => ({
+      const itemsMapped: OrderItem[] = (o.items || [])
+        .filter((item: any) => !item.title?.includes("Kapıda") && !item.metadata?.is_cod_fee)
+        .map((item: any) => ({
         id: item.id,
         title: item.title,
         sku: item.variant?.sku || "",

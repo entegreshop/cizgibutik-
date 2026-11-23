@@ -43,34 +43,33 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       }
     }
 
-    // 3. Evaluate logic
+    // 3. Evaluate logic (COD Fee should NOT be a line item product, it is stored in metadata)
     const isCodMethod = body.method_id === "cod" || body.method_id === "cash_on_delivery" || body.method_id === "cod_cash"
     const isCodCcMethod = body.method_id === "cod_cc" || body.method_id === "cash_on_delivery_cc" || body.method_id === "card_on_delivery"
 
+    let feeTL = 0
+    let feeKurus = 0
+
     if ((isCodMethod && codSettings.is_active) || (isCodCcMethod && codCcSettings.is_active)) {
       const activeSettings = isCodCcMethod ? codCcSettings : codSettings
-      const maxAmountKurus = (activeSettings.max_amount || Infinity) * 100
+      feeTL = Number(activeSettings.additional_fee || 0)
+      feeKurus = Math.round(feeTL * 100)
+    }
 
-      // Calculate subtotal in kurus from items without the COD item
-      const subtotalKurus = cart.items
-        ?.filter((i: any) => !i.title?.includes("Kapıda") && !i.metadata?.is_cod_fee)
-        .reduce((acc: number, item: any) => acc + (Number(item.unit_price || 0) * Number(item.quantity || 1)), 0) || 0
-
-      if (subtotalKurus <= maxAmountKurus) {
-        const feeKurus = Math.round((activeSettings.additional_fee || 0) * 100)
-        if (feeKurus > 0) {
-          await cartModule.addLineItems(cart.id, [
-            {
-              title: isCodCcMethod ? COD_CC_ITEM_TITLE : COD_ITEM_TITLE,
-              quantity: 1,
-              unit_price: feeKurus,
-              requires_shipping: false,
-              is_discountable: false,
-              metadata: { is_cod_fee: true }
-            } as any
-          ])
+    try {
+      await cartModule.updateCarts({
+        id: cart.id,
+        metadata: {
+          ...(cart.metadata || {}),
+          is_cod: isCodMethod || isCodCcMethod,
+          payment_fee: feeTL,
+          cod_fee_amount: feeKurus,
+          payment_option: isCodCcMethod ? "card_on_delivery" : isCodMethod ? "cash_on_delivery" : (cart.metadata?.payment_option || body.method_id),
+          secilen_odeme_yontemi: isCodCcMethod ? "Kapıda Kredi Kartı ile Ödeme" : isCodMethod ? "Kapıda Nakit Ödeme" : (cart.metadata?.secilen_odeme_yontemi || body.method_id)
         }
-      }
+      })
+    } catch (metaErr) {
+      console.warn("Cart metadata update note in payment-cod/apply:", metaErr)
     }
 
     // 4. Sync cart shipping methods amount with effective shipping settings (150 TL for COD, or free threshold for online)
