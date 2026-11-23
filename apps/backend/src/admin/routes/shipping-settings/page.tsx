@@ -136,11 +136,11 @@ function buildDefaultCarriers(): CarrierItem[] {
 const DEFAULT_SHIPPING_CONFIG: ShippingConfig = {
   systemType: "advanced",
   standardShippingEnabled: true,
-  standardShippingFee: 100,
+  standardShippingFee: 150,
   standardShippingCurrency: "TL",
   standardShippingCartType: "Tüm sepetlere ekle",
   freeShippingEnabled: true,
-  freeShippingThreshold: 1000,
+  freeShippingThreshold: 3000,
   freeShippingCurrency: "TL",
   regions: [
     {
@@ -328,7 +328,7 @@ const ShippingSettingsPage = () => {
         standardShippingEnabled:
           raw.standardShippingEnabled ?? raw.standard_fee_enabled ?? true,
         standardShippingFee: Number(
-          raw.standardShippingFee ?? raw.standard_fee_amount ?? 100
+          raw.standardShippingFee ?? raw.standard_fee_amount ?? 150
         ),
         standardShippingCurrency: "TL",
         standardShippingCartType:
@@ -336,7 +336,7 @@ const ShippingSettingsPage = () => {
         freeShippingEnabled:
           raw.freeShippingEnabled ?? raw.free_shipping_enabled ?? true,
         freeShippingThreshold: Number(
-          raw.freeShippingThreshold ?? raw.free_shipping_threshold ?? 1000
+          raw.freeShippingThreshold ?? raw.free_shipping_threshold ?? 3000
         ),
         freeShippingCurrency: "TL",
         regions: normalizedRegions,

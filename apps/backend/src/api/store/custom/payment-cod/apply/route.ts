@@ -64,6 +64,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
               title: isCodCcMethod ? COD_CC_ITEM_TITLE : COD_ITEM_TITLE,
               quantity: 1,
               unit_price: feeKurus,
+              requires_shipping: false,
+              is_discountable: false,
               metadata: { is_cod_fee: true }
             } as any
           ])
@@ -73,6 +75,27 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     // 4. Sync cart shipping methods amount with effective shipping settings (150 TL for COD, or free threshold for online)
     const effectiveShippingKurus = await syncCartShippingMethods(req.scope, body.cart_id, body.method_id)
+
+    // 5. If a payment collection already exists for this cart, sync its amount with the updated cart total
+    try {
+      const { ContainerRegistrationKeys } = await import("@medusajs/framework/utils")
+      const paymentModule = req.scope.resolve<any>(Modules.PAYMENT)
+      const query = req.scope.resolve<any>(ContainerRegistrationKeys.QUERY)
+      const { data: cartData } = await query.graph({
+        entity: "cart",
+        fields: ["id", "total", "payment_collection.id", "payment_collection.amount"],
+        filters: { id: body.cart_id }
+      })
+      const paymentCol = cartData?.[0]?.payment_collection
+      const cartTotal = cartData?.[0]?.total
+      if (paymentCol && cartTotal !== undefined && Number(paymentCol.amount) !== Number(cartTotal)) {
+        await paymentModule.updatePaymentCollections(paymentCol.id, {
+          amount: Number(cartTotal)
+        })
+      }
+    } catch (paySyncErr) {
+      console.warn("Payment collection amount sync note:", paySyncErr)
+    }
 
     res.json({ success: true, effective_shipping_kurus: effectiveShippingKurus })
   } catch (error: any) {
