@@ -73,8 +73,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     try {
-      await cartModule.updateCarts({
-        id: cart.id,
+      await (cartModule as any).updateCarts(cart.id, {
         metadata: {
           ...(cart.metadata || {}),
           is_cod: isCodMethod || isCodCcMethod,
