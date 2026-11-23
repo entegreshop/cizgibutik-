@@ -397,11 +397,13 @@ const SiparisYonetimiPage = () => {
   const [printModalTargetIds, setPrintModalTargetIds] = useState<string[]>([])
   const [printTemplate, setPrintTemplate] = useState("E-Fatura")
 
+  const ADMIN_ORDERS_URL = "/admin/orders?limit=100&order=-created_at&fields=id,status,created_at,email,display_id,payment_status,fulfillment_status,total,subtotal,discount_total,shipping_total,currency_code,*customer,*sales_channel,*payment_collections,*items,*shipping_address,*billing_address,*shipping_methods,metadata"
+
   // Fetch real orders from Medusa V2 on mount
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await fetch("/admin/orders?limit=100&order=-created_at&fields=id,status,created_at,email,display_id,payment_status,fulfillment_status,total,currency_code,*customer,*sales_channel,*payment_collections,*items,*shipping_address,*billing_address,metadata")
+        const res = await fetch(ADMIN_ORDERS_URL)
         if (res.ok) {
           const data = await res.json()
           if (data && data.orders) {
@@ -719,7 +721,7 @@ const SiparisYonetimiPage = () => {
       if (data && data.success) {
         showSuccess(data.message || "Sipariş başarıyla oluşturuldu.")
         await fetchOrderOperations()
-        const refreshRes = await fetch("/admin/orders?limit=100&order=-created_at&fields=id,status,created_at,email,display_id,payment_status,fulfillment_status,total,currency_code,*customer,*sales_channel,*payment_collections,*items,*shipping_address,*billing_address,metadata")
+        const refreshRes = await fetch(ADMIN_ORDERS_URL)
         if (refreshRes.ok) {
           const refreshData = await refreshRes.json()
           if (refreshData?.orders) setRealOrders(refreshData.orders)
@@ -785,7 +787,6 @@ const SiparisYonetimiPage = () => {
       }))
 
       const subtotalVal = itemsMapped.reduce((acc, item) => acc + (item.unit_price * item.quantity), 0)
-      const totalVal = (o.total || 0) / 100
 
       // Try to determine payment method name
       let payMethod = "Kredi Kartı"
@@ -794,6 +795,38 @@ const SiparisYonetimiPage = () => {
       else if (metaOption === "card_on_delivery") payMethod = "Kapıda Kredi Kartı ile Ödeme"
       else if (metaOption === "bank_transfer") payMethod = "Havale / EFT"
       else if (metaOption === "paytr") payMethod = "PayTR"
+      else if (o.metadata?.secilen_odeme_yontemi) payMethod = o.metadata.secilen_odeme_yontemi
+
+      const isCodMethod = metaOption === "cash_on_delivery" || metaOption === "card_on_delivery" || o.metadata?.is_cod === true || payMethod.includes("Kapıda")
+
+      // Discount (Only count if customer used coupon or discount_total exists)
+      const rawDiscount = Number(o.discount_total || 0)
+      const discountVal = rawDiscount > 0 ? (rawDiscount / 100) : 0
+
+      // Shipping total (Use shipping method amount, shipping_total, metadata, or standard 150 TL)
+      const rawShipping = o.shipping_methods?.[0]?.amount !== undefined 
+        ? Number(o.shipping_methods[0].amount) 
+        : (o.shipping_total !== undefined && Number(o.shipping_total) > 0 ? Number(o.shipping_total) : null)
+      const metaShipping = o.metadata?.shipping_fee !== undefined ? Number(o.metadata.shipping_fee) : null
+
+      let shippingVal = 0
+      if (rawShipping !== null) {
+        shippingVal = rawShipping / 100
+      } else if (metaShipping !== null) {
+        shippingVal = metaShipping
+      } else if (isCodMethod || (subtotalVal - discountVal < 3000)) {
+        shippingVal = 150
+      }
+
+      // COD payment fee
+      const rawFee = o.metadata?.payment_fee !== undefined 
+        ? Number(o.metadata.payment_fee) 
+        : (o.metadata?.cod_fee_amount !== undefined ? Number(o.metadata.cod_fee_amount) / 100 : 0)
+      const paymentFeeVal = rawFee > 0 ? rawFee : (isCodMethod ? 40 : 0)
+
+      const calculatedTotal = Math.max(0, subtotalVal - discountVal) + shippingVal + paymentFeeVal
+      const rawTotalVal = (o.total || 0) / 100
+      const totalVal = (rawTotalVal > 0 && Math.abs(rawTotalVal - calculatedTotal) < 1) ? rawTotalVal : calculatedTotal
 
       // Map shipping option/carrier
       const carrierName = o.shipping_methods?.[0]?.name || "Diğer Kargo"
@@ -861,11 +894,11 @@ const SiparisYonetimiPage = () => {
         },
         items: itemsMapped,
         subtotal: subtotalVal,
-        vat_total: totalVal - subtotalVal > 0 ? totalVal - subtotalVal : totalVal * 0.1,
+        vat_total: subtotalVal * 0.1,
         total: totalVal,
-        discount_total: (o.discount_total || 0) / 100,
-        shipping_total: (o.shipping_methods?.[0]?.amount !== undefined ? Number(o.shipping_methods[0].amount) : (o.shipping_total || 0)) / 100,
-        payment_fee: o.metadata?.payment_fee !== undefined ? Number(o.metadata.payment_fee) : ((o.metadata?.cod_fee_amount || 0) / 100),
+        discount_total: discountVal,
+        shipping_total: shippingVal,
+        payment_fee: paymentFeeVal,
         payment_method: payMethod,
         payment_option: metaOption || "cash_on_delivery",
         status: orderStatus,
@@ -1048,7 +1081,7 @@ const SiparisYonetimiPage = () => {
         if (res.ok) {
           const data = await res.json()
           // Re-fetch orders list
-          const refreshRes = await fetch("/admin/orders?limit=100")
+          const refreshRes = await fetch(ADMIN_ORDERS_URL)
           const refreshData = await refreshRes.json()
           if (refreshData && refreshData.orders) {
             setRealOrders(refreshData.orders)
@@ -1073,7 +1106,7 @@ const SiparisYonetimiPage = () => {
         })
       })
       if (res.ok && !skipRefresh) {
-        const refreshRes = await fetch("/admin/orders?limit=100&fields=*customer,*shipping_address,*billing_address,*items")
+        const refreshRes = await fetch(ADMIN_ORDERS_URL)
         const refreshData = await refreshRes.json()
         if (refreshData && refreshData.orders) setRealOrders(refreshData.orders)
       }
@@ -1094,7 +1127,7 @@ const SiparisYonetimiPage = () => {
         })
         if (res.ok) {
           showSuccess("Sipariş başarıyla güncellendi.")
-          const refreshRes = await fetch("/admin/orders?limit=100&fields=*customer,*shipping_address,*billing_address,*items")
+          const refreshRes = await fetch(ADMIN_ORDERS_URL)
           const refreshData = await refreshRes.json()
           if (refreshData && refreshData.orders) {
             setRealOrders(refreshData.orders)
@@ -4704,7 +4737,7 @@ const SiparisYonetimiPage = () => {
                   }
                   setShowStatusModal(false);
                   
-                  const refreshRes = await fetch("/admin/orders?limit=100&fields=*customer,*shipping_address,*billing_address,*items")
+                  const refreshRes = await fetch(ADMIN_ORDERS_URL)
                   const refreshData = await refreshRes.json()
                   if (refreshData && refreshData.orders) setRealOrders(refreshData.orders)
 
@@ -4794,7 +4827,7 @@ const SiparisYonetimiPage = () => {
                   }
                   setShowShipmentModal(false);
                   
-                  const refreshRes = await fetch("/admin/orders?limit=100&fields=*customer,*shipping_address,*billing_address,*items")
+                  const refreshRes = await fetch(ADMIN_ORDERS_URL)
                   const refreshData = await refreshRes.json()
                   if (refreshData && refreshData.orders) setRealOrders(refreshData.orders)
 

@@ -73,8 +73,14 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         const autoPromos = await promotionModule.listPromotions({ is_automatic: true })
         if (autoPromos && autoPromos.length > 0) {
           for (const ap of autoPromos) {
-            await promotionModule.updatePromotions(ap.id, { is_automatic: false })
-            console.log(`[AutoPromo] Disabled auto promo on GET: ${ap.code || ap.id}`)
+            try {
+              await promotionModule.updatePromotions({ id: ap.id, is_automatic: false })
+              console.log(`[AutoPromo] Disabled auto promo on GET: ${ap.code || ap.id}`)
+            } catch (uErr) {
+              try {
+                await (promotionModule as any).updatePromotions(ap.id, { is_automatic: false })
+              } catch {}
+            }
           }
         }
       }
