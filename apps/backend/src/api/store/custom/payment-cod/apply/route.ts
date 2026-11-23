@@ -14,7 +14,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       return res.status(400).json({ error: "cart_id is required" })
     }
 
-    // 1. Get Payment settings from admin config (with fallback defaults)
+    // 1. Ensure no promotions are applied automatically without customer coupon code
+    try {
+      const promotionModule = req.scope.resolve<any>(Modules.PROMOTION)
+      if (promotionModule) {
+        const autoPromos = await promotionModule.listPromotions({ is_automatic: true })
+        if (autoPromos && autoPromos.length > 0) {
+          for (const ap of autoPromos) {
+            await promotionModule.updatePromotions(ap.id, { is_automatic: false })
+            console.log(`[AutoPromo] Disabled auto promo: ${ap.code || ap.id}`)
+          }
+        }
+      }
+    } catch (promoErr) {
+      console.warn("Promotion auto check note:", promoErr)
+    }
+
+    // 1.1. Get Payment settings from admin config (with fallback defaults)
     const paymentConfig = readPaymentConfig()
     const codSettings = {
       is_active: Boolean(paymentConfig.cash_on_delivery?.active),

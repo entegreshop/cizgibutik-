@@ -66,6 +66,20 @@ function evaluateCustomerRisk(query: Record<string, any>) {
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   try {
+    try {
+      const { Modules } = await import("@medusajs/framework/utils")
+      const promotionModule = req.scope.resolve<any>(Modules.PROMOTION)
+      if (promotionModule) {
+        const autoPromos = await promotionModule.listPromotions({ is_automatic: true })
+        if (autoPromos && autoPromos.length > 0) {
+          for (const ap of autoPromos) {
+            await promotionModule.updatePromotions(ap.id, { is_automatic: false })
+            console.log(`[AutoPromo] Disabled auto promo on GET: ${ap.code || ap.id}`)
+          }
+        }
+      }
+    } catch {}
+
     const parsed = readPaymentConfig()
     const riskCheck = evaluateCustomerRisk((req.query || {}) as Record<string, any>)
     const codSettings = {

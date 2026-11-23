@@ -550,7 +550,7 @@ const KampanyalarPage = () => {
               await sdk.admin.promotion.create({
                 code: uniqueCode,
                 type: "standard",
-                is_automatic: true,
+                is_automatic: false,
                 application_method: {
                   type: (sp.type || "fixed") === "percent" ? "percentage" : "fixed",
                   target_type: "items",

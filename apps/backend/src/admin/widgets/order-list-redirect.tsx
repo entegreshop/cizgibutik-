@@ -147,6 +147,9 @@ interface CustomOrder {
   subtotal: number // TL
   vat_total: number // TL
   total: number // TL
+  discount_total?: number // TL
+  shipping_total?: number // TL
+  payment_fee?: number // TL
   payment_method: string // human readable e.g. "Kapıda Nakit Ödeme"
   payment_option: "paytr" | "bank_transfer" | "cash_on_delivery" | "card_on_delivery"
   status: "onay_bekleyen" | "hazirlanan" | "kargolanan" | "teslim_edilen" | "iade_edilen" | "iptal_edilen" | "odeme_hatasi" | "tum_siparisler"
@@ -860,6 +863,9 @@ const SiparisYonetimiPage = () => {
         subtotal: subtotalVal,
         vat_total: totalVal - subtotalVal > 0 ? totalVal - subtotalVal : totalVal * 0.1,
         total: totalVal,
+        discount_total: (o.discount_total || 0) / 100,
+        shipping_total: (o.shipping_methods?.[0]?.amount !== undefined ? Number(o.shipping_methods[0].amount) : (o.shipping_total || 0)) / 100,
+        payment_fee: o.metadata?.payment_fee !== undefined ? Number(o.metadata.payment_fee) : ((o.metadata?.cod_fee_amount || 0) / 100),
         payment_method: payMethod,
         payment_option: metaOption || "cash_on_delivery",
         status: orderStatus,
@@ -1589,6 +1595,9 @@ const SiparisYonetimiPage = () => {
 
               <div class="total-box">
                 <div>Ara Toplam: ₺ ${orderObj.subtotal.toFixed(2)}</div>
+                ${orderObj.discount_total && orderObj.discount_total > 0 ? `<div style="color:#dc2626;">İndirim Tutarı: - ₺ ${orderObj.discount_total.toFixed(2)}</div>` : ''}
+                <div>Kargo: ₺ ${(orderObj.shipping_total || 0).toFixed(2)}</div>
+                ${orderObj.payment_fee && orderObj.payment_fee > 0 ? `<div>Kapıda Ödeme Bedeli: + ₺ ${orderObj.payment_fee.toFixed(2)}</div>` : ''}
                 <div>KDV: ₺ ${orderObj.vat_total.toFixed(2)}</div>
                 <div class="grand-total">Genel Toplam: ₺ ${orderObj.total.toFixed(2)}</div>
               </div>
@@ -3801,7 +3810,7 @@ const SiparisYonetimiPage = () => {
                           </div>
                         </td>
                         <td colSpan={4} className="py-3.5 px-4 align-middle">
-                          <div className="flex flex-col gap-2 max-w-[260px] ml-auto">
+                          <div className="flex flex-col gap-2 max-w-[280px] ml-auto">
                             <div className="flex items-center justify-between text-slate-600">
                               <span>Ara Toplam</span>
                               <span className="font-semibold text-slate-800">
@@ -3811,9 +3820,43 @@ const SiparisYonetimiPage = () => {
                                 TL
                               </span>
                             </div>
+
+                            {activeOrderDetails.discount_total !== undefined && activeOrderDetails.discount_total > 0 ? (
+                              <div className="flex items-center justify-between text-red-600 font-medium">
+                                <span>İndirim Tutarı</span>
+                                <span>
+                                  - {activeOrderDetails.discount_total.toLocaleString("tr-TR", {
+                                    minimumFractionDigits: 2,
+                                  })}{" "}
+                                  TL
+                                </span>
+                              </div>
+                            ) : null}
+
                             <div className="flex items-center justify-between text-slate-600">
-                              <span>Genel Toplam</span>
-                              <span className="font-bold text-slate-900">
+                              <span>Kargo Ücreti</span>
+                              <span className="font-semibold text-slate-800">
+                                {activeOrderDetails.shipping_total !== undefined && activeOrderDetails.shipping_total > 0
+                                  ? `${activeOrderDetails.shipping_total.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} TL`
+                                  : "Ücretsiz"}
+                              </span>
+                            </div>
+
+                            {activeOrderDetails.payment_fee !== undefined && activeOrderDetails.payment_fee > 0 ? (
+                              <div className="flex items-center justify-between text-slate-600">
+                                <span>{activeOrderDetails.payment_method?.includes("Kredi Kartı") ? "Kapıda Kredi Kartı Bedeli" : "Kapıda Ödeme Bedeli"}</span>
+                                <span className="font-semibold text-slate-800">
+                                  + {activeOrderDetails.payment_fee.toLocaleString("tr-TR", {
+                                    minimumFractionDigits: 2,
+                                  })}{" "}
+                                  TL
+                                </span>
+                              </div>
+                            ) : null}
+
+                            <div className="flex items-center justify-between text-slate-600 pt-2 border-t border-slate-200">
+                              <span className="font-bold text-slate-900">Genel Toplam</span>
+                              <span className="font-bold text-slate-900 text-base">
                                 {activeOrderDetails.total.toLocaleString("tr-TR", {
                                   minimumFractionDigits: 2,
                                 })}{" "}
