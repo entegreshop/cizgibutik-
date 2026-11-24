@@ -604,48 +604,66 @@ const KampanyalarPage = () => {
         if (!yuzdeForm.code.trim()) {
           throw new Error("Kupon kodu zorunludur.")
         }
-        try {
-          const created = await sdk.admin.promotion.create({
-            code: yuzdeForm.code.trim().toUpperCase(),
-            type: "standard",
-            is_automatic: false,
-            status: yuzdeForm.active ? "active" : "draft",
-            application_method: {
-              type: yuzdeForm.type === "percent" ? "percentage" : "fixed",
-              target_type: "order",
-              value:
-                yuzdeForm.type === "percent"
-                  ? Number(yuzdeForm.amount || "10")
-                  : Number(yuzdeForm.amount || "10") * 100,
-              ...(yuzdeForm.type !== "percent" ? { currency_code: "try" } : {}),
-            },
-            rules: yuzdeForm.minCart
-              ? [
-                  {
-                    attribute: "item_total",
-                    operator: "gte",
-                    values: [String(Number(yuzdeForm.minCart) * 100)],
-                  },
-                ]
-              : undefined,
-          })
+        const promoCode = yuzdeForm.code.trim().toUpperCase()
+        const isPercent = yuzdeForm.type === "percent"
+        const amountNum = Number(yuzdeForm.amount || "10")
 
-          if (yuzdeForm.end_date && created.promotion?.id) {
-            try {
-              await sdk.client.fetch(`/admin/promotions/${created.promotion.id}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: { metadata: { end_date: yuzdeForm.end_date } },
-              })
-            } catch {}
+        // 1. Aynı kodda var olan kupon varsa temizle (böylece tip veya yüzde güncellemeleri anında yansır)
+        try {
+          const listRes = await sdk.admin.promotion.list({ limit: 100 })
+          const existing = (listRes.promotions || []).find(
+            (p: any) => p.code?.toUpperCase() === promoCode
+          )
+          if (existing?.id) {
+            await sdk.admin.promotion.delete(existing.id)
           }
-        } catch (promoErr: any) {
-          if (!promoErr?.message?.includes("already exists")) {
-            throw promoErr
-          }
+        } catch (findErr) {
+          console.warn("Mevcut kupon arama/silme uyarısı:", findErr)
         }
+
+        // 2. Medusa v2 standartlarına uygun percentage / fixed kurgusu oluştur
+        const appMethod: any = {
+          type: isPercent ? "percentage" : "fixed",
+          target_type: "items",
+          allocation: "across",
+          value: isPercent ? amountNum : amountNum * 100,
+        }
+        if (!isPercent) {
+          appMethod.currency_code = "try"
+        }
+
+        const promoPayload: any = {
+          code: promoCode,
+          type: "standard",
+          is_automatic: false,
+          status: yuzdeForm.active ? "active" : "draft",
+          application_method: appMethod,
+        }
+
+        if (yuzdeForm.minCart && Number(yuzdeForm.minCart) > 0) {
+          promoPayload.rules = [
+            {
+              attribute: "item_total",
+              operator: "gte",
+              values: [String(Number(yuzdeForm.minCart) * 100)],
+            },
+          ]
+        }
+
+        const created = await sdk.admin.promotion.create(promoPayload)
+
+        if (yuzdeForm.end_date && created.promotion?.id) {
+          try {
+            await sdk.client.fetch(`/admin/promotions/${created.promotion.id}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: { metadata: { end_date: yuzdeForm.end_date } },
+            })
+          } catch {}
+        }
+
         await fetchPromotions()
-        notifySuccess("Klasik kupon başarıyla oluşturuldu ve aktif edildi!")
+        notifySuccess(`"${promoCode}" kuponu (%${isPercent ? amountNum : ""} ${!isPercent ? amountNum + " TL" : ""} indirim) başarıyla kaydedildi ve yayınlandı!`)
         setLoading(false)
         return
       }
