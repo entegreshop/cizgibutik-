@@ -73,6 +73,7 @@ export interface BannerCarouselItem {
   footer_note: string
   badge_text: string
   bg_image_url: string
+  bg_image_url_mobile?: string
   bg_color: string
   source_type: "latest" | "category" | "collection"
   handle: string
@@ -3040,7 +3041,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
 
                     <div className="sm:col-span-4">
                       <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">
-                        Arka Plan Kampanya Görseli (Sol Model / Konsept Görseli)
+                        Masaüstü Banner Görseli (1180x474 Yatay)
                       </label>
                       <div className="flex items-center gap-2">
                         <input
@@ -3051,11 +3052,11 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
                             next[bIdx] = { ...bBlock, bg_image_url: e.target.value }
                             updateField("banner_carousels", next)
                           }}
-                          placeholder="Görsel URL veya bilgisayardan yükleyin"
+                          placeholder="Masaüstü görsel URL veya dosya seçin"
                           className="flex-1 h-[36px] px-3 rounded border border-[#e2e5ec] text-[12px]"
                         />
                         <label className="px-3.5 py-2 rounded bg-[#eef4ff] text-[#3d94fb] text-[12px] font-bold cursor-pointer shrink-0">
-                          {uploadingKey === `bcarousel-${bIdx}` ? "Yükleniyor..." : "📁 Görsel Yükle"}
+                          {uploadingKey === `bcarousel-${bIdx}` ? "Yükleniyor..." : "📁 Masaüstü Yükle"}
                           <input
                             type="file"
                             accept="image/*"
@@ -3066,6 +3067,43 @@ export const DesignStudio: React.FC<DesignStudioProps> = ({ initialSection = "he
                                 uploadMediaFile(f, `bcarousel-${bIdx}`, (url) => {
                                   const next = [...(config.banner_carousels || [])]
                                   next[bIdx] = { ...bBlock, bg_image_url: url }
+                                  updateField("banner_carousels", next)
+                                })
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-4">
+                      <label className="block text-[11.5px] font-semibold text-[#48465b] mb-1">
+                        Mobil Banner Görseli (750x700 Dikey / Kare - Opsiyonel)
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={bBlock.bg_image_url_mobile || ""}
+                          onChange={(e) => {
+                            const next = [...(config.banner_carousels || [])]
+                            next[bIdx] = { ...bBlock, bg_image_url_mobile: e.target.value }
+                            updateField("banner_carousels", next)
+                          }}
+                          placeholder="Mobil görsel URL veya dosya seçin"
+                          className="flex-1 h-[36px] px-3 rounded border border-[#e2e5ec] text-[12px]"
+                        />
+                        <label className="px-3.5 py-2 rounded bg-[#fdf2f8] text-[#db2777] text-[12px] font-bold cursor-pointer shrink-0">
+                          {uploadingKey === `bcarousel-mob-${bIdx}` ? "Yükleniyor..." : "📱 Mobil Yükle"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0]
+                              if (f) {
+                                uploadMediaFile(f, `bcarousel-mob-${bIdx}`, (url) => {
+                                  const next = [...(config.banner_carousels || [])]
+                                  next[bIdx] = { ...bBlock, bg_image_url_mobile: url }
                                   updateField("banner_carousels", next)
                                 })
                               }
