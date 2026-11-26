@@ -1725,33 +1725,33 @@ Headers:
                 {[
                   {
                     page: "Ana Sayfa",
-                    title: "Çizgi Butik | Oto Bodykit, Tampon, Spoiler ve Modifiye",
-                    desc: "Aracınıza özel bodykit setleri, ön lip, difüzör ve spoiler modelleri.",
+                    title: "Çizgi Butik - Yeni Sezon Kadın Giyim & Online Butik",
+                    desc: "Yeni sezon kadın giyim modelleri, şık elbiseler, ikili takımlar ve kombinler Çizgi Butik'te.",
                   },
                   {
                     page: "Yeni Ürünler",
                     title: "Yeni Gelen Ürünler | Çizgi Butik",
-                    desc: "En yeni sezon ürünleri ve güncel stoklarımızı hemen inceleyin.",
+                    desc: "En yeni sezon kadın giyim trendleri ve güncel butik koleksiyonlarımızı hemen keşfedin.",
                   },
                   {
                     page: "İndirimdeki Ürünler",
                     title: "Fırsat & İndirimli Ürünler | Çizgi Butik",
-                    desc: "Kampanyalı ve özel indirimli ürünleri kaçırmayın.",
+                    desc: "Özel indirimli elbiseler, takımlar ve kampanyalı ürün fırsatlarını kaçırmayın.",
                   },
                   {
                     page: "Çok Satan Ürünler",
                     title: "En Çok Satanlar | Çizgi Butik",
-                    desc: "Müşterilerimizin en çok tercih ettiği popüler ürünler.",
+                    desc: "Müşterilerimizin en çok tercih ettiği popüler ikili takım ve elbise modelleri.",
                   },
                   {
                     page: "İletişim Sayfası",
                     title: "İletişim & Mağaza Adresimiz | Çizgi Butik",
-                    desc: "Bize ulaşın, adres, telefon ve WhatsApp destek hattımız.",
+                    desc: "Bize ulaşın, sipariş destek, telefon ve WhatsApp hattımız.",
                   },
                   {
                     page: "Blog Ana Sayfa",
-                    title: "Blog & Rehber Yazıları | Çizgi Butik",
-                    desc: "Modifiye, bakım ve stil önerileri hakkında güncel blog yazıları.",
+                    title: "Blog & Moda Rehberi | Çizgi Butik",
+                    desc: "Kadın giyim trendleri, kombin önerileri ve stil tüyoları hakkında güncel blog yazıları.",
                   },
                 ].map((r) => (
                   <tr key={r.page}>
@@ -1877,7 +1877,7 @@ Headers:
                     <input type="checkbox" className="w-4 h-4" />
                   </td>
                   <td className="py-3 px-3">41</td>
-                  <td className="py-3 px-3 font-mono text-[12px]">/urun/eski-model-on-tampon-eki</td>
+                  <td className="py-3 px-3 font-mono text-[12px]">/urun/eski-sezon-ekose-ceket</td>
                   <td className="py-3 px-3 font-bold">28</td>
                   <td className="py-3 px-3 text-[12px]">
                     10.11.2026 14:12<div className="text-[#74788d]">88.241.19.104</div>
@@ -1888,7 +1888,7 @@ Headers:
                   <td className="py-3 px-3">
                     <button
                       type="button"
-                      onClick={() => alert("/urun/eski-model-on-tampon-eki için 301 Yönlendirmesi oluşturuldu!")}
+                      onClick={() => alert("/urun/eski-sezon-ekose-ceket için 301 Yönlendirmesi oluşturuldu!")}
                       className="h-[28px] px-2.5 rounded-[4px] bg-[#0abb87] text-white text-[11.5px] font-medium cursor-pointer"
                     >
                       + Yönlendirme Oluştur
