@@ -6,45 +6,73 @@ import os from "os"
 const configFilePath = path.join(process.cwd(), "uploads", "pages-config.json")
 
 const defaultPages = {
-  "hakkimizda": {
-    title: "Hakkımızda",
-    content: "Özse Moda Tekstil Ltd. Şti. olarak moda dünyasında öncü markalardan biri olmayı hedefliyoruz."
-  },
   "mesafeli-satis": {
     title: "Mesafeli Satış Sözleşmesi",
-    content: "İşbu sözleşme 13.06.2003 tarih ve 25137 sayılı Resmi Gazetede yayımlanan Mesafeli Sözleşmeler Uygulama Usul ve Esasları Hakkında Yönetmelik gereği internet üzerinden gerçekleştiren satışlar için sözleşme yapılması zorunluluğuna istinaden düzenlenmiş olup, maddeler halinde aşağıda belirtilmiştir."
+    content: `MADDE 1 - TARAFLAR
+1.1. SATICI:
+Ticari Unvan: ÖZSE MODA TEKSTİL KAFE GIDA İNŞAAT SAN. TİC. LTD. ŞTİ. (Çizgi Butik)
+Adres: Merkez Mah. Muallim Naci Sk. No: 9 Güngören / İstanbul
+Telefon: 0532 337 00 81
+E-posta: info@cizgibutik.com
+Mersis No: 0705060035500001
+Vergi Dairesi & No: Güngören V.D. - 7050600355
+Web Sitesi: https://cizgibutik.com
+
+1.2. ALICI:
+Web sitesi üzerinden sipariş veren, fatura ve teslimat bilgileri sipariş formunda belirtilen gerçek veya tüzel kişidir.
+
+MADDE 2 - SÖZLEŞMENİN KONUSU
+İşbu sözleşmenin konusu, ALICI'nın SATICI'ya ait https://cizgibutik.com internet sitesinden elektronik ortamda siparişini yaptığı ürünlerin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmelere Dair Yönetmelik hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır.
+
+MADDE 3 - CAYMA HAKKI
+ALICI, sözleşme konusu ürünün kendisine veya gösterdiği adresteki kişi/kuruluşa tesliminden itibaren 14 (on dört) gün içinde hiçbir gerekçe göstermeksizin cayma hakkını kullanabilir. Cayma hakkının kullanılması için 14 gün içinde SATICI'ya yazılı bildirimde bulunulması şarttır.`
   },
   "iade-ve-degisim": {
     title: "İptal, İade ve Değişim Koşulları",
-    content: "Almış olduğunuz ürünleri kullanılmamış ve etiketleri sökülmemiş olması şartıyla 14 gün içerisinde iade edebilir veya değiştirebilirsiniz."
-  },
-  "kvkk": {
-    title: "KVKK",
-    content: "Kişisel Verilerin Korunması Kanunu uyarınca verileriniz güvenle işlenmektedir. Verileriniz üçüncü kişilerle paylaşılmamaktadır."
+    content: `Almış olduğunuz ürünleri kullanılmamış, etiketleri sökülmemiş ve tekrar satılabilirlik özelliğini kaybetmemiş olması şartıyla teslimat tarihinden itibaren 14 gün içerisinde iade edebilir veya değişim talep edebilirsiniz.
+
+İade Talebi & Adres:
+Firma: ÖZSE MODA TEKSTİL KAFE GIDA İNŞAAT SAN. TİC. LTD. ŞTİ. (Çizgi Butik)
+Adres: Merkez Mah. Muallim Naci Sk. No: 9 Güngören / İstanbul
+Müşteri Hizmetleri: 0532 337 00 81 | info@cizgibutik.com`
   },
   "teslimat-kargo": {
     title: "Teslimat ve Kargo Şartları",
-    content: "Saat 15:00'a kadar verilen tüm siparişleriniz aynı gün kargoya teslim edilmektedir. Teslimat süresi ortalama 1-3 iş günüdür."
-  },
-  "kullanici-sozlesmesi": {
-    title: "Kullanıcı Sözleşmesi",
-    content: "Web sitemizi kullanarak aşağıdaki kullanım şartlarını kabul etmiş sayılırsınız."
-  },
-  "gizlilik-sozlesmesi": {
-    title: "Gizlilik Sözleşmesi",
-    content: "Müşterilerimizin gizliliğine önem veriyoruz ve kişisel verilerinizi yetkisiz erişime karşı koruyoruz."
+    content: `Hafta içi saat 16:00'a kadar verilen tüm siparişleriniz aynı gün özenle hazırlanarak kargoya teslim edilmektedir. Teslimat süresi Türkiye geneli ortalama 1-3 iş günüdür. Kargonuz yola çıktığında takip numaranız SMS ve e-posta ile tarafınıza iletilir.`
   },
   "iletisim": {
     title: "İletişim",
-    content: "ÖZSE MODA TEKSTİL LTD. ŞTİ.\nAdres: Merkez Mahallesi Merter Sokak NO 44 Güngören / İstanbul\nTel: +90 530 456 43 77\nE-posta: info@kombingo.com"
+    content: `ÖZSE MODA TEKSTİL KAFE GIDA İNŞAAT SAN. TİC. LTD. ŞTİ. (Çizgi Butik)
+Adres: Merkez Mah. Muallim Naci Sk. No: 9 Güngören / İstanbul / Türkiye
+Telefon / WhatsApp Destek: 0532 337 00 81
+E-posta: info@cizgibutik.com
+Mersis No: 0705060035500001
+Güngören Vergi Dairesi No: 7050600355
+Çalışma Saatleri: Hafta içi 09:00 - 19:00, Cumartesi 10:00 - 18:00`
+  },
+  "kvkk": {
+    title: "Kişisel Verilerin Korunması (KVKK)",
+    content: `6698 sayılı Kişisel Verilerin Korunması Kanunu uyarınca, ÖZSE MODA TEKSTİL KAFE GIDA İNŞAAT SAN. TİC. LTD. ŞTİ. (Çizgi Butik) olarak kişisel verilerinizi sipariş işlemlerinin yürütülmesi ve yasal mevzuat gereklilikleri kapsamında güvenle işlemekteyiz. Kişisel verileriniz hiçbir üçüncü tarafla ticari amaçla paylaşılmaz.`
+  },
+  "kullanici-sozlesmesi": {
+    title: "Kullanıcı Sözleşmesi",
+    content: `https://cizgibutik.com web sitesini ziyaret eden ve alışveriş yapan tüm kullanıcılar bu sözleşmedeki şartları kabul etmiş sayılır. Sitedeki tüm görseller, tasarımlar ve içerikler ÖZSE MODA TEKSTİL KAFE GIDA İNŞAAT SAN. TİC. LTD. ŞTİ.'ye ait olup telif hakkı ile korunmaktadır.`
+  },
+  "gizlilik-sozlesmesi": {
+    title: "Gizlilik Sözleşmesi",
+    content: `Müşterilerimizin kişisel bilgilerinin gizliliği ve güvenliği 256-bit SSL güvenlik sertifikası ve 3D Secure protokolleri ile korunmaktadır. Kredi kartı bilgileriniz sistemlerimizde saklanmaz.`
+  },
+  "hakkimizda": {
+    title: "Hakkımızda",
+    content: `Çizgi Butik, kadın giyim modasında şıklığı, kaliteyi ve müşteri memnuniyetini bir araya getirmek amacıyla ÖZSE MODA TEKSTİL KAFE GIDA İNŞAAT SAN. TİC. LTD. ŞTİ. çatısı altında kurulmuştur. En güncel koleksiyonları güvenilir ve hızlı e-ticaret altyapısıyla sizlere sunmaktan gurur duyuyoruz.`
   },
   "siparis-takip": {
     title: "Sipariş Takip",
-    content: "Siparişinizi hesabım sayfasından veya kargo takip numaranızı kullanarak kargo firması sitesinden takip edebilirsiniz."
+    content: `Siparişlerinizi kargo takip numaranız ile anlık olarak takip edebilirsiniz. Takip kodunuz siparişiniz kargoya verildiğinde SMS ve e-posta olarak gönderilmektedir.`
   },
   "havale-bildirimleri": {
     title: "Havale Bildirimleri",
-    content: "Havale/EFT ile yaptığınız ödemeleriniz için dekontunuzu WhatsApp hattımızdan bize iletebilirsiniz."
+    content: `Banka havalesi / EFT ile gerçekleştirilen ödemelerde dekontunuzu 0532 337 00 81 numaralı WhatsApp hattımıza veya info@cizgibutik.com adresimize iletebilirsiniz.`
   }
 }
 
@@ -62,7 +90,7 @@ function readConfig() {
 
     if (targetPath) {
       const content = fs.readFileSync(targetPath, "utf-8")
-      return JSON.parse(content)
+      return { ...defaultPages, ...JSON.parse(content) }
     }
   } catch (err) {
     console.error("Error reading pages config:", err)
@@ -98,8 +126,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   const success = writeConfig(body.pages)
   if (success) {
-    res.json({ success: true, pages: body.pages })
+    res.json({ success: true, message: "Pages updated successfully" })
   } else {
-    res.status(500).json({ success: false, message: "Could not write configuration" })
+    res.status(500).json({ success: false, message: "Failed to update pages" })
   }
 }

@@ -75,7 +75,7 @@ export async function processQuickCheckout(data: QuickCheckoutFormData) {
 
       // Bos sepet
       const cartParams: any = { region_id: region.id }
-      const finalEmail = data.email && data.email.trim() !== "" ? data.email : "misafir@bellbutik.com"
+      const finalEmail = data.email && data.email.trim() !== "" ? data.email : "misafir@cizgibutik.com"
       cartParams.email = finalEmail
 
       const cartResp = await sdk.store.cart.create(cartParams, {}, headers)
@@ -111,7 +111,7 @@ export async function processQuickCheckout(data: QuickCheckoutFormData) {
       company: data.invoice_type === 'kurumsal' ? data.company_name : undefined
     }
 
-    const finalEmailForUpdate = data.email && data.email.trim() !== "" ? data.email : "misafir@bellbutik.com"
+    const finalEmailForUpdate = data.email && data.email.trim() !== "" ? data.email : "misafir@cizgibutik.com"
 
     try {
       await sdk.store.cart.update(
@@ -143,6 +143,11 @@ export async function processQuickCheckout(data: QuickCheckoutFormData) {
     metadataUpdate.is_cod = isCodOrder;
     metadataUpdate.payment_fee = isCodOrder ? 40 : 0;
     metadataUpdate.cod_fee_amount = isCodOrder ? 4000 : 0;
+    metadataUpdate.shipping_fee = 150;
+    const cleanCoupon = data.coupon ? data.coupon.trim().toUpperCase() : "";
+    metadataUpdate.coupon_code = cleanCoupon;
+    metadataUpdate.coupon = cleanCoupon;
+    metadataUpdate.promo_code = cleanCoupon;
 
     if (data.payment_method === 'cash_on_delivery') metadataUpdate.payment_option = "cash_on_delivery";
     else if (data.payment_method === 'cod_cc') metadataUpdate.payment_option = "card_on_delivery";
@@ -220,7 +225,11 @@ export async function processQuickCheckout(data: QuickCheckoutFormData) {
                 "Content-Type": "application/json",
                 "x-publishable-api-key": publishableKey
             },
-            body: JSON.stringify({ cart_id: targetCartId, method_id: data.payment_method })
+            body: JSON.stringify({ 
+                cart_id: targetCartId, 
+                method_id: data.payment_method,
+                coupon_code: data.coupon ? data.coupon.trim() : ""
+            })
         }, 10000)
         logToFile("payment-cod/apply success");
     } catch(e: any) {
@@ -232,9 +241,9 @@ export async function processQuickCheckout(data: QuickCheckoutFormData) {
     if (data.coupon && data.coupon.trim() !== "") {
         console.log("[QuickCheckout] 3.5. Kupon uygulanıyor:", data.coupon)
         try {
-            await sdk.store.cart.update(
+            await sdk.store.cart.addPromotions(
                 targetCartId,
-                { promo_codes: [data.coupon.trim()] } as any,
+                { promo_codes: [data.coupon.trim().toUpperCase()] },
                 {},
                 headers
             )
@@ -245,12 +254,16 @@ export async function processQuickCheckout(data: QuickCheckoutFormData) {
     } else {
         console.log("[QuickCheckout] 3.5. Kupon temizleniyor (boş veya kaldırılmış)")
         try {
-            await sdk.store.cart.update(
-                targetCartId,
-                { promo_codes: [] } as any,
-                {},
-                headers
-            )
+            const currentCart = await sdk.store.cart.retrieve(targetCartId, { fields: "+promotions.*,+promotions.code" }, headers).then((r: any) => r.cart).catch(() => null)
+            const activeCodes = (currentCart?.promotions || []).map((p: any) => p.code).filter(Boolean)
+            if (activeCodes.length > 0) {
+                await sdk.store.cart.removePromotions(
+                    targetCartId,
+                    { promo_codes: activeCodes },
+                    {},
+                    headers
+                )
+            }
         } catch(err: any) {
             console.warn("[QuickCheckout] Kupon temizleme notu:", err.message)
         }

@@ -145,7 +145,7 @@ function resolveCanonicalStorefrontUrl(): string {
   const raw =
     process.env.STOREFRONT_URL ||
     process.env.NEXT_PUBLIC_STOREFRONT_URL ||
-    "https://www.cizgibutik.com"
+    "https://cizgibutik.com"
   if (
     !raw ||
     raw.includes("localhost") ||
@@ -153,9 +153,9 @@ function resolveCanonicalStorefrontUrl(): string {
     raw.includes("0.0.0.0") ||
     raw.includes("api.cizgibutik.com")
   ) {
-    return "https://www.cizgibutik.com"
+    return "https://cizgibutik.com"
   }
-  return raw.replace(/\/+$/, "")
+  return raw.replace(/\/+$/, "").replace(/^https?:\/\/www\./, "https://")
 }
 
 function escapeXml(str: string): string {
@@ -332,8 +332,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         rawPrice = Number(priceObj?.amount || 0)
       }
 
-      // Convert kuruş to TRY when stored as > 50,000
-      let salePriceVal = rawPrice > 50000 ? rawPrice / 100 : rawPrice
+      // Convert kuruş to TRY when stored as >= 1,000 (e.g. 79900 = 799.00 TRY)
+      let salePriceVal = rawPrice >= 1000 ? rawPrice / 100 : rawPrice
       if (!salePriceVal || salePriceVal <= 0) {
         salePriceVal = 1990
       }
@@ -344,7 +344,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
       // Calculate pre-discount list price so both <g:price> (Fiyat) and <g:sale_price> (İndirimli fiyat) are populated
       const metaOriginal = Number(product.metadata?.original_price || 0)
-      const normalizedOriginal = metaOriginal > 50000 ? metaOriginal / 100 : metaOriginal
+      const normalizedOriginal = metaOriginal >= 1000 ? metaOriginal / 100 : metaOriginal
       const regularPriceVal =
         normalizedOriginal > salePriceVal
           ? normalizedOriginal
