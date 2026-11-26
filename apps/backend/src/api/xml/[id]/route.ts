@@ -426,10 +426,15 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         xml += `      <additional_image_link>${escapeXml(addImg)}</additional_image_link>\n`
       }
 
+      const shippingCost = salePriceVal >= 3000 ? "0.00" : "60.00"
       xml += `      <g:shipping>\n`
       xml += `        <g:country>TR</g:country>\n`
-      xml += `        <g:service>Standart</g:service>\n`
-      xml += `        <g:price>0 ${isoCurrency}</g:price>\n`
+      xml += `        <g:service>Standart Kargo</g:service>\n`
+      xml += `        <g:price>${shippingCost} ${isoCurrency}</g:price>\n`
+      xml += `        <g:min_handling_time>0</g:min_handling_time>\n`
+      xml += `        <g:max_handling_time>1</g:max_handling_time>\n`
+      xml += `        <g:min_transit_time>0</g:min_transit_time>\n`
+      xml += `        <g:max_transit_time>3</g:max_transit_time>\n`
       xml += `      </g:shipping>\n`
       xml += `    </item>\n`
     })

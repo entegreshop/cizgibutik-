@@ -29,7 +29,7 @@ ALICI, sözleşme konusu ürünün kendisine veya gösterdiği adresteki kişi/k
   },
   "iade-ve-degisim": {
     title: "İptal, İade ve Değişim Koşulları",
-    content: `Almış olduğunuz ürünleri kullanılmamış, etiketleri sökülmemiş ve tekrar satılabilirlik özelliğini kaybetmemiş olması şartıyla teslimat tarihinden itibaren 14 gün içerisinde iade edebilir veya değişim talep edebilirsiniz.
+    content: `Almış olduğunuz ürünleri kullanılmamış, etiketleri sökülmemiş ve tekrar satılabilirlik özelliğini kaybetmemiş olması şartıyla teslimat tarihinden itibaren 14 gün içerisinde iade edebilir veya değişim talep edebilirsiniz. Hem kusurlu hem kusurlu olmayan ürünler için 14 gün iade kabul edilmektedir. İade gönderilerinde kargo ücreti müşterinin sorumluluğundadır (ayıplı ürünlerde kargo satıcıya aittir). Yeniden stoka ekleme ücreti alınmaz (Maliyet: 0 TL). Depomuza ulaşan iadelerin geri ödemesi 3 gün içinde tamamlanır.
 
 İade Talebi & Adres:
 Firma: ÖZSE MODA TEKSTİL KAFE GIDA İNŞAAT SAN. TİC. LTD. ŞTİ. (Çizgi Butik)
@@ -38,7 +38,7 @@ Müşteri Hizmetleri: 0532 337 00 81 | info@cizgibutik.com`
   },
   "teslimat-kargo": {
     title: "Teslimat ve Kargo Şartları",
-    content: `Hafta içi saat 16:00'a kadar verilen tüm siparişleriniz aynı gün özenle hazırlanarak kargoya teslim edilmektedir. Teslimat süresi Türkiye geneli ortalama 1-3 iş günüdür. Kargonuz yola çıktığında takip numaranız SMS ve e-posta ile tarafınıza iletilir.`
+    content: `Saat 14:00'e kadar verilen tüm siparişleriniz aynı gün (0-1 iş günü içinde) özenle hazırlanarak kargoya teslim edilmektedir. Nakliye süresi 0-3 iş günü, toplam teslimat süresi Türkiye geneli ortalama 0-4 iş günüdür. 3.000 TL ve üzeri siparişlerde kargo ücretsiz, altındaki siparişlerde sabit 60 TL kargo ücreti geçerlidir. Kargonuz yola çıktığında takip numaranız SMS ve e-posta ile iletilir.`
   },
   "iletisim": {
     title: "İletişim",
